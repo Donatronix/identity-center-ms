@@ -1,0 +1,23 @@
+version: '3.5'
+
+networks:
+  app-tier:
+    name: sumraNet
+    driver: bridge
+
+services:
+  apache:
+    container_name: {{DEPLOY_NAME}}
+    image: {{DOCKER_IMAGE}}
+    networks:
+      - app-tier
+    ports:
+      - '8105:8080'
+    volumes:
+      - ./conf/vhost.conf:/etc/apache2/sites-enabled/000-default.conf:ro
+#      - ./conf/.env:/var/www/html/.env:rw
+      - ./certs/dev.sumra.net.crt:/certs/dev.sumra.net.crt:ro
+      - ./certs/dev.sumra.net.key:/certs/dev.sumra.net.key:ro
+      - ./web:/var/www/html:rw
+      - ./xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini:rw
+    command: /bin/bash -c "php artisan swagger-lume:generate && php artisan queue:listen rabbitmq --queue=IdentityServer --timeout=0 > /dev/null & apache2-foreground"
