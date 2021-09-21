@@ -12,7 +12,7 @@ services:
     networks:
       - app-tier
     ports:
-      - '8105:8080'
+      - '8050:8080'
     volumes:
       - ./conf/vhost.conf:/etc/apache2/sites-enabled/000-default.conf:ro
 #      - ./conf/.env:/var/www/html/.env:rw
