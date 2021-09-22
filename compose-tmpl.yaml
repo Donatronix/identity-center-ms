@@ -20,6 +20,6 @@ services:
       - ./certs/dev.sumra.net.key:/certs/dev.sumra.net.key:ro
       - ./web:/var/www/html:rw
       - ./xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini:rw
-    command: /bin/bash -c "php artisan l5-swagger:generate"
+    command: /bin/bash -c "php artisan l5-swagger:generate > /dev/null & apache2-foreground"
              # && php artisan queue:listen rabbitmq --queue=IdentityServer --timeout=0 > /dev/null & apache2-foreground
 
