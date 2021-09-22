@@ -8,8 +8,8 @@ use Illuminate\Routing\Controller as BaseController;
 /**
  * @OA\Info(
  *
- *     title="Contacts Book API Microservice",
- *     description="This is API of Contacts Book Microservice",
+ *     title="Identity Server API",
+ *     description="This is API of Identity Server",
  *     version="1.0",
  *
  *     @OA\Contact(
@@ -28,7 +28,7 @@ use Illuminate\Routing\Controller as BaseController;
  *
  *     @OA\Flow(
  *         flow="implicit",
- *         authorizationUrl="https://apim.sumra.net/oauth2",
+ *         authorizationUrl="https://is.sumra.net/oauth2",
  *         scopes={
  *             "ManagerRead"="Manager can read",
  *             "User":"User access",
