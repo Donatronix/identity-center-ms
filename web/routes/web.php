@@ -16,3 +16,18 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::group([
+    'prefix' => 'auth'
+], function () {
+    Route::post('register', 'Auth\AuthController@register');
+    Route::post('login', 'Auth\AuthController@login')->name('login');
+
+    // add this middleware to ensure that every request is authenticated
+    Route::group([
+        'middleware' => 'auth:api'
+    ], function () {
+        Route::get('logout', 'Auth\AuthController@logout');
+        Route::get('user', 'Auth\AuthController@user');
+    });
+});

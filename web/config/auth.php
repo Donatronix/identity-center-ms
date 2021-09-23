@@ -45,6 +45,11 @@ return [
             'driver' => 'passport',
             'provider' => 'users',
         ],
+
+        'admin' => [
+            'driver' => 'token',
+            'provider' => 'admins',
+        ],
     ],
 
     /*

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Client;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Laravel\Passport\Passport;
 
@@ -26,16 +27,35 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         // Add passport routes
-        Passport::routes(null, [
-            'prefix' => 'oauth2',
-        ]);
+        // Set custom slug in routes and enable needed endpoints
+        Passport::routes(
+            function ($router) {
+                $router->forAuthorization();
+                $router->forAccessTokens();
+//                $router->forTransientTokens();
+//                $router->forClients();
+//                $router->forPersonalAccessTokens();
+            },
+            [
+                'prefix' => 'oauth2',
+            ]
+        );
 
-        //Passport::loadKeysFrom(__DIR__.'/../secrets/oauth');
+        // Set secret keys path
+        Passport::loadKeysFrom(base_path('keys'));
 
+        // Set Client Secret Hashing
         Passport::hashClientSecrets();
 
+        // Set Token Lifetimes
         Passport::tokensExpireIn(now()->addDays(15));
         Passport::refreshTokensExpireIn(now()->addDays(30));
         Passport::personalAccessTokensExpireIn(now()->addMonths(6));
+
+        // Overriding Default Models
+        //Passport::useTokenModel(Token::class);
+        Passport::useClientModel(Client::class);
+        //Passport::useAuthCodeModel(AuthCode::class);
+        //Passport::usePersonalAccessClientModel(PersonalAccessClient::class);
     }
 }
