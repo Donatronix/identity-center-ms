@@ -19,26 +19,17 @@ class UserOneStepController extends Controller
      * Create new user for One-Step
      *
      * @OA\Post(
-     *     path="/api/v1/ids/users/one-step",
+     *     path="/users/one-step",
      *     summary="Create new user for One-Step",
      *     description="Create new user for One-Step",
      *     tags={"One-Step Users"},
      *
      *     security={{
-     *         "default": {
-     *             "ManagerRead",
+     *         "passport": {
      *             "User",
-     *             "ManagerWrite"
+     *             "ManagerRead"
      *         }
      *     }},
-     *     x={
-     *         "auth-type": "Application & Application User",
-     *         "throttling-tier": "Unlimited",
-     *         "wso2-application-security": {
-     *             "security-types": {"oauth2"},
-     *             "optional": "false"
-     *         }
-     *     },
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -163,26 +154,17 @@ class UserOneStepController extends Controller
      * Return user data
      *
      * @OA\Get(
-     *     path="/api/v1/ids/users/one-step/me",
+     *     path="/users/one-step/me",
      *     summary="Get current user profile",
      *     description="Get current user profile",
      *     tags={"One-Step Users"},
      *
      *     security={{
-     *         "default": {
-     *             "ManagerRead",
+     *         "passport": {
      *             "User",
-     *             "ManagerWrite"
+     *             "ManagerRead"
      *         }
      *     }},
-     *     x={
-     *         "auth-type": "Application & Application User",
-     *         "throttling-tier": "Unlimited",
-     *         "wso2-application-security": {
-     *             "security-types": {"oauth2"},
-     *             "optional": "false"
-     *         }
-     *     },
      *
      *     @OA\Response(
      *         response=200,
@@ -230,26 +212,17 @@ class UserOneStepController extends Controller
      * Update the specified resource in storage
      *
      * @OA\Patch(
-     *     path="/api/v1/ids/users/one-step/{id}",
+     *     path="/users/one-step/{id}",
      *     summary="update user",
      *     description="update user",
      *     tags={"One-Step Users"},
      *
      *     security={{
-     *         "default": {
-     *             "ManagerRead",
+     *         "passport": {
      *             "User",
-     *             "ManagerWrite"
+     *             "ManagerRead"
      *         }
      *     }},
-     *     x={
-     *         "auth-type": "Application & Application User",
-     *         "throttling-tier": "Unlimited",
-     *         "wso2-application-security": {
-     *             "security-types": {"oauth2"},
-     *             "optional": "false"
-     *         }
-     *     },
      *
      *     @OA\Response(
      *         response=200,

@@ -4,8 +4,9 @@
  * @var Laravel\Lumen\Routing\Router $router
  */
 $router->group([
-   // 'prefix' => env('APP_API_VERSION', 'v1'),
+    'prefix' => env('APP_API_VERSION', 'v1'),
 ], function ($router) {
+
     /**
      *
      */

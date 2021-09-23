@@ -41,26 +41,17 @@ class UserController extends Controller
      * Register User
      *
      * @OA\Post(
-     *     path="/api/v1/ids/admin",
+     *     path="/admin",
      *     summary="Create new user",
      *     description="Create new user",
      *     tags={"Admin / Users"},
      *
      *     security={{
-     *         "default": {
+     *         "passport": {
      *             "ManagerRead",
-     *             "User",
      *             "ManagerWrite"
      *         }
      *     }},
-     *     x={
-     *         "auth-type": "Application & Application User",
-     *         "throttling-tier": "Unlimited",
-     *         "wso2-application-security": {
-     *             "security-types": {"oauth2"},
-     *             "optional": "false"
-     *         }
-     *     },
      *
      *     @OA\Parameter(
      *          name="email",
@@ -180,26 +171,17 @@ class UserController extends Controller
      * Return user data
      *
      * @OA\Get(
-     *     path="/api/v1/ids/admin/{id}",
+     *     path="/admin/{id}",
      *     summary="Get user details",
      *     description="Get user details",
      *     tags={"Admin / Users"},
      *
      *     security={{
-     *         "default": {
+     *         "passport": {
      *             "ManagerRead",
-     *             "User",
      *             "ManagerWrite"
      *         }
      *     }},
-     *     x={
-     *         "auth-type": "Application & Application User",
-     *         "throttling-tier": "Unlimited",
-     *         "wso2-application-security": {
-     *             "security-types": {"oauth2"},
-     *             "optional": "false"
-     *         }
-     *     },
      *
      *     @OA\Response(
      *         response=200,
@@ -248,26 +230,17 @@ class UserController extends Controller
      * Update the specified resource in storage
      *
      * @OA\Patch(
-     *     path="/api/v1/ids/admin/{id}",
+     *     path="/admin/{id}",
      *     summary="update user",
      *     description="update user",
      *     tags={"Admin / Users"},
      *
      *     security={{
-     *         "default": {
+     *         "passport": {
      *             "ManagerRead",
-     *             "User",
      *             "ManagerWrite"
      *         }
      *     }},
-     *     x={
-     *         "auth-type": "Application & Application User",
-     *         "throttling-tier": "Unlimited",
-     *         "wso2-application-security": {
-     *             "security-types": {"oauth2"},
-     *             "optional": "false"
-     *         }
-     *     },
      *
      *     @OA\Response(
      *         response=200,
@@ -344,26 +317,17 @@ class UserController extends Controller
      * Verify user email
      *
      * @OA\Post(
-     *     path="/api/v1/ids/admin/one-step/verify/send",
+     *     path="/admin/one-step/verify/send",
      *     summary="Verify user email",
      *     description="resend user email",
      *     tags={"Admin / Users"},
      *
      *     security={{
-     *         "default": {
+     *         "passport": {
      *             "ManagerRead",
-     *             "User",
      *             "ManagerWrite"
      *         }
      *     }},
-     *     x={
-     *         "auth-type": "Application & Application User",
-     *         "throttling-tier": "Unlimited",
-     *         "wso2-application-security": {
-     *             "security-types": {"oauth2"},
-     *             "optional": "false"
-     *         }
-     *     },
      *
      *     @OA\Parameter(
      *          name="email",
@@ -410,26 +374,17 @@ class UserController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/v1/ids/admin/one-step/verify",
+     *     path="/admin/one-step/verify",
      *     summary="Verify user email",
      *     description="Verify user email",
      *     tags={"Admin / Users"},
      *
      *     security={{
-     *         "default": {
+     *         "passport": {
      *             "ManagerRead",
-     *             "User",
      *             "ManagerWrite"
      *         }
      *     }},
-     *     x={
-     *         "auth-type": "Application & Application User",
-     *         "throttling-tier": "Unlimited",
-     *         "wso2-application-security": {
-     *             "security-types": {"oauth2"},
-     *             "optional": "false"
-     *         }
-     *     },
      *
      *     @OA\Parameter(
      *          name="email",
