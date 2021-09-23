@@ -13,7 +13,7 @@ services:
       - app-tier
     ports:
       - '80:8080'
-      - '443:8443'
+#      - '443:8443'
     volumes:
       - ./conf/vhost.conf:/etc/apache2/sites-enabled/000-default.conf:ro
 #      - ./conf/.env:/var/www/html/.env:rw
@@ -22,5 +22,5 @@ services:
       - ./web:/var/www/html:rw
       - ./xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini:rw
     command: /bin/bash -c "php artisan l5-swagger:generate > /dev/null & apache2-foreground"
-             # && php artisan queue:listen rabbitmq --queue=IdentityServer --timeout=0 > /dev/null & apache2-foreground
+             # && php artisan queue:listen rabbitmq --queue=IdentityServer --timeout=0
 
