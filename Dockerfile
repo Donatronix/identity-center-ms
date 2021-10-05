@@ -1,96 +1,97 @@
-###################  This Dockerfile is made of two parts:  ###################
-#
-# 1. The first part extends a PHP composer image so that you can install the application's dependencies.
+FROM alpine:latest
+LABEL Maintainer="Ihor Porokhnenko <ihor.porokhnenko@gmail.com>"
+LABEL Description="Lightweight container with Nginx & PHP-FPM 8 based on Alpine Linux."
 
-FROM composer:latest as build
+# Do a single run command to make the intermediary containers smaller.
+#RUN set -ex
 
-LABEL maintainer="Ihor Porokhnenko <ihor.porokhnenko@gmail.com>"
+## Update package list
+RUN apk update
 
-RUN apk update && apk add --no-cache \
-        php8-intl \
-        icu-dev \
-        gmp-dev \
-        libpng \
-        libpng-dev
+## Install packages necessary during the build phase
+RUN apk --no-cache add \
+    mc \
+    nano \
+    curl \
+    nginx \
+    php8 \
+    php8-intl \
+    php8-fpm \
+    php8-ctype \
+    php8-curl \
+    php8-pdo \
+    php8-pdo_mysql \
+    php8-dom \
+    php8-sodium \
+    php8-exif \
+    php8-fileinfo \
+    php8-gd \
+    php8-iconv \
+    php8-json \
+    php8-mbstring \
+    php8-opcache \
+    php8-openssl \
+    php8-pecl-imagick \
+    php8-pecl-redis \
+    php8-phar \
+    php8-session \
+    php8-simplexml \
+    php8-soap \
+    php8-xml \
+    php8-xmlreader \
+    php8-zip \
+    php8-zlib \
+    php8-xmlwriter \
+    php8-tokenizer \
+    supervisor tzdata htop
 
-#RUN docker-php-ext-configure intl
-RUN docker-php-ext-install \
-    intl \
-    sockets \
-    bcmath \
-    gmp \
-    gd \
-    && apk del libpng-dev
-    #libjpeg-turbo-dev libwebp-dev zlib-dev libxpm-dev
+# Creating symlink php8 => php
+RUN ln -s /usr/bin/php8 /usr/bin/php
 
-COPY ./web      /app
-COPY ./pubsub   /pubsub
-COPY ./json-api /json-api
-#COPY ./baum    /baum
+# Install PHP tools
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 
-WORKDIR /app
-RUN rm -rf .idea
+## Clean apk cache after all installed packages
+RUN rm -rf /var/cache/apk/*
+
+# Configure nginx
+COPY config/nginx.conf /etc/nginx/nginx.conf
+COPY config/vhost.conf /etc/nginx/conf.d/vhost.conf
+
+# Configure PHP-FPM
+COPY config/fpm-pool.conf /etc/php8/php-fpm.d/www.conf
+COPY config/php.ini /etc/php8/conf.d/custom.ini
+
+# Configure supervisord
+COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Setup document root
+RUN mkdir -p /var/www/html
+
+# Make sure files/folders needed by the processes are accessable when they run under the nobody user
+RUN chown -R nobody:nobody /var/www/html && \
+  chown -R nobody:nobody /run && \
+  chown -R nobody:nobody /var/lib/nginx && \
+  chown -R nobody:nobody /var/log/nginx
+
+# Switch to use a non-root user from here on
+USER nobody
+
+## Copy existing application directory contents
+WORKDIR /var/www/html
+COPY --chown=nobody ./web/ /var/www/html/
+VOLUME /var/www/html/
+
+## Composer packages install & update
 RUN composer -v install
 RUN composer -v update
 
-# 2. The second part creates a final Docker image with an Apache web server to serve the application
+# Expose the port nginx is reachable on
+EXPOSE 80
+#443
 
-FROM php:8.0.6-apache-buster
+# Let supervisord start nginx & php-fpm
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
-COPY --from=build /app /var/www/html
-COPY --from=build /pubsub /var/www/pubsub
-COPY --from=build /json-api /var/www/json-api
-
-# make sure apt is up to date
-RUN apt update --fix-missing && apt upgrade -y
-
-RUN apt install -y \
-        mc \
-        curl \
-        g++ \
-        openssh-client \
-        build-essential \
-        libssl-dev \
-        zlib1g-dev \
-        libicu-dev \
-        libgmp-dev \
-        libpng-dev \
-        libjpeg-dev \
-        libjpeg62-turbo-dev \
-        #libwebp-dev
-        #libxpm-dev
-        libfreetype6-dev \
-        libzip-dev \
-        libonig-dev
-
-#RUN docker-php-ext-configure gd \
-#    --with-freetype=/usr/include/ \
-#    --with-jpeg=/usr/include/ \
-#    --with-webp=/usr/include/
-
-RUN docker-php-ext-install -j$(nproc) \
-    pdo \
-    pdo_mysql \
-    intl \
-    sockets \
-    bcmath \
-    gmp \
-    zip \
-    mbstring
-
-RUN pecl install xdebug-3.0.3
-
-#RUN docker-php-ext-configure xdebug
-RUN docker-php-ext-enable \
-    xdebug
-
-# Configure Apache
-COPY conf/vhost.conf /etc/apache2/sites-available/000-default.conf
-RUN echo "Listen 8080" > /etc/apache2/ports.conf
-RUN echo "Listen 8443" >> /etc/apache2/ports.conf
-EXPOSE 8443 8080
-
-RUN chown -R www-data:www-data /var/www/html \
-    && a2enmod rewrite ssl headers
-
-USER www-data
+# Configure a healthcheck to validate that everything is up&running
+#HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1/fpm-ping
