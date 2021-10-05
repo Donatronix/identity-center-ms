@@ -5,7 +5,7 @@ return [
     'documentations' => [
         'default' => [
             'api' => [
-                'title' => 'Identity Server API',
+                'title' => 'Global Identity Centre. Sumra ID API',
             ],
             'routes' => [
                 /*

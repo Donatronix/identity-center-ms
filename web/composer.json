@@ -1,6 +1,6 @@
 {
-    "name": "sumra/identity-server",
-    "description": "Sumra Identity Server",
+    "name": "gic/sumra-id-api",
+    "description": "Global Identity Centre. Sumra ID API",
     "type": "project",
     "private": true,
     "require": {

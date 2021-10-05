@@ -1,26 +1,25 @@
-version: '3.5'
+version: '3.8'
 
 networks:
-  app-tier:
-    name: sumraNet
+  gic-network:
+    name: Global-Identity-Centre
     driver: bridge
 
 services:
-  apache:
-    container_name: {{DEPLOY_NAME}}
+  # Application Container
+  app:
+    container_name: {{DEPLOY_NAME}}-app
     image: {{DOCKER_IMAGE}}
     networks:
-      - app-tier
+      - gic-network
+    restart: always
+    tty: true
     ports:
-      - '80:8080'
-#      - '443:8443'
+      - '80:80'
+#      - '443:443'
     volumes:
-      - ./conf/vhost.conf:/etc/apache2/sites-enabled/000-default.conf:ro
-#      - ./conf/.env:/var/www/html/.env:rw
-      - ./certs/dev.sumra.net.crt:/certs/dev.sumra.net.crt:ro
-      - ./certs/dev.sumra.net.key:/certs/dev.sumra.net.key:ro
       - ./web:/var/www/html:rw
-      - ./xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini:rw
-    command: /bin/bash -c "php artisan l5-swagger:generate > /dev/null & apache2-foreground"
-             # && php artisan queue:listen rabbitmq --queue=IdentityServer --timeout=0
-
+      - ./logs:/var/log/nginx:rw
+#      - ./config/.env:/var/www/html/.env:rw
+#      - ./xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini:rw
+    command: /bin/sh -c "php artisan l5-swagger:generate > /dev/null"

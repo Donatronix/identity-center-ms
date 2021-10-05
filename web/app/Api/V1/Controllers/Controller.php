@@ -7,13 +7,13 @@ use Illuminate\Routing\Controller as BaseController;
 
 /**
  * @OA\Info(
- *     title="Identity Server API",
- *     description="This is API of Identity Server",
+ *     title="Global Identity Centre. Sumra ID API",
+ *     description="This is API of Global Identity Centre / Sumra ID",
  *     version="V1",
  *
  *     @OA\Contact(
  *         email="admin@sumraid.com",
- *         name="SumraID Support Team"
+ *         name="Global Identity Centre Support Team"
  *     )
  * )
  */
@@ -21,7 +21,7 @@ use Illuminate\Routing\Controller as BaseController;
 /**
  *  @OA\Server(
  *      url=L5_SWAGGER_CONST_HOST,
- *      description="Identity Server API, Version 1"
+ *      description="Global Identity Centre. Sumra ID API, Version 1"
  *  )
  */
 
