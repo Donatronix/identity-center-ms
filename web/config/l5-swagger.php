@@ -5,14 +5,14 @@ return [
     'documentations' => [
         'default' => [
             'api' => [
-                'title' => 'Global Identity Centre. Sumra ID API',
+                'title' => env('APP_NAME', 'Swagger API'),
             ],
             'routes' => [
                 /*
                  * Route for accessing api documentation interface
                 */
                 'api' => 'api/documentation',
-                'docs' => 'api/docs',
+                'docs' => 'api/export',
             ],
             'paths' => [
                 /*

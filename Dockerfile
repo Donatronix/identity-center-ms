@@ -43,20 +43,24 @@ RUN apk --no-cache add \
     php8-zlib \
     php8-xmlwriter \
     php8-tokenizer \
-    supervisor tzdata htop
+    supervisor \
+    tzdata \
+    htop
 
 # Creating symlink php8 => php
 RUN ln -s /usr/bin/php8 /usr/bin/php
 
 # Install PHP tools
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+RUN rm -rf /composer-setup.php
 
 ## Clean apk cache after all installed packages
 RUN rm -rf /var/cache/apk/*
 
 # Configure nginx
+RUN rm -rf /etc/nginx/http.d/default.conf
 COPY config/nginx.conf /etc/nginx/nginx.conf
-COPY config/vhost.conf /etc/nginx/conf.d/vhost.conf
+COPY config/vhost.conf /etc/nginx/http.d/vhost.conf
 
 # Configure PHP-FPM
 COPY config/fpm-pool.conf /etc/php8/php-fpm.d/www.conf
@@ -80,11 +84,12 @@ USER nobody
 ## Copy existing application directory contents
 WORKDIR /var/www/html
 COPY --chown=nobody ./web/ /var/www/html/
+#COPY ./web/ /var/www/html/
 VOLUME /var/www/html/
 
 ## Composer packages install & update
-RUN composer -v install
-RUN composer -v update
+#RUN composer -v install
+#RUN composer -v update
 
 # Expose the port nginx is reachable on
 EXPOSE 80
