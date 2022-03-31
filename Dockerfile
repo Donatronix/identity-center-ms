@@ -72,18 +72,18 @@ COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # Setup document root
 RUN mkdir -p /var/www/html
 
-# Make sure files/folders needed by the processes are accessable when they run under the nobody user
-RUN chown -R nobody:nobody /var/www/html && \
-  chown -R nobody:nobody /run && \
-  chown -R nobody:nobody /var/lib/nginx && \
-  chown -R nobody:nobody /var/log/nginx
+# Make sure files/folders needed by the processes are accessable when they run under the root user
+RUN chown -R root:root /var/www/html && \
+  chown -R root:root /run && \
+  chown -R root:root /var/lib/nginx && \
+  chown -R root:root /var/log/nginx
 
 # Switch to use a non-root user from here on
-USER nobody
+USER root
 
 ## Copy existing application directory contents
 WORKDIR /var/www/html
-COPY --chown=nobody ./web/ /var/www/html/
+COPY --chown=root ./web/ /var/www/html/
 #COPY ./web/ /var/www/html/
 VOLUME /var/www/html/
 
@@ -91,6 +91,9 @@ VOLUME /var/www/html/
 #RUN composer -v install
 #RUN composer -v update
 
+RUN mkdir storage/framework/sessions
+RUN mkdir storage/framework/views
+RUN mkdir storage/framework/cache
 # Expose the port nginx is reachable on
 EXPOSE 80
 #443
