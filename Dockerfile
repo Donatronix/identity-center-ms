@@ -82,8 +82,8 @@ RUN chown -R root:root /var/www/html && \
 USER root
 
 ## Copy existing application directory contents
-WORKDIR /var/www/html
-COPY --chown=root ./web/ /var/www/html/
+WORKDIR /var/www/html/web
+COPY --chown=root ./ /var/www/html/
 #COPY ./web/ /var/www/html/
 VOLUME /var/www/html/
 
