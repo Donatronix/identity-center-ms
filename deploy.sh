@@ -4,8 +4,8 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
-#git submodule init
-#git submodule update --remote
+git submodule init
+git submodule update --remote
 REVISION=`git rev-parse --short HEAD`
 
 BRANCH=`git status |head -n 1|awk '{print $3}'`

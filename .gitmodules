@@ -6,3 +6,6 @@
 	path = json-api
 	url = git@bitbucket.org:sumraprague/json-api.git
 	branch = master
+[submodule "sumra-sdk"]
+    path = sumra-sdk
+    url = git@bitbucket.org:sumraprague/sumra-sdk.git

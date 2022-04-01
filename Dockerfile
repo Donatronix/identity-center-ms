@@ -91,9 +91,9 @@ VOLUME /var/www/html/
 #RUN composer -v install
 #RUN composer -v update
 
-RUN mkdir storage/framework/sessions
-RUN mkdir storage/framework/views
-RUN mkdir storage/framework/cache
+# RUN mkdir storage/framework/sessions
+# RUN mkdir storage/framework/views
+# RUN mkdir storage/framework/cache
 # Expose the port nginx is reachable on
 EXPOSE 80
 #443
