@@ -1,25 +1,28 @@
 version: '3.8'
 
-networks:
-  gic-network:
-    name: Global-Identity-Centre
-    driver: bridge
-
 services:
-  # Application Container
-  app:
-    container_name: {{DEPLOY_NAME}}-app
+  {{DEPLOY_NAME}}-app:
+    container_name: {{DEPLOY_NAME}}
     image: {{DOCKER_IMAGE}}
+    restart: always
     networks:
-      - gic-network
-#    restart: always
-    tty: true
+      - kus-net
     ports:
-      - '80:80'
-#      - '443:443'
+      - '8200:80'
+      - '18200:443'
+    environment:
+      - WEB_DOCUMENT_ROOT=/var/www/html/public
+#      - WEB_ALIAS_DOMAIN=api.sumrameet.com
+      - PHP_DISMOD=apcu,calendar,exif,gd,imagick,imap,ioncube,mongodb,ldap,pcntl,pdo_pgsql,pgsql,shmop,soap,sysvmsg,sysvsem,sysvshm,vips
+      - PHP_DISPLAY_ERRORS=1
+      - LOG_STDERR=/var/log/vhost-error.log
     volumes:
       - ./web:/var/www/html:rw
       - ./logs:/var/log/nginx:rw
-#      - ./config/.env:/var/www/html/.env:rw
-#      - ./xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini:rw
-#    command: /bin/sh -c "php artisan l5-swagger:generate > /dev/null"
+#     - ./xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini:rw
+#    command: /bin/bash -c "php artisan swagger-lume:generate && php artisan queue:listen rabbitmq --queue=IdentityCentre --timeout=0 > /dev/null"
+
+networks:
+  kus-net:
+    name: KeyUniversalServicesNet
+    driver: bridge

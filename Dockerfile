@@ -1,9 +1,9 @@
-FROM alpine:latest
+FROM webdevops/php-nginx:8.0-alpine
 LABEL Maintainer="Ihor Porokhnenko <ihor.porokhnenko@gmail.com>"
 LABEL Description="Lightweight container with Nginx & PHP-FPM 8 based on Alpine Linux."
 
 # Do a single run command to make the intermediary containers smaller.
-#RUN set -ex
+RUN set -ex
 
 ## Update package list
 RUN apk update
@@ -11,92 +11,48 @@ RUN apk update
 ## Install packages necessary during the build phase
 RUN apk --no-cache add \
     mc \
-    nano \
-    curl \
-    nginx \
-    php8 \
-    php8-intl \
-    php8-fpm \
-    php8-ctype \
-    php8-curl \
-    php8-pdo \
-    php8-pdo_mysql \
-    php8-dom \
-    php8-sodium \
-    php8-exif \
-    php8-fileinfo \
-    php8-gd \
-    php8-iconv \
-    php8-json \
-    php8-mbstring \
-    php8-opcache \
-    php8-openssl \
-    php8-pecl-imagick \
-    php8-pecl-redis \
-    php8-phar \
-    php8-session \
-    php8-simplexml \
-    php8-soap \
-    php8-xml \
-    php8-xmlreader \
-    php8-zip \
-    php8-zlib \
-    php8-xmlwriter \
-    php8-tokenizer \
-    supervisor \
-    tzdata \
-    htop
-
-# Creating symlink php8 => php
-RUN ln -s /usr/bin/php8 /usr/bin/php
-
-# Install PHP tools
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && php composer-setup.php --install-dir=/usr/local/bin --filename=composer
-RUN rm -rf /composer-setup.php
+    nano
 
 ## Clean apk cache after all installed packages
 RUN rm -rf /var/cache/apk/*
 
 # Configure nginx
-RUN rm -rf /etc/nginx/http.d/default.conf
-COPY config/nginx.conf /etc/nginx/nginx.conf
-COPY config/vhost.conf /etc/nginx/http.d/vhost.conf
+#RUN rm -f /etc/nginx/http.d/default.conf
+#COPY config/nginx/nginx.conf /etc/nginx/nginx.conf
+#COPY config/nginx/http.d/app.conf /etc/nginx/http.d/app.conf
+
+COPY config/vhost.conf /opt/docker/etc/nginx/vhost.conf
+COPY config/vhost.ssl.conf /opt/docker/etc/nginx/vhost.ssl.conf
+COPY config/vhost.common.d/ /opt/docker/etc/nginx/vhost.common.d/
 
 # Configure PHP-FPM
-COPY config/fpm-pool.conf /etc/php8/php-fpm.d/www.conf
-COPY config/php.ini /etc/php8/conf.d/custom.ini
+#COPY config/php/fpm-pool.conf /etc/php8/php-fpm.d/www.conf
+#COPY config/php/php.ini /etc/php8/conf.d/custom.ini
 
-# Configure supervisord
-COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+## Copy existing application contents to workdir
+COPY --chown=nginx:nginx ./web /var/www/html
+COPY --chown=nginx:nginx ./sumra-sdk /var/www/sumra-sdk
 
-# Setup document root
-RUN mkdir -p /var/www/html
-
-# Make sure files/folders needed by the processes are accessable when they run under the nobody user
-RUN chown -R nobody:nobody /var/www/html && \
-  chown -R nobody:nobody /run && \
-  chown -R nobody:nobody /var/lib/nginx && \
-  chown -R nobody:nobody /var/log/nginx
-
-# Switch to use a non-root user from here on
-USER nobody
-
-## Copy existing application directory contents
+## Set work directory
 WORKDIR /var/www/html
-COPY --chown=nobody ./web/ /var/www/html/
-#COPY ./web/ /var/www/html/
-VOLUME /var/www/html/
+
+## Set writable dirs
+RUN chmod -R 777 /var/www/html/storage/*
+
+## Remove unneeded files
+RUN rm -rf /var/www/html/.idea
+RUN find /var/www/html/storage/framework/ -type f -name "*.php" -delete
+RUN rm -rf -R /var/www/html/storage/logs/*.log
+RUN rm -rf /var/www/html/.editorconfig
+RUN rm -rf /var/www/html/.env
+RUN rm -rf /var/www/html/.env.example
+RUN rm -rf /var/www/html/.gitignore
+RUN rm -rf /var/www/html/.styleci.yml
+
+## Update env
+RUN cp -f .env.production .env
+RUN rm -rf /var/www/html/.env.production
 
 ## Composer packages install & update
-#RUN composer -v install
-#RUN composer -v update
-
-# Expose the port nginx is reachable on
-EXPOSE 80
-#443
-
-# Let supervisord start nginx & php-fpm
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
-
-# Configure a healthcheck to validate that everything is up&running
-#HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1/fpm-ping
+RUN composer -v install
+RUN composer -v update

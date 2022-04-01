@@ -1,0 +1,8 @@
+172.20.0.1 - - [01/Apr/2022:12:50:01 +0000] "GET / HTTP/1.1" 404 125 "-" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:98.0) Gecko/20100101 Firefox/98.0" "-" 0.000 - . -
+172.20.0.1 - - [01/Apr/2022:12:50:01 +0000] "GET /favicon.ico HTTP/1.1" 404 125 "http://localhost/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:98.0) Gecko/20100101 Firefox/98.0" "-" 0.000 - . -
+172.20.0.1 - - [01/Apr/2022:12:51:25 +0000] "GET /api/documentation HTTP/1.1" 404 125 "-" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:98.0) Gecko/20100101 Firefox/98.0" "-" 0.000 - . -
+172.20.0.1 - - [01/Apr/2022:12:51:33 +0000] "GET /v1/api/documentation HTTP/1.1" 404 125 "-" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:98.0) Gecko/20100101 Firefox/98.0" "-" 0.000 - . -
+172.20.0.1 - - [01/Apr/2022:12:52:12 +0000] "GET / HTTP/1.1" 404 125 "-" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:98.0) Gecko/20100101 Firefox/98.0" "-" 0.000 - . -
+172.20.0.1 - - [01/Apr/2022:12:52:15 +0000] "GET / HTTP/1.1" 404 125 "-" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:98.0) Gecko/20100101 Firefox/98.0" "-" 0.000 - . -
+172.20.0.1 - - [01/Apr/2022:12:52:17 +0000] "GET / HTTP/1.1" 404 125 "-" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:98.0) Gecko/20100101 Firefox/98.0" "-" 0.000 - . -
+127.0.0.1 - - [01/Apr/2022:12:53:43 +0000] "GET / HTTP/1.1" 404 153 "-" "curl/7.80.0" "-" 0.000 - . -
