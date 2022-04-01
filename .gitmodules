@@ -1,8 +1,4 @@
-[submodule "pubsub"]
-	path = pubsub
-	url = git@bitbucket.org:sumraprague/pubsub.git
-	branch = master
-[submodule "json-api"]
-	path = json-api
-	url = git@bitbucket.org:sumraprague/json-api.git
+[submodule "sumra-sdk"]
+    path = sumra-sdk
+    url = git@bitbucket.org:sumraprague/sumra-sdk.git
 	branch = master
