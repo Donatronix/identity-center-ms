@@ -26,6 +26,8 @@ $app = new Laravel\Lumen\Application(
 $app->withFacades();
 $app->withEloquent();
 
+
+
 /*
 |--------------------------------------------------------------------------
 | Register Container Bindings
@@ -79,7 +81,7 @@ $app->middleware([
 ]);
 
 $app->routeMiddleware([
-    //'auth' => App\Http\Middleware\Authenticate::class,
+    'auth' => App\Http\Middleware\Authenticate::class,
     'checkUser' => \Sumra\SDK\Middleware\CheckUserMiddleware::class,
     'checkAdmin' => \Sumra\SDK\Middleware\CheckAdminMiddleware::class,
 ]);
@@ -123,6 +125,8 @@ $app->register(\Sumra\SDK\JsonApiServiceProvider::class);
  */
 $app->configure('swagger-lume');
 $app->register(\SwaggerLume\ServiceProvider::class);
+$app->register(Laravel\Passport\PassportServiceProvider::class);
+$app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
 
 /**
  * Artisan Commands Lumen Generator
