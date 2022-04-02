@@ -2,10 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
-use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
+use Laravel\Lumen\Providers\EventServiceProvider as ServiceProvider;
+use App\Listeners\RechargeBalanceTransactionListener;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -15,18 +13,11 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        Registered::class => [
-            SendEmailVerificationNotification::class,
+        'rechargeBalanceRequest' => [
+            'App\Listeners\RechargeBalanceRequestListener',
+        ],
+        'rechargeBalanceTransaction' => [
+            RechargeBalanceTransactionListener::class,
         ],
     ];
-
-    /**
-     * Register any events for your application.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        //
-    }
 }

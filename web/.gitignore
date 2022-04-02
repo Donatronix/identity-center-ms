@@ -1,11 +1,11 @@
 /.idea
-/.vscode
-/__bkp
-/node_modules
 /public/hot
 /public/storage
+/storage/api-docs
+/storage/app
+/storage/framework
+/storage/logs
 /vendor
 .env
-npm-debug.log
-yarn-error.log
+.phpunit.result.cache
 composer.lock

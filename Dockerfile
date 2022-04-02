@@ -13,6 +13,10 @@ RUN apk --no-cache add \
     mc \
     nano
 
+## Install GMP extention
+RUN apk add gmp-dev
+RUN docker-php-ext-install gmp
+
 ## Clean apk cache after all installed packages
 RUN rm -rf /var/cache/apk/*
 
@@ -37,7 +41,7 @@ COPY --chown=nginx:nginx ./sumra-sdk /var/www/sumra-sdk
 WORKDIR /var/www/html
 
 ## Set writable dirs
-RUN chmod -R 777 /var/www/html/storage/*
+RUN chmod -R 777 /var/www/html/storage
 
 ## Remove unneeded files
 RUN rm -rf /var/www/html/.idea

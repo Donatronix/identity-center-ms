@@ -1,0 +1,23 @@
+{
+    "BitPayConfiguration": {
+        "Environment": "Test",
+        "EnvConfig": {
+            "Test": {
+                "PrivateKeyPath": "\/storage\/keys\/bitpay.key",
+                "PrivateKeySecret": "A6Zaq4nVkH1iVgcR4pNA94rFTwraRQu9YqcnY7pHHNhS",
+                "ApiTokens": {
+                    "merchant": "FDpsaV6E9BXq4UXTsEnNBA3GF8hPNoh5eguuGGfDymSd",
+                    "payroll": "2c4LJEPemnFpPSRHiYKHh3qrJA9tV3HPvTjqeyW29pwo"
+                }
+            },
+            "Prod": {
+                "PrivateKeyPath": null,
+                "PrivateKeySecret": null,
+                "ApiTokens": {
+                    "merchant": null,
+                    "payroll": null
+                }
+            }
+        }
+    }
+}
