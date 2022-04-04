@@ -2,11 +2,13 @@
 
 namespace App\Api\V1\Controllers\OneStepId;
 
-use App\Models\User;
-use App\Api\V1\Controllers\Controller;
-use Illuminate\Http\Request;
 use Exception;
+use App\Models\User;
 use GuzzleHttp\Client;
+use Illuminate\Http\Request;
+use App\Models\TwoFactorAuth;
+use Illuminate\Support\Facades\DB;
+use App\Api\V1\Controllers\Controller;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class UserRequestsRegistrationByPhoneNumber extends Controller
@@ -170,16 +172,22 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
             
         }
 
+        DB::beginTransaction();
         // user does  not exist
         try {
-            
-            // send sms here
-
+           
+           
             $user = User::create([
                 "phone" => $request->phone,
                 "status" => User::STATUS_INACTIVE
            ]);
             
+           $twoFa = TwoFactorAuth::generateTokenForUser($user);
+            
+            // Send the code to the user
+            
+
+            DB::commit(); 
             // Return response
             return response()->json([
                 'type' => 'success',
@@ -191,6 +199,7 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
 
         } catch (Exception $e) {
 
+            DB::rollBack();
             return response()->json([
                 'type' => 'danger',
                 'title' => "Create new user. Step 1",
@@ -198,6 +207,9 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
             ], 400);
         }
         
+        
+
+
     }
   
 

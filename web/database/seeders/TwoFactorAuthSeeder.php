@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
-class ClientsSeeder extends Seeder
+class TwoFactorAuthSeeder extends Seeder
 {
     /**
      * Run the database seeds.
