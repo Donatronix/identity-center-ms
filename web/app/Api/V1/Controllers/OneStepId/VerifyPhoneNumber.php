@@ -2,11 +2,13 @@
 
 namespace App\Api\V1\Controllers\OneStepId;
 
-use App\Models\User;
-use App\Api\V1\Controllers\Controller;
-use Illuminate\Http\Request;
 use Exception;
+use App\Models\User;
 use GuzzleHttp\Client;
+use Illuminate\Http\Request;
+use App\Models\TwoFactorAuth;
+use App\Api\V1\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class VerifyPhoneNumber extends Controller
@@ -120,85 +122,65 @@ class VerifyPhoneNumber extends Controller
         // ...
         // Validate input data
         $this->validate($request, [
-            'phone_number' => 'required|integer',
+            'token' => 'required',
         ]);
+
+        try {
+            
+            $twoFa = TwoFactorAuth::where("code",$request->token)->firstOrFail();
         
+        } catch ( ModelNotFoundException $th) {
 
-        try {
-
-            $user = User::where("phone_number", $request->phone)->firstOrFail();
-            
-
-            // user already exists
-            if( $user->status == User::STATUS_BANNED)
-            {
-                 
-                return response()->json([
-                     "phone_exists" => true,
-                     "user_status" => $user->status,
-                     "type" => "danger",
-                     "message" => "This user has been banned from this platform."
-                ],403);
-
-            }
-            else if ($user->status == User::STATUS_INACTIVE) 
-            {
-                return response()->json([
-                     "code" => 200,
-                     "message" => "This user already exists. Required send verification code",
-                     "phone_exists" => true,
-                     "user_status" => $user->status,
-                     "type" => "success"
-                ],200);
-
-            }else if ($user->status == User::STATUS_ACTIVE)
-            {
-                 
-                return response()->json([
-                     "code" => 200,
-                     "message" => "This user already exists.",
-                     "phone_exists" => true,
-                     "user_status" => $user->status,
-                     "type" => "success"
-                ], 200);
-            }
-
-
-        } catch (ModelNotFoundException $e) {
-    
-            //pass
-            
-        }
-
-        // user does  not exist
-        try {
-            
-            // TODO
-            // send sms here
-
-            $user = User::create([
-                "phone" => $request->phone,
-                "status" => User::STATUS_INACTIVE
-           ]);
-            
-            // Return response
-            return response()->json([
-                'type' => 'success',
-                'title' => "Create new user. Step 1",
-                'message' => 'User was successful created',
-                'id' => $user->id
-            ], 201);
-
-
-        } catch (Exception $e) {
-
-            return response()->json([
-                'type' => 'danger',
-                'title' => "Create new user. Step 1",
-                'message' => $e->getMessage()
+            return response()->json([ 
+                "type" => "danger",
+                "message" => "Invalid Token",
+                "validate_auth_code" => false
             ], 400);
         }
+
+
+        try {
+            
+            $user = $twoFa->user;
+
+            if($user->status == User::STATUS_BANNED){
+                 
+                return response()->json([
+                    "type" => "danger",
+                    "user_status" => $user->status,
+                    "sid" => $twoFa->sid,
+                    "message" => "User has been banned from this platform."     
+                ],403);
+            }
+
+            $user->phone_number_verified_at = Carbon::now();
+            $user->save();
+
+        } catch (Exception $th) {
+            //throw $th;
+
+            return response()->json([
+               "message" => "Unable to verify token",
+               "type" => "danger"
+            ],400);
+
+        }
+
+
+        return response()->json([
+            "message" => "Phone Number Verification successful",
+            "type" => "success",
+            "sid" => $twoFa->sid,
+            "user_status" => $user->status,
+            "validate_auth_code" => true
+    
+        ]);
+   
         
+
+
+        
+
     }
   
 

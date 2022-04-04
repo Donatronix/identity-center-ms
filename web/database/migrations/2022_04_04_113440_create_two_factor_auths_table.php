@@ -16,8 +16,8 @@ class CreateTwoFactorAuthsTable extends Migration
     {
         Schema::create('two_factor_auths', function (Blueprint $table) {
             $table->id();
-            $table->string('code');
-            $table->string('message_id');
+            $table->string('code')->unique();
+            $table->string('sid');
             $table->uuid("user_id");
             $table->foreignUuid('user_id');
             $table->timestamps();

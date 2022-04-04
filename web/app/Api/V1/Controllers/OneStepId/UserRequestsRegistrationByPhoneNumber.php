@@ -175,8 +175,6 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
         DB::beginTransaction();
         // user does  not exist
         try {
-           
-           
             $user = User::create([
                 "phone" => $request->phone,
                 "status" => User::STATUS_INACTIVE
@@ -185,8 +183,6 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
            $twoFa = TwoFactorAuth::generateTokenForUser($user);
             
             // Send the code to the user
-            
-
             DB::commit(); 
             // Return response
             return response()->json([
@@ -203,13 +199,9 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
             return response()->json([
                 'type' => 'danger',
                 'title' => "Create new user. Step 1",
-                'message' => $e->getMessage()
+                'message' => "Unable to create user."
             ], 400);
         }
-        
-        
-
-
     }
   
 

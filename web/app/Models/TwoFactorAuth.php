@@ -12,8 +12,12 @@ class TwoFactorAuth extends Model
 {
     //
 
-    protected $fillable = ["message_id", "user_id", "code"];
+    protected $fillable = ["sid", "user_id", "code"];
 
+    public function user(){
+         
+        return $this->belongsTo(User::class, "user_id");
+    }
 
     public static function generateTokenForUser(User $user)
     {
