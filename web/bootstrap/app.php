@@ -62,6 +62,7 @@ $app->singleton(
 
 
 $app->configure('app');
+$app->configure('nexmo');
 $app->configure('settings');
 $app->configure('auth');
 $app->configure('filesystems');

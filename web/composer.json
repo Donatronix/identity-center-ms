@@ -10,6 +10,7 @@
         "ext-gmp": "*",
         "dusterio/lumen-passport": "^0.3.0",
         "laravel/lumen-framework": "~8",
+        "guzzlehttp/guzzle": "^7.0",
         "sumra/sdk": "*"
     },
     "require-dev": {

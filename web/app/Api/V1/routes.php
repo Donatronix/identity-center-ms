@@ -1,5 +1,8 @@
 <?php
 
+use App\Api\V1\Controllers\OneStepId\UserRequestsRegistrationByPhoneNumber;
+
+
 /**
  * @var Laravel\Lumen\Routing\Router $router
  */
@@ -11,17 +14,16 @@ $router->group([
      *
      */
     $router->group([
-        'prefix' => 'users',
-        'as' => 'users'
+        'prefix' => 'user',
+        'as' => 'users',
+        'namespace' => 'OneStepId'
     ], function ($router) {
         $router->group([
             'prefix' => 'one-step',
             'as' => '.one-step'
         ], function ($router) {
-            $router->get('/', 'UserOneStepController@index');
-            $router->post('/', 'UserOneStepController@store');
-            $router->get('/{id}', 'UserOneStepController@show');
-            $router->patch('/{id}', 'UserOneStepController@update');
+            $router->post('/register-request', UserRequestsRegistrationByPhoneNumber::class);
+    
         });
     });
 
