@@ -60,9 +60,12 @@ $app->singleton(
 |
 */
 
+
 $app->configure('app');
 $app->configure('settings');
-$app->configure('payments');
+$app->configure('auth');
+$app->configure('filesystems');
+$app->configure('cache');
 
 /*
 |--------------------------------------------------------------------------
