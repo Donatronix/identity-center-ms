@@ -151,7 +151,7 @@ class UserSubmitsUsername extends Controller
             ],403);
         }else if ($user->status == User::STATUS_ACTIVE){
             //login active user
-            return $this->login($user,$request->sid);
+            return $this->login($user,$request->sid, $request->username);
         }
 
         // Only  inactive users gets to this part of the code
@@ -183,7 +183,7 @@ class UserSubmitsUsername extends Controller
                 ], 400);
             }
 
-            return $this->login($user,$request->sid);
+            return $this->login($user,$request->sid, $request->username);
             
         }else {
         // username already exists for this SID
@@ -196,8 +196,34 @@ class UserSubmitsUsername extends Controller
 
 
 
-    public function login(User $user, $sid){
+    public function login(User $user, $sid, $username){
+         
+        //check if its a malicious user
+        try {
 
+            $user = User::getBySid($sid);
+            if (strtolower($user->username) !== strtolower($username))
+            {
+                // malicious user, warn and block
+                //TODO count login attempts and block
+                return response()->json([
+                    "type" => "danger",
+                    "message" => "Unauthorized operation.",
+                    "user_status" => $user->status
+                ],403);
+            }
+
+            // generate access token
+            
+
+        }catch (Exception $e){
+
+
+            
+        }
+        
+        // generate jwt token using user object
+         
          return response()->json([
             "token" => "12433434"
          ]);
