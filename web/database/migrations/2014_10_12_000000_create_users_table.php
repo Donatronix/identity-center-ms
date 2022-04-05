@@ -18,7 +18,8 @@ class CreateUsersTable extends Migration
             $table->uuid('id')->primary();
             $table->string('first_name', 60)->nullable();
             $table->string('last_name', 60)->nullable();
-            $table->string('username', 25)->nullable();
+            // need username to be case insensitive
+            $table->string('username', 25)->collation("latin_general_ci")->nullable()->unique();
             $table->bigInteger('phone_number')->unsigned()->unique();
             $table->timestamp('phone_number_verified_at')->nullable();
             $table->string('email', 150)->nullable()->unique();

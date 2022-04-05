@@ -192,10 +192,6 @@ class UserSubmitsUsername extends Controller
                 "message" => "Username already exists for this SID"
             ]);
         }
-       
-        //login user
-        
-
     }
 
 
