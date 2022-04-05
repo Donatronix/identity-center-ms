@@ -175,12 +175,20 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
         DB::beginTransaction();
         // user does  not exist
         try {
+
+
+            // TODO
+            // Generate Token
+            // Send SMS
+            //    if successful
+            // create user 
+
             $user = User::create([
                 "phone" => $request->phone,
                 "status" => User::STATUS_INACTIVE
            ]);
             
-           $twoFa = TwoFactorAuth::generateTokenForUser($user);
+           
             
             // Send the code to the user
             DB::commit(); 

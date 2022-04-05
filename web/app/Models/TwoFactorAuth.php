@@ -19,7 +19,9 @@ class TwoFactorAuth extends Model
         return $this->belongsTo(User::class, "user_id");
     }
 
-    public static function generateTokenForUser(User $user)
+   
+
+    public static function generateToken()
     {
 
         do {
@@ -28,18 +30,10 @@ class TwoFactorAuth extends Model
             
         } while (self::where("code",$token)->exists());
 
-        try {
-            //code...
-           $twoFa = self::create([ "code" => $token, 'user_id' => $user->id]);
-
-           return $twoFa;
-
-        } catch (Exception $th) {
-            //throw $th;
-            throw new Exception("Unable to generate token");
-        }
+        return $token;
         
     }
+
 
     public static function verifyToken(User $user, $token)
     {

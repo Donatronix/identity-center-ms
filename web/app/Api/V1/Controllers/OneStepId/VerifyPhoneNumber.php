@@ -4,7 +4,6 @@ namespace App\Api\V1\Controllers\OneStepId;
 
 use Exception;
 use App\Models\User;
-use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use App\Models\TwoFactorAuth;
 use App\Api\V1\Controllers\Controller;
@@ -17,12 +16,12 @@ class VerifyPhoneNumber extends Controller
  
   
      /**
-     * Create new user for One-Step
+     * Verify Phone Number 
      *
      * @OA\Post(
-     *     path="/auth/send-phone",
-     *     summary="Create new user for One-Step",
-     *     description="Create new user for One-Step",
+     *     path="/auth/send-code",
+     *     summary="Verify Phone Number ",
+     *     description="Verify Phone Number ",
      *     tags={"One-Step Users"},
      *
      *
@@ -30,19 +29,19 @@ class VerifyPhoneNumber extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             type="object",
-     *             required={"phone"},
+     *             required={"auth_code_from_user"},
      *
      *             @OA\Property(
-     *                 property="phone",
-     *                 type="number",
-     *                 description="Phone number of user",
-     *                 example="380971829100"
+     *                 property="auth_code_from_user",
+     *                 type="string",
+     *                 description="verification code enter by user",
+     *                 example="ksdaofdf"
      *             )
      *         )
      *     ),
      *
      *     @OA\Response(
-     *          response=201,
+     *          response=200,
      *          description="Success",
      *
      *          @OA\JsonContent(
@@ -54,9 +53,15 @@ class VerifyPhoneNumber extends Controller
      *                 example="success"
      *             ),
      *             @OA\Property(
-     *                 property="title",
+     *                 property="sid",
      *                 type="string",
      *                 example="Create new user. Step 1"
+     *             ),
+     *             @OA\Property(
+     *                 property="validate_auth_code",
+     *                 type="boolean",
+     *                 example="true"
+     *                 description="Indicates if validation is successful"
      *             ),
      *             @OA\Property(
      *                 property="message",
@@ -64,20 +69,10 @@ class VerifyPhoneNumber extends Controller
      *                 example="User was successful created"
      *             ),
      *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 description="User object",
-     *
-     *                 @OA\Property(
-     *                     property="id",
-     *                     type="string",
-     *                     example="50000005-5005-5005-5005-500000000005"
-     *                 ),
-     *                 @OA\Property(
-     *                     property="phone",
-     *                     type="number",
-     *                     example="380971829100"
-     *                 )
+     *                 property="user_status",
+     *                 type="number",
+     *                 description="User Status INACTIVE = 0, ACTIVE = 1, BANNED = 2",
+
      *             )
      *         )
      *     ),
@@ -94,9 +89,9 @@ class VerifyPhoneNumber extends Controller
      *                 example="danger"
      *             ),
      *             @OA\Property(
-     *                 property="title",
-     *                 type="string",
-     *                 example="Create new user. Step 1"
+     *                 property="validate_auth_code",
+     *                 type="boolean",
+     *                 example="false"
      *             ),
      *             @OA\Property(
      *                 property="message",
@@ -122,12 +117,12 @@ class VerifyPhoneNumber extends Controller
         // ...
         // Validate input data
         $this->validate($request, [
-            'token' => 'required',
+            'auth_code_from_user' => 'required',
         ]);
 
         try {
             
-            $twoFa = TwoFactorAuth::where("code",$request->token)->firstOrFail();
+            $twoFa = TwoFactorAuth::where("code",$request->auth_code_from_user)->firstOrFail();
         
         } catch ( ModelNotFoundException $th) {
 
@@ -161,7 +156,9 @@ class VerifyPhoneNumber extends Controller
 
             return response()->json([
                "message" => "Unable to verify token",
-               "type" => "danger"
+               "type" => "danger",
+               "validate_auth_code" => false,
+               
             ],400);
 
         }
