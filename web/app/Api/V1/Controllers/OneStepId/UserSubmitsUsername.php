@@ -37,6 +37,14 @@ class UserSubmitsUsername extends Controller
      *                 description="verification code enter by user",
      *                 example="chinedu338"
      *             ),
+     * 
+     * 
+     *             @OA\Property(
+     *                 property="sid",
+     *                 type="string",
+     *                 description="Message ID",
+     *                 example="dawsd-sdsd-sdfsds-dsd"
+     *             ),
      *         )
      *     ),
      *
@@ -55,7 +63,7 @@ class UserSubmitsUsername extends Controller
      *             @OA\Property(
      *                 property="sid",
      *                 type="string",
-     *                 example="Create new user. Step 1"
+     *                 example="Create ew user. Step 3"
      *             ),
      *             @OA\Property(
      *                 property="validate_auth_code",
@@ -117,68 +125,86 @@ class UserSubmitsUsername extends Controller
         // ...
         // Validate input data
         $this->validate($request, [
-            'username' => 'unique:users,required',
+            'username' => 'required',
             "sid" => "required"
         ]);
 
+        // try to retrieve user using sid
         try {
-            
-            
-        
+            // retrieve user using the sid
+            $user = User::getBySid($request->sid);
         } catch ( ModelNotFoundException $th) {
-
             return response()->json([ 
                 "type" => "danger",
-                "message" => "Invalid Token",
-                "validate_auth_code" => false
-            ], 400);
+                "message" => "Invalid sid Token",
+            ], 403);
         }
 
 
-        try {
-            
-            $user = $twoFa->user;
+        // check user status 
+        if($user->status == User::STATUS_BANNED){
+            //report banned
+            return response()->json([
+                "type" => "danger",
+                "user_status" => $user->status,
+                "message" => "User has been banned from this platform."     
+            ],403);
+        }else if ($user->status == User::STATUS_ACTIVE){
+            //login active user
+            return $this->login($user,$request->sid);
+        }
 
-            if($user->status == User::STATUS_BANNED){
-                 
+        // Only  inactive users gets to this part of the code
+        // check if username is taken
+        $usernameExists = User::where("username",$request->username)->exists();
+        if ($usernameExists){
+             return response()->json([
+                 "type" => "danger",
+                 "message" => "Username already exists.",
+                 "user_status" => $user->status,
+                 "phone_exist" => true                 
+             ], 400);
+
+        }
+
+        // check if username is empty 
+        if (empty($user->username)){
+
+            try {
+                $user->username = $request->username;
+                $user->status = User::STATUS_ACTIVE;
+                $user->save();
+
+            } catch (Exception $th) {
+                //throw $th;
                 return response()->json([
                     "type" => "danger",
-                    "user_status" => $user->status,
-                    "sid" => $twoFa->sid,
-                    "message" => "User has been banned from this platform."     
-                ],403);
+                    "message" => "Unable to save username."
+                ], 400);
             }
 
-            $user->phone_number_verified_at = Carbon::now();
-            $user->save();
-
-        } catch (Exception $th) {
-            //throw $th;
-
+            return $this->login($user,$request->sid);
+            
+        }else {
+        // username already exists for this SID
             return response()->json([
-               "message" => "Unable to verify token",
-               "type" => "danger",
-               "validate_auth_code" => false,
-               
-            ],400);
-
+                "type" => "danger",
+                "message" => "Username already exists for this SID"
+            ]);
         }
-
-
-        return response()->json([
-            "message" => "Phone Number Verification successful",
-            "type" => "success",
-            "sid" => $twoFa->sid,
-            "user_status" => $user->status,
-            "validate_auth_code" => true
-    
-        ]);
-   
+       
+        //login user
         
 
+    }
 
-        
 
+
+    public function login(User $user, $sid){
+
+         return response()->json([
+            "token" => "12433434"
+         ]);
     }
   
 
