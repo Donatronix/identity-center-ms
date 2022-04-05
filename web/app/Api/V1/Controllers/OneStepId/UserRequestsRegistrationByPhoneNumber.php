@@ -10,6 +10,7 @@ use App\Models\TwoFactorAuth;
 use Illuminate\Support\Facades\DB;
 use App\Api\V1\Controllers\Controller;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Str;
 
 class UserRequestsRegistrationByPhoneNumber extends Controller
 {  
@@ -176,7 +177,9 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
         // user does  not exist
         try {
 
+            $token = TwoFactorAuth::generateToken();
 
+            $sid = $this->sendSms($token,$request->phone);
             // TODO
             // Generate Token
             // Send SMS
@@ -188,6 +191,12 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
                 "status" => User::STATUS_INACTIVE
            ]);
             
+
+           $twoFa = TwoFactorAuth::create([
+                "sid" => $sid,
+                "user_id" => $user->id,
+                "code" => $token
+           ]);
            
             
             // Send the code to the user
@@ -210,6 +219,20 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
                 'message' => "Unable to create user."
             ], 400);
         }
+    }
+
+
+    private function sendSms($token,$phoneNumber){
+          
+          try {
+             
+            // contact communication MS 
+
+          } catch (\Throwable $th) {
+              //throw $th;
+          }
+
+          return Str::random(16);
     }
   
 

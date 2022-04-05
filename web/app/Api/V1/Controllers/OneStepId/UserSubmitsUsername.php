@@ -117,12 +117,13 @@ class UserSubmitsUsername extends Controller
         // ...
         // Validate input data
         $this->validate($request, [
-            'auth_code_from_user' => 'required',
+            'username' => 'unique:users,required',
+            "sid" => "required"
         ]);
 
         try {
             
-            $twoFa = TwoFactorAuth::where("code",$request->auth_code_from_user)->firstOrFail();
+            
         
         } catch ( ModelNotFoundException $th) {
 
