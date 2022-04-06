@@ -10,18 +10,18 @@ use App\Api\V1\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-class VerifyPhoneNumber extends Controller
+class RequestForSumraId extends Controller
 {  
     
  
   
      /**
-     * Verify Phone Number 
+     * Request for sumra id 
      *
      * @OA\Post(
      *     path="/auth/send-code",
-     *     summary="Verify Phone Number ",
-     *     description="Verify Phone Number ",
+     *     summary="Request for sumra id ",
+     *     description="Request for sumra id ",
      *     tags={"One-Step Users"},
      *
      *
@@ -117,61 +117,14 @@ class VerifyPhoneNumber extends Controller
         // ...
         // Validate input data
         $this->validate($request, [
-            'auth_code_from_user' => 'required',
+            "first_name" => "required",
+            "last_name" => "required",
+            'email' => "required",
+            'birthday' => "required",
+            'password' => "required"
         ]);
 
-        try {
-            
-            $twoFa = TwoFactorAuth::where("code",$request->auth_code_from_user)->firstOrFail();
         
-        } catch ( ModelNotFoundException $th) {
-
-            return response()->json([ 
-                "type" => "danger",
-                "message" => "Invalid Token",
-                "validate_auth_code" => false
-            ], 400);
-        }
-
-
-        try {
-            
-            $user = $twoFa->user;
-
-            if($user->status == User::STATUS_BANNED){
-                 
-                return response()->json([
-                    "type" => "danger",
-                    "user_status" => $user->status,
-                    "sid" => $twoFa->sid,
-                    "message" => "User has been banned from this platform."     
-                ],403);
-            }
-
-            $user->phone_number_verified_at = Carbon::now();
-            $user->save();
-
-        } catch (Exception $th) {
-            //throw $th;
-
-            return response()->json([
-               "message" => "Unable to verify token",
-               "type" => "danger",
-               "validate_auth_code" => false,
-               
-            ],400);
-
-        }
-
-        return response()->json([
-            "message" => "Phone Number Verification successful",
-            "type" => "success",
-            "sid" => $twoFa->sid,
-            "user_status" => $user->status,
-            "validate_auth_code" => true
-    
-        ]);
-    }
   
 
 }

@@ -50,7 +50,7 @@ class Handler extends ExceptionHandler
      * @throws \Throwable
      */
     public function render($request, Throwable $e)
-    {
+    {   
         if ($e instanceof ModelNotFoundException) {
             $classFullName = $e->getModel();
             $className = substr($classFullName, strrpos($classFullName, '\\') + 1);
