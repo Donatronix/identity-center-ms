@@ -20,12 +20,8 @@ $router->group([
         'as' => 'users',
         'namespace' => 'OneStepId'
     ], function ($router) {
-        
             $router->post('/send-phone', UserRequestsRegistrationByPhoneNumber::class);
             $router->post('/send-username', UserSubmitsUsername::class);
             $router->post('/send-code', VerifyPhoneNumber::class);
-    
-
     });
-
 });

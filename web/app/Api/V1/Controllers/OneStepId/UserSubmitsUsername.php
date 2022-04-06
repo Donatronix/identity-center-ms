@@ -213,7 +213,7 @@ class UserSubmitsUsername extends Controller
                 ],403);
             }
             // generate access token
-            $token = $user->createToken();
+            $token = $user->createToken("bearer")->accessToken;
 
             return response()->json([
 
@@ -228,13 +228,6 @@ class UserSubmitsUsername extends Controller
                 "message" => "Invalid SID"
             ],403);
         }
-        
-        // generate jwt token using user object
-         
-        
-         return response()->json([
-            "token" => "12433434"
-         ]);
     }
   
 

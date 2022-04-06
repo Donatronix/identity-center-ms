@@ -5,12 +5,14 @@
     "private": true,
     "require": {
         "php": "^8.0",
-        "doctrine/dbal": "~3",
-        "ext-json": "*",
         "ext-gmp": "*",
+        "ext-json": "*",
+        "doctrine/dbal": "~3",
         "dusterio/lumen-passport": "^0.3.0",
-        "laravel/lumen-framework": "~8",
         "guzzlehttp/guzzle": "^7.0",
+        "illuminate/redis": "*",
+        "laravel/lumen-framework": "~8",
+        "predis/predis": "^1.1",
         "sumra/sdk": "*"
     },
     "require-dev": {

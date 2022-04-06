@@ -64,6 +64,7 @@ $app->singleton(
 $app->configure('app');
 $app->configure('nexmo');
 $app->configure('settings');
+$app->configure('database');
 $app->configure('auth');
 $app->configure('filesystems');
 $app->configure('cache');
@@ -104,6 +105,7 @@ $app->routeMiddleware([
 $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(App\Providers\EventServiceProvider::class);
+$app->register(Illuminate\Redis\RedisServiceProvider::class);
 
 /**
  * Enable CORS policy
