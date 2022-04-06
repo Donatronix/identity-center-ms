@@ -212,18 +212,26 @@ class UserSubmitsUsername extends Controller
                     "user_status" => $user->status
                 ],403);
             }
-
             // generate access token
-            
+            $token = $user->createToken();
+
+            return response()->json([
+
+                "message" => "Login successful",
+                "type" => "success",
+                "token" => $token,
+            ]);
 
         }catch (Exception $e){
-
-
-            
+            return response()->json([
+                "type" => "danger",
+                "message" => "Invalid SID"
+            ],403);
         }
         
         // generate jwt token using user object
          
+        
          return response()->json([
             "token" => "12433434"
          ]);

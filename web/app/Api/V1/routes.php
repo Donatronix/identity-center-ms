@@ -1,5 +1,7 @@
 <?php
 
+use App\Api\V1\Controllers\OneStepId\VerifyPhoneNumber;
+use App\Api\V1\Controllers\OneStepId\UserSubmitsUsername;
 use App\Api\V1\Controllers\OneStepId\UserRequestsRegistrationByPhoneNumber;
 
 
@@ -14,39 +16,16 @@ $router->group([
      *
      */
     $router->group([
-        'prefix' => 'user',
+        'prefix' => 'auth',
         'as' => 'users',
         'namespace' => 'OneStepId'
     ], function ($router) {
-        $router->group([
-            'prefix' => 'one-step',
-            'as' => '.one-step'
-        ], function ($router) {
-            $router->post('/register-request', UserRequestsRegistrationByPhoneNumber::class);
+        
+            $router->post('/send-phone', UserRequestsRegistrationByPhoneNumber::class);
+            $router->post('/send-username', UserSubmitsUsername::class);
+            $router->post('/send-code', VerifyPhoneNumber::class);
     
-        });
+
     });
 
-    /**
-     * ADMIN PANEL
-     */
-    $router->group(
-        [
-            'prefix' => 'admin',
-            'namespace' => 'Admin'
-        ],
-        function ($router) {
-            $router->group([
-                'prefix' => 'users',
-                'as' => 'admin.users'
-            ], function () use ($router) {
-                $router->get('/', 'UserController@index');
-                $router->get('/{id}', 'UserController@show');
-                $router->patch('/{id}', 'UserController@approve');
-                $router->delete('/{id}', 'UserController@destroy');
-                $router->post('/verify', 'UserController@verify');
-                $router->post('/verify/send', 'UserController@verify_email');
-            });
-        }
-    );
 });
