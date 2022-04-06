@@ -9,6 +9,7 @@ use App\Models\TwoFactorAuth;
 use App\Api\V1\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Redis;
 
 class UserSubmitsUsername extends Controller
 {  
@@ -140,7 +141,6 @@ class UserSubmitsUsername extends Controller
             ], 403);
         }
 
-
         // check user status 
         if($user->status == User::STATUS_BANNED){
             //report banned
@@ -196,7 +196,7 @@ class UserSubmitsUsername extends Controller
 
 
 
-    public function login(User $user, $sid, $username){
+    private function login(User $user, $sid, $username){
          
         //check if its a malicious user
         try {
@@ -204,6 +204,8 @@ class UserSubmitsUsername extends Controller
             $user = User::getBySid($sid);
             if (strtolower($user->username) !== strtolower($username))
             {
+                
+    
                 // malicious user, warn and block
                 //TODO count login attempts and block
                 return response()->json([
@@ -223,6 +225,7 @@ class UserSubmitsUsername extends Controller
             ]);
 
         }catch (Exception $e){
+            dd($e);
             return response()->json([
                 "type" => "danger",
                 "message" => "Invalid SID"

@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use Laravel\Passport\Passport;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Passport\Client;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,5 +17,9 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         //
+        Passport::ignoreMigrations();
+   
+
+
     }
 }

@@ -90,7 +90,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         parent::boot();
 
         static::creating(function ($model) {
-            $model->phone = Str::after($model->phone, '+');
+            $model->phone_number = Str::after($model->phone_number, '+');
         });
     }
 
@@ -125,7 +125,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
             return $user;
              //code...
         } catch (ModelNotFoundException $e) {
-            //throw $th;
             throw $e;
         }
 

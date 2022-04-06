@@ -19,7 +19,6 @@ class CreateTwoFactorAuthsTable extends Migration
             $table->string('code')->unique();
             $table->string('sid');
             $table->uuid("user_id");
-            $table->foreignUuid('user_id');
             $table->timestamps();
         });
     }

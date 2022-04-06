@@ -18,10 +18,10 @@ $router->group([
     $router->group([
         'prefix' => 'auth',
         'as' => 'users',
-        'namespace' => 'OneStepId'
+        "namespace" => "\App\Api\V1\Controllers\OneStepId"
     ], function ($router) {
-            $router->post('/send-phone', UserRequestsRegistrationByPhoneNumber::class);
-            $router->post('/send-username', UserSubmitsUsername::class);
-            $router->post('/send-code', VerifyPhoneNumber::class);
+            $router->post('/send-phone', "UserRequestsRegistrationByPhoneNumber");
+            $router->post('/send-username', "UserSubmitsUsername");
+            $router->post('/send-code', "VerifyPhoneNumber");
     });
 });

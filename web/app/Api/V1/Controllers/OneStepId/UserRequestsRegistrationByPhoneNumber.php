@@ -119,7 +119,8 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function __invoke(Request $request)
-    {
+    { 
+ 
         // ...
         // Validate input data
         $this->validate($request, [
@@ -128,9 +129,8 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
         
 
         try {
-
-            $user = User::where("phone_number", $request->phone)->firstOrFail();
             
+            $user = User::where("phone_number", $request->phone_number)->firstOrFail();
 
             // user already exists
             if( $user->status == User::STATUS_BANNED)
@@ -170,7 +170,7 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
         } catch (ModelNotFoundException $e) {
     
             //pass
-            
+            //New user
         }
 
         DB::beginTransaction();
@@ -178,8 +178,8 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
         try {
 
             $token = TwoFactorAuth::generateToken();
-
-            $sid = $this->sendSms($token,$request->phone);
+            
+            $sid = $this->sendSms($token,$request->phone_number);
             // TODO
             // Generate Token
             // Send SMS
@@ -187,11 +187,11 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
             // create user 
 
             $user = User::create([
-                "phone" => $request->phone,
+                "phone_number" => $request->phone_number,
                 "status" => User::STATUS_INACTIVE
            ]);
             
-
+           
            $twoFa = TwoFactorAuth::create([
                 "sid" => $sid,
                 "user_id" => $user->id,
@@ -206,13 +206,16 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
                 'type' => 'success',
                 'title' => "Create new user. Step 1",
                 'message' => 'User was successful created',
-                'id' => $user->id
+                'sid' => $sid,
+                // TODO Remove this before shipping
+                "test_purpose_token" => $token
             ], 201);
 
 
         } catch (Exception $e) {
 
             DB::rollBack();
+  
             return response()->json([
                 'type' => 'danger',
                 'title' => "Create new user. Step 1",
@@ -224,13 +227,13 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
 
     private function sendSms($token,$phoneNumber){
           
-          try {
+        //   try {
              
-            // contact communication MS 
+        //     // contact communication MS 
 
-          } catch (\Throwable $th) {
-              //throw $th;
-          }
+        //   } catch (\Throwable $th) {
+        //       //throw $th;
+        //   }
 
           return Str::random(16);
     }
