@@ -163,7 +163,6 @@ class VerifyPhoneNumber extends Controller
 
         }
 
-
         return response()->json([
             "message" => "Phone Number Verification successful",
             "type" => "success",
@@ -172,12 +171,6 @@ class VerifyPhoneNumber extends Controller
             "validate_auth_code" => true
     
         ]);
-   
-        
-
-
-        
-
     }
   
 

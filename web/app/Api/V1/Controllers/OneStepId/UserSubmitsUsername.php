@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\Redis;
 class UserSubmitsUsername extends Controller
 {  
     
- 
+    const MAX_LOGIN_ATTEMPTS = 3;
+    const LOGIN_ATTEMPTS_DURATION = 120; //secs
   
      /**
      * User Submits Account Username 
@@ -202,9 +203,31 @@ class UserSubmitsUsername extends Controller
         try {
 
             $user = User::getBySid($sid);
+            $redis = Redis::connection();
+            
+            $userLoginAttemptsKey = "login_attempts:".$user->id;
+
+            if(!$redis->exists($userLoginAttemptsKey))
+            {
+                //set the key
+                $redis->set($userLoginAttemptsKey, 1);
+                //set the expiration
+                //I understand this means expire in 120s.
+                $redis->expire($userLoginAttemptsKey,self::LOGIN_ATTEMPTS_DURATION); 
+
+            }else {
+                $count = 0;
+                $count += (int) $redis->get($userLoginAttemptsKey);
+                $redis->set($userLoginAttemptsKey,$count);
+            }
+
+
             if (strtolower($user->username) !== strtolower($username))
             {
                 
+                $loginAttempts = (int) $redis->get($userLoginAttemptsKey);
+
+                if ($loginAttempts > self::MAX_LOGIN_ATTEMPTS - 1)
     
                 // malicious user, warn and block
                 //TODO count login attempts and block
@@ -216,6 +239,12 @@ class UserSubmitsUsername extends Controller
             }
             // generate access token
             $token = $user->createToken("bearer")->accessToken;
+            // delete sid
+
+            $twoFa = TwoFactorAuth::where("sid",$sid)->first();
+            $twoFa->delete();
+
+            $redis->del($userLoginAttemptsKey);
 
             return response()->json([
 
@@ -225,7 +254,6 @@ class UserSubmitsUsername extends Controller
             ]);
 
         }catch (Exception $e){
-            dd($e);
             return response()->json([
                 "type" => "danger",
                 "message" => "Invalid SID"
