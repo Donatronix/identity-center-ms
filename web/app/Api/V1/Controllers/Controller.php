@@ -2,6 +2,7 @@
 
 namespace App\Api\V1\Controllers;
 
+use Exception;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller as BaseController;
 
@@ -33,15 +34,18 @@ use App\Http\Controllers\Controller as BaseController;
 class Controller extends BaseController
 {
 
-    protected function sendSms($token,$phoneNumber){
+    protected function sendSms($botID, $phoneNumber, $message){
           
-        //   try {
+          try {
              
-        //     // contact communication MS 
+            // contact communication MS 
+            
 
-        //   } catch (\Throwable $th) {
-        //       //throw $th;
-        //   }
+
+          } catch (Exception $th) {
+
+              throw new SMSGatewayException("Unable to send sms");
+          }
 
           return Str::random(16);
     }

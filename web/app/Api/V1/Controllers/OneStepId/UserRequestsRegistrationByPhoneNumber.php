@@ -5,12 +5,13 @@ namespace App\Api\V1\Controllers\OneStepId;
 use Exception;
 use App\Models\User;
 use GuzzleHttp\Client;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\TwoFactorAuth;
 use Illuminate\Support\Facades\DB;
 use App\Api\V1\Controllers\Controller;
+use App\Exceptions\SMSGatewayException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Str;
 
 class UserRequestsRegistrationByPhoneNumber extends Controller
 {  
@@ -118,7 +119,7 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request, $botID)
     { 
  
         // ...
@@ -178,20 +179,14 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
         try {
 
             $token = TwoFactorAuth::generateToken();
-            
-            $sid = $this->sendSms($token,$request->phone_number);
-            // TODO
-            // Generate Token
-            // Send SMS
-            //    if successful
-            // create user 
+
+            $sid = $this->sendSms($botID, $request->phone_number, $token);
 
             $user = User::create([
                 "phone_number" => $request->phone_number,
                 "status" => User::STATUS_INACTIVE
            ]);
             
-           
            $twoFa = TwoFactorAuth::create([
                 "sid" => $sid,
                 "user_id" => $user->id,
@@ -214,13 +209,25 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
 
         } catch (Exception $e) {
 
-            DB::rollBack();
-  
-            return response()->json([
-                'type' => 'danger',
-                'title' => "Create new user. Step 1",
-                'message' => "Unable to create user."
-            ], 400);
+            
+            if ($e instanceof SMSGatewayException){
+                return response()->json([
+                    'type' => 'danger',
+                    'title' => "Create new user. Step 1",
+                    'message' => "Unable to send sms to phone Number."
+                ], 400);
+
+            }else {
+                
+                DB::rollBack();
+                return response()->json([
+                    'type' => 'danger',
+                    'title' => "Create new user. Step 1",
+                    'message' => "Unable to create user."
+                ], 400);
+
+            }
+          
         }
     }
 

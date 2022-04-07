@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Models\TwoFactorAuth;
 use Illuminate\Support\Facades\DB;
 use App\Api\V1\Controllers\Controller;
+use App\Exceptions\SMSGatewayException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class SendTokenSmsToUser extends Controller
@@ -155,7 +156,7 @@ class SendTokenSmsToUser extends Controller
 
             $token = TwoFactorAuth::generateToken();
             
-            $sid = $this->sendSms($token,$request->phone_number);
+            $sid = $this->sendSms($botID, $request->phone_number, $token);
 
             $twoFa = TwoFactorAuth::create([
                     "sid" => $sid,
@@ -176,7 +177,6 @@ class SendTokenSmsToUser extends Controller
 
 
         } catch (Exception $e) {
-  
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to send sms to phone number. Try again.",
