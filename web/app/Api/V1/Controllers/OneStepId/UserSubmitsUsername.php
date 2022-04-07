@@ -7,7 +7,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\TwoFactorAuth;
 use App\Api\V1\Controllers\Controller;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Redis;
 
@@ -21,9 +20,9 @@ class UserSubmitsUsername extends Controller
      * User Submits Account Username 
      *
      * @OA\Post(
-     *     path="/auth/send-code",
+     *     path="/auth/send-username",
      *     summary="User Submits Account Username ",
-     *     description="User Submits Account Username ",
+     *     description="Here the new user or the existing user submits username for login, along with the sid",
      *     tags={"One-Step Users"},
      *
      *
@@ -39,8 +38,6 @@ class UserSubmitsUsername extends Controller
      *                 description="verification code enter by user",
      *                 example="chinedu338"
      *             ),
-     * 
-     * 
      *             @OA\Property(
      *                 property="sid",
      *                 type="string",

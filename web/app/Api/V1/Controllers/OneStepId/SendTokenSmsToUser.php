@@ -3,11 +3,13 @@
 namespace App\Api\V1\Controllers\OneStepId;
 
 use Exception;
+use Carbon\Carbon;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\TwoFactorAuth;
+use Illuminate\Support\Facades\DB;
 use App\Api\V1\Controllers\Controller;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class SendTokenSmsToUser extends Controller
@@ -19,7 +21,7 @@ class SendTokenSmsToUser extends Controller
      * Create new user for One-Step
      *
      * @OA\Post(
-     *     path="/auth/send-phone",
+     *     path="/auth/send-sms",
      *     summary="Create new user for One-Step",
      *     description="Create new user for One-Step",
      *     tags={"One-Step Users"},
@@ -118,14 +120,11 @@ class SendTokenSmsToUser extends Controller
      */
     public function __invoke(Request $request,$botID)
     { 
- 
         // ...
         // Validate input data
         $this->validate($request, [
             'phone_number' => 'required|integer',
         ]);
-        
-
         try {
             
             $user = User::where("phone_number", $request->phone_number)->firstOrFail();
@@ -152,71 +151,38 @@ class SendTokenSmsToUser extends Controller
 
 
         // User is either active or inactive, we send token
-
-        DB::beginTransaction();
-        // user does  not exist
         try {
 
             $token = TwoFactorAuth::generateToken();
             
             $sid = $this->sendSms($token,$request->phone_number);
-            // TODO
-            // Generate Token
-            // Send SMS
-            //    if successful
-            // create user 
 
-            $user = User::create([
-                "phone_number" => $request->phone_number,
-                "status" => User::STATUS_INACTIVE
-           ]);
-            
-           
-           $twoFa = TwoFactorAuth::create([
-                "sid" => $sid,
-                "user_id" => $user->id,
-                "code" => $token
-           ]);
-           
-            
-            // Send the code to the user
-            DB::commit(); 
+            $twoFa = TwoFactorAuth::create([
+                    "sid" => $sid,
+                    "user_id" => $user->id,
+                    "code" => $token
+            ]);
+
             // Return response
             return response()->json([
                 'type' => 'success',
-                'title' => "Create new user. Step 1",
-                'message' => 'User was successful created',
+                'message' => 'A token SMS has been sent to your phone number',
+                "phone_exists" => true,
+                "user_status" => $user->status,
                 'sid' => $sid,
                 // TODO Remove this before shipping
                 "test_purpose_token" => $token
-            ], 201);
+            ], 200);
 
 
         } catch (Exception $e) {
-
-            DB::rollBack();
   
             return response()->json([
                 'type' => 'danger',
-                'title' => "Create new user. Step 1",
-                'message' => "Unable to create user."
+                'message' => "Unable to send sms to phone number. Try again.",
+                "phone_exists" => true
             ], 400);
         }
     }
-
-
-    private function sendSms($token,$phoneNumber){
-          
-        //   try {
-             
-        //     // contact communication MS 
-
-        //   } catch (\Throwable $th) {
-        //       //throw $th;
-        //   }
-
-          return Str::random(16);
-    }
-  
 
 }
