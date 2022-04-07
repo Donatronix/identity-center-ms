@@ -4,19 +4,17 @@ namespace App\Api\V1\Controllers\OneStepId;
 
 use Exception;
 use App\Models\User;
-use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use App\Models\TwoFactorAuth;
-use Illuminate\Support\Facades\DB;
 use App\Api\V1\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Str;
 
-class UserRequestsRegistrationByPhoneNumber extends Controller
+class SendTokenSmsToUser extends Controller
 {  
     
  
-  
+   
      /**
      * Create new user for One-Step
      *
@@ -118,7 +116,7 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request,$botID)
     { 
  
         // ...
@@ -131,7 +129,6 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
         try {
             
             $user = User::where("phone_number", $request->phone_number)->firstOrFail();
-
             // user already exists
             if( $user->status == User::STATUS_BANNED)
             {
@@ -144,34 +141,17 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
                 ],403);
 
             }
-            else if ($user->status == User::STATUS_INACTIVE) 
-            {
-                return response()->json([
-                     "code" => 200,
-                     "message" => "This user already exists. Required send verification code",
-                     "phone_exists" => true,
-                     "user_status" => $user->status,
-                     "type" => "success"
-                ],200);
-
-            }else if ($user->status == User::STATUS_ACTIVE)
-            {
-                 
-                return response()->json([
-                     "code" => 200,
-                     "message" => "This user already exists.",
-                     "phone_exists" => true,
-                     "user_status" => $user->status,
-                     "type" => "success"
-                ], 200);
-            }
-
-
         } catch (ModelNotFoundException $e) {
-    
-            //pass
-            //New user
+            //Phone Number Does not exist
+            return response()->json([
+                "message" => "This phone number does not exist",
+                "phone_exists" => false,
+                "type" => "danger"
+           ], 400);
         }
+
+
+        // User is either active or inactive, we send token
 
         DB::beginTransaction();
         // user does  not exist
@@ -223,5 +203,20 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
             ], 400);
         }
     }
+
+
+    private function sendSms($token,$phoneNumber){
+          
+        //   try {
+             
+        //     // contact communication MS 
+
+        //   } catch (\Throwable $th) {
+        //       //throw $th;
+        //   }
+
+          return Str::random(16);
+    }
+  
 
 }

@@ -2,6 +2,7 @@
 
 namespace App\Api\V1\Controllers;
 
+use Illuminate\Support\Str;
 use App\Http\Controllers\Controller as BaseController;
 
 /**
@@ -31,5 +32,19 @@ use App\Http\Controllers\Controller as BaseController;
  */
 class Controller extends BaseController
 {
+
+    protected function sendSms($token,$phoneNumber){
+          
+        //   try {
+             
+        //     // contact communication MS 
+
+        //   } catch (\Throwable $th) {
+        //       //throw $th;
+        //   }
+
+          return Str::random(16);
+    }
+  
 }
 
