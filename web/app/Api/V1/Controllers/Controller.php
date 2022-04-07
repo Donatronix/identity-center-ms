@@ -4,6 +4,7 @@ namespace App\Api\V1\Controllers;
 
 use Exception;
 use Illuminate\Support\Str;
+use App\Exceptions\SMSGatewayException;
 use App\Http\Controllers\Controller as BaseController;
 
 /**
@@ -38,7 +39,7 @@ class Controller extends BaseController
           
           try {
              
-            // contact communication MS 
+            //  api call to communication MS 
             
 
 
