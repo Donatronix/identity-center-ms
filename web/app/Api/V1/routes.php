@@ -6,7 +6,6 @@
 $router->group([
     'prefix' => env('APP_API_VERSION', 'v1'),
 ], function ($router) {
-
     /**
      *
      */
@@ -28,23 +27,20 @@ $router->group([
     /**
      * ADMIN PANEL
      */
-    $router->group(
-        [
-            'prefix' => 'admin',
-            'namespace' => 'Admin'
-        ],
-        function ($router) {
-            $router->group([
-                'prefix' => 'users',
-                'as' => 'admin.users'
-            ], function () use ($router) {
-                $router->get('/', 'UserController@index');
-                $router->get('/{id}', 'UserController@show');
-                $router->patch('/{id}', 'UserController@approve');
-                $router->delete('/{id}', 'UserController@destroy');
-                $router->post('/verify', 'UserController@verify');
-                $router->post('/verify/send', 'UserController@verify_email');
-            });
-        }
-    );
+    $router->group([
+        'prefix' => 'admin',
+        'namespace' => 'Admin'
+    ], function ($router) {
+        $router->group([
+            'prefix' => 'users',
+            'as' => 'admin.users'
+        ], function ($router) {
+            $router->get('/', 'UserController@index');
+            $router->get('/{id}', 'UserController@show');
+            $router->patch('/{id}', 'UserController@approve');
+            $router->delete('/{id}', 'UserController@destroy');
+            $router->post('/verify', 'UserController@verify');
+            $router->post('/verify/send', 'UserController@verify_email');
+        });
+    });
 });

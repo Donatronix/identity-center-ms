@@ -4,10 +4,9 @@
     "type": "project",
     "private": true,
     "require": {
-        "php": "^7.4|^8.0",
+        "php": "^8.0",
         "darkaonline/l5-swagger": "~8",
         "fruitcake/laravel-cors": "~2",
-        "guzzlehttp/guzzle": "~7",
         "laravel/framework": "~8",
         "laravel/passport": "~10",
         "laravel/tinker": "~2",
@@ -62,7 +61,7 @@
     "prefer-stable": true,
     "repositories": [
         {
-            "type":"path",
+            "type": "path",
             "url": "../sumra-sdk",
             "options": {
                 "symlink": false
