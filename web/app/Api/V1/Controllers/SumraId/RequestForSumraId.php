@@ -123,8 +123,4 @@ class RequestForSumraId extends Controller
             'birthday' => "required",
             'password' => "required"
         ]);
-
-        
-  
-
 }

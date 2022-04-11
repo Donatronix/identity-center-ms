@@ -14,10 +14,7 @@ use App\Exceptions\SMSGatewayException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class UserRequestsRegistrationByPhoneNumber extends Controller
-{  
-    
- 
-  
+{ 
      /**
      * Create new user for One-Step
      *

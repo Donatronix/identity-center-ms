@@ -12,9 +12,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class VerifyPhoneNumber extends Controller
 {  
-    
- 
-  
      /**
      * Verify Phone Number 
      *
