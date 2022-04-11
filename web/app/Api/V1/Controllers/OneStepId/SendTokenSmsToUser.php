@@ -14,10 +14,7 @@ use App\Exceptions\SMSGatewayException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class SendTokenSmsToUser extends Controller
-{  
-    
- 
-   
+{ 
      /**
      * Create new user for One-Step
      *

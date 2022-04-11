@@ -120,15 +120,11 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function __invoke(Request $request, $botID)
-    { 
- 
-        // ...
+    {
         // Validate input data
         $this->validate($request, [
             'phone_number' => 'required|integer',
         ]);
-        
-
         try {
             
             $user = User::where("phone_number", $request->phone_number)->firstOrFail();
@@ -166,8 +162,6 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
                      "type" => "success"
                 ], 200);
             }
-
-
         } catch (ModelNotFoundException $e) {
     
             //pass
@@ -192,8 +186,6 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
                 "user_id" => $user->id,
                 "code" => $token
            ]);
-           
-            
             // Send the code to the user
             DB::commit(); 
             // Return response
@@ -205,11 +197,7 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
                 // TODO Remove this before shipping
                 "test_purpose_token" => $token
             ], 201);
-
-
-        } catch (Exception $e) {
-
-            
+        } catch (Exception $e) { 
             if ($e instanceof SMSGatewayException){
                 return response()->json([
                     'type' => 'danger',
@@ -230,5 +218,4 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
           
         }
     }
-
 }
