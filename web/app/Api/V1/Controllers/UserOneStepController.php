@@ -196,27 +196,21 @@ class UserOneStepController extends Controller
         }
 
         try {
-
             $user = $builder->firstOrFail();
-
         } catch (Exception $e){
-
             return response()->json([
                 'type' => 'danger',
                 'title' => "Not Found",
                 'message' => " User not found"
             ], 404);
-
         }
-
-        
 
         //$user = User::where('id', $id)->first();
         // TODO maybe we need to return public user data for everyone and secure user data for user
         //if (Auth::id() == $user->id) {
         //    return $user;
         //}
-         
+
         return response()->jsonApi([
             'type' => 'success',
             'data' => $user

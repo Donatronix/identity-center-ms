@@ -53,7 +53,7 @@ $router->group([
         $router->group([
             'prefix' => 'users',
             'as' => 'admin.users'
-        ], function ($router) {
+        ], function () use ($router) {
             $router->get('/', 'UserController@index');
             $router->get('/{id}', 'UserController@show');
             $router->patch('/{id}', 'UserController@approve');

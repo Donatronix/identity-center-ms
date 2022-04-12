@@ -18,14 +18,13 @@ class CreateUsersTable extends Migration
             $table->uuid('id')->primary();
             $table->string('first_name', 60)->nullable();
             $table->string('last_name', 60)->nullable();
-            // need username to be case insensitive
-            $table->string('username', 25)->collation("utf8mb4_0900_ai_ci")->nullable()->unique();
+            $table->string('username', 25)->nullable()->unique();
             $table->bigInteger('phone_number')->unsigned()->unique();
-            $table->timestamp('phone_number_verified_at')->nullable();
             $table->string('email', 150)->nullable()->unique();
             $table->date('birthday')->nullable();
             $table->string('password', 60)->nullable();
             $table->tinyInteger('status')->default(User::STATUS_INACTIVE);
+            $table->timestamp('phone_number_verified_at')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use Laravel\Lumen\Providers\EventServiceProvider as ServiceProvider;
-use App\Listeners\RechargeBalanceTransactionListener;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -13,12 +12,7 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        'rechargeBalanceRequest' => [
-            'App\Listeners\RechargeBalanceRequestListener',
-        ],
-        'rechargeBalanceTransaction' => [
-            RechargeBalanceTransactionListener::class,
-        ],
+        //
     ];
 
     /**
