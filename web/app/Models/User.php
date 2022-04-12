@@ -2,22 +2,29 @@
 
 namespace App\Models;
 
-use Sumra\SDK\Traits\UuidTrait;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use Sumra\SDK\Traits\UuidTrait;
 use Laravel\Passport\HasApiTokens;
+use Illuminate\Auth\Authenticatable;
+use Laravel\Lumen\Auth\Authorizable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 
-class User extends Authenticatable
+
+
+class User extends Model implements AuthenticatableContract, AuthorizableContract
 {
     use HasApiTokens;
-    use HasFactory;
-    use Notifiable;
-    use UuidTrait;
+    use Authenticatable;
+    use Authorizable;
     use SoftDeletes;
-
+    use HasFactory;
+    use UuidTrait;
+    
     /**
      * Statuses of users
      */
@@ -52,7 +59,7 @@ class User extends Authenticatable
         'first_name',
         'last_name',
         'username',
-        'phone',
+        'phone_number',
         'email',
         'birthday',
         'password',
@@ -83,7 +90,7 @@ class User extends Authenticatable
         parent::boot();
 
         static::creating(function ($model) {
-            $model->phone = Str::after($model->phone, '+');
+            $model->phone_number = Str::after($model->phone_number, '+');
         });
     }
 
@@ -106,5 +113,20 @@ class User extends Authenticatable
         }
 
         return $this->attributes['display_name'] = $displayName;
+    }
+
+
+    public static function getBySid($sid){
+
+        try {
+
+            $twoFa = TwoFactorAuth::where("sid",$sid)->firstOrFail();
+            $user = $twoFa->user;
+            return $user;
+             //code...
+        } catch (ModelNotFoundException $e) {
+            throw $e;
+        }
+
     }
 }

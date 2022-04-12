@@ -2,7 +2,11 @@
 
 namespace App\Exceptions;
 
-use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\ValidationException;
+use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -13,29 +17,56 @@ class Handler extends ExceptionHandler
      * @var array
      */
     protected $dontReport = [
-        //
+        AuthorizationException::class,
+        HttpException::class,
+        ModelNotFoundException::class,
+        ValidationException::class,
     ];
 
     /**
-     * A list of the inputs that are never flashed for validation exceptions.
+     * Report or log an exception.
      *
-     * @var array
-     */
-    protected $dontFlash = [
-        'current_password',
-        'password',
-        'password_confirmation',
-    ];
-
-    /**
-     * Register the exception handling callbacks for the application.
+     * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
+     *
+     * @param \Throwable $e
      *
      * @return void
+     *
+     * @throws \Exception
      */
-    public function register()
+    public function report(Throwable $e)
     {
-        $this->reportable(function (Throwable $e) {
-            //
-        });
+        parent::report($e);
+    }
+
+    /**
+     * Render an exception into an HTTP response.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \Throwable               $e
+     *
+     * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
+     *
+     * @throws \Throwable
+     */
+    public function render($request, Throwable $e)
+    {   
+        if ($e instanceof ModelNotFoundException) {
+            $classFullName = $e->getModel();
+            $className = substr($classFullName, strrpos($classFullName, '\\') + 1);
+
+            return response()->json(config('constants.errors.' . $className . 'NotFound'), 404);
+        }
+
+        if ($e instanceof ValidationException) {
+            return response()->json([
+                'message' => 'YOUR CUSTOM MESSAGE HERE',
+                'errors' => $e->validator->getMessageBag(),
+                $e->errors(),
+                $e->status
+            ], 422);
+        }
+
+        return parent::render($request, $e);
     }
 }

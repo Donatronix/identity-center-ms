@@ -1,33 +1,25 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+/** @var \Laravel\Lumen\Routing\Router $router */
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes
+| Application Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', function () use ($router) {
+    return $router->app->version();
 });
 
-Route::group([
-    'prefix' => 'auth'
-], function () {
-    Route::post('register', 'Auth\AuthController@register');
-    Route::post('login', 'Auth\AuthController@login')->name('login');
+Route::group(
+    [
+        'prefix' => env('APP_API_PREFIX', '')
+    ],
+    function ($router) {
+        include base_path('app/Api/V1/routes.php');
+    }
+);
 
-    // add this middleware to ensure that every request is authenticated
-    Route::group([
-        'middleware' => 'auth:api'
-    ], function () {
-        Route::get('logout', 'Auth\AuthController@logout');
-        Route::get('user', 'Auth\AuthController@user');
-    });
-});
+if (file_exists(__DIR__ . '/tests.php'))
+    require_once(__DIR__ . '/tests.php');

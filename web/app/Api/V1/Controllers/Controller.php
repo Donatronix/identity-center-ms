@@ -2,8 +2,10 @@
 
 namespace App\Api\V1\Controllers;
 
-use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Routing\Controller as BaseController;
+use Exception;
+use Illuminate\Support\Str;
+use App\Exceptions\SMSGatewayException;
+use App\Http\Controllers\Controller as BaseController;
 
 /**
  * @OA\Info(
@@ -32,5 +34,22 @@ use Illuminate\Routing\Controller as BaseController;
  */
 class Controller extends BaseController
 {
-    use ValidatesRequests;
+
+    protected function sendSms($botID, $phoneNumber, $message){
+          
+          try {
+             
+            //  api call to communication MS 
+            
+
+
+          } catch (Exception $th) {
+
+              throw new SMSGatewayException("Unable to send sms");
+          }
+
+          return Str::random(16);
+    }
+  
 }
+

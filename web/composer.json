@@ -11,51 +11,39 @@
         "laravel/passport": "~10",
         "laravel/tinker": "~2",
         "sumra/sdk": "*"
+        "php": "^8.0",
+        "ext-gmp": "*",
+        "ext-json": "*",
+        "doctrine/dbal": "~3",
+        "dusterio/lumen-passport": "^0.3.0",
+        "guzzlehttp/guzzle": "^7.0",
+        "illuminate/redis": "*",
+        "laravel/lumen-framework": "~8",
+        "predis/predis": "^1.1",
+        "sumra/sdk": "*"
     },
     "require-dev": {
-        "facade/ignition": "~2",
         "fakerphp/faker": "~1",
-        "laravel/sail": "~1",
-        "mockery/mockery": "~1",
-        "nunomaduro/collision": "~5",
-        "phpunit/phpunit": "~9"
+        "mockery/mockery": "~1"
+
     },
     "autoload": {
         "psr-4": {
+            "Tests\\": "tests/",
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }
     },
     "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
-    "scripts": {
-        "post-autoload-dump": [
-            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
-        ],
-        "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi"
-        ],
-        "post-root-package-install": [
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
-        ],
-        "post-create-project-cmd": [
-            "@php artisan key:generate --ansi"
+        "classmap": [
+            "tests/"
         ]
     },
-    "extra": {
-        "laravel": {
-            "dont-discover": []
-        }
-    },
     "config": {
-        "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "optimize-autoloader": true
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -67,5 +55,10 @@
                 "symlink": false
             }
         }
-    ]
+    ],
+    "scripts": {
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ]
+    }
 }
