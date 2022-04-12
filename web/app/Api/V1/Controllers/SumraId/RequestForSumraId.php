@@ -11,12 +11,12 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class RequestForSumraId extends Controller
-{  
-    
- 
-  
+{
+
+
+
      /**
-     * Request for sumra id 
+     * Request for sumra id
      *
      * @OA\Post(
      *     path="/auth/send-code",
@@ -123,4 +123,5 @@ class RequestForSumraId extends Controller
             'birthday' => "required",
             'password' => "required"
         ]);
+    }
 }
