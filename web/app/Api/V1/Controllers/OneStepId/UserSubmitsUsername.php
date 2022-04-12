@@ -11,17 +11,17 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Redis;
 
 class UserSubmitsUsername extends Controller
-{  
-    
+{
+
     const MAX_LOGIN_ATTEMPTS = 3;
     const LOGIN_ATTEMPTS_DURATION = 120; //secs
-  
+
      /**
-     * User Submits Account Username 
+     * User Submits Account Username
      *
      * @OA\Post(
      *     path="/auth/send-username",
-     *     summary="User Submits Account Username ",
+     *     summary="User Submits Account Username",
      *     description="Here the new user or the existing user submits username for login, along with the sid",
      *     tags={"One-Step Users"},
      *
@@ -67,7 +67,7 @@ class UserSubmitsUsername extends Controller
      *             @OA\Property(
      *                 property="validate_auth_code",
      *                 type="boolean",
-     *                 example="true"
+     *                 example="true",
      *                 description="Indicates if validation is successful"
      *             ),
      *             @OA\Property(
@@ -78,8 +78,7 @@ class UserSubmitsUsername extends Controller
      *             @OA\Property(
      *                 property="user_status",
      *                 type="number",
-     *                 description="User Status INACTIVE = 0, ACTIVE = 1, BANNED = 2",
-
+     *                 description="User Status INACTIVE = 0, ACTIVE = 1, BANNED = 2"
      *             )
      *         )
      *     ),
@@ -133,19 +132,19 @@ class UserSubmitsUsername extends Controller
             // retrieve user using the sid
             $user = User::getBySid($request->sid);
         } catch ( ModelNotFoundException $th) {
-            return response()->json([ 
+            return response()->json([
                 "type" => "danger",
                 "message" => "Invalid sid Token",
             ], 403);
         }
 
-        // check user status 
+        // check user status
         if($user->status == User::STATUS_BANNED){
             //report banned
             return response()->json([
                 "type" => "danger",
                 "user_status" => $user->status,
-                "message" => "User has been banned from this platform."     
+                "message" => "User has been banned from this platform."
             ],403);
         }else if ($user->status == User::STATUS_ACTIVE){
             //login active user
@@ -160,12 +159,12 @@ class UserSubmitsUsername extends Controller
                  "type" => "danger",
                  "message" => "Username already exists.",
                  "user_status" => $user->status,
-                 "phone_exist" => true                 
+                 "phone_exist" => true
              ], 400);
 
         }
 
-        // check if username is empty 
+        // check if username is empty
         if (empty($user->username)){
 
             try {
@@ -182,7 +181,7 @@ class UserSubmitsUsername extends Controller
             }
 
             return $this->login($user,$request->sid, $request->username);
-            
+
         }else {
         // username already exists for this SID
             return response()->json([
@@ -195,13 +194,13 @@ class UserSubmitsUsername extends Controller
 
 
     private function login(User $user, $sid, $username){
-         
+
         //check if its a malicious user
         try {
 
             $user = User::getBySid($sid);
             $redis = Redis::connection();
-            
+
             $userLoginAttemptsKey = "login_attempts:".$user->id;
 
             if(!$redis->exists($userLoginAttemptsKey))
@@ -210,7 +209,7 @@ class UserSubmitsUsername extends Controller
                 $redis->set($userLoginAttemptsKey, 1);
                 //set the expiration
                 //I understand this means expire in 120s.
-                $redis->expire($userLoginAttemptsKey,self::LOGIN_ATTEMPTS_DURATION); 
+                $redis->expire($userLoginAttemptsKey,self::LOGIN_ATTEMPTS_DURATION);
 
             }else {
                 $count = 0;
@@ -221,11 +220,11 @@ class UserSubmitsUsername extends Controller
 
             if (strtolower($user->username) !== strtolower($username))
             {
-                
+
                 $loginAttempts = (int) $redis->get($userLoginAttemptsKey);
 
                 if ($loginAttempts > self::MAX_LOGIN_ATTEMPTS - 1)
-    
+
                 // malicious user, warn and block
                 //TODO count login attempts and block
                 return response()->json([
@@ -257,6 +256,6 @@ class UserSubmitsUsername extends Controller
             ],403);
         }
     }
-  
+
 
 }

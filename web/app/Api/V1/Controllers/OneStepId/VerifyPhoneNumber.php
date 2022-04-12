@@ -11,16 +11,15 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class VerifyPhoneNumber extends Controller
-{  
-     /**
-     * Verify Phone Number 
+{
+    /**
+     * Verify Phone Number
      *
      * @OA\Post(
      *     path="/auth/send-code",
-     *     summary="Verify Phone Number ",
-     *     description="Verify Phone Number ",
+     *     summary="Verify Phone Number",
+     *     description="Verify Phone Number",
      *     tags={"One-Step Users"},
-     *
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -57,7 +56,7 @@ class VerifyPhoneNumber extends Controller
      *             @OA\Property(
      *                 property="validate_auth_code",
      *                 type="boolean",
-     *                 example="true"
+     *                 example="true",
      *                 description="Indicates if validation is successful"
      *             ),
      *             @OA\Property(
@@ -68,8 +67,7 @@ class VerifyPhoneNumber extends Controller
      *             @OA\Property(
      *                 property="user_status",
      *                 type="number",
-     *                 description="User Status INACTIVE = 0, ACTIVE = 1, BANNED = 2",
-
+     *                 description="User Status INACTIVE = 0, ACTIVE = 1, BANNED = 2"
      *             )
      *         )
      *     ),
@@ -111,37 +109,30 @@ class VerifyPhoneNumber extends Controller
      */
     public function __invoke(Request $request)
     {
-        // ...
         // Validate input data
         $this->validate($request, [
             'auth_code_from_user' => 'required',
         ]);
 
         try {
-            
             $twoFa = TwoFactorAuth::where("code",$request->auth_code_from_user)->firstOrFail();
-        
         } catch ( ModelNotFoundException $th) {
-
-            return response()->json([ 
+            return response()->json([
                 "type" => "danger",
                 "message" => "Invalid Token",
                 "validate_auth_code" => false
             ], 400);
         }
 
-
         try {
-            
             $user = $twoFa->user;
 
             if($user->status == User::STATUS_BANNED){
-                 
                 return response()->json([
                     "type" => "danger",
                     "user_status" => $user->status,
                     "sid" => $twoFa->sid,
-                    "message" => "User has been banned from this platform."     
+                    "message" => "User has been banned from this platform."
                 ],403);
             }
 
@@ -149,15 +140,11 @@ class VerifyPhoneNumber extends Controller
             $user->save();
 
         } catch (Exception $th) {
-            //throw $th;
-
             return response()->json([
                "message" => "Unable to verify token",
                "type" => "danger",
                "validate_auth_code" => false,
-               
             ],400);
-
         }
 
         return response()->json([
@@ -166,9 +153,6 @@ class VerifyPhoneNumber extends Controller
             "sid" => $twoFa->sid,
             "user_status" => $user->status,
             "validate_auth_code" => true
-    
         ]);
     }
-  
-
 }
