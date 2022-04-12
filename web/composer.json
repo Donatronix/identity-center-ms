@@ -1,22 +1,14 @@
 {
-    "name": "gic/sumra-id-api",
-    "description": "Global Identity Centre. Sumra ID API",
+    "name": "kus/global-identity-centre-ms",
+    "description": "Global Identity Centre API Microservice",
+    "license": "MIT",
     "type": "project",
     "private": true,
     "require": {
         "php": "^8.0",
-        "darkaonline/l5-swagger": "~8",
-        "fruitcake/laravel-cors": "~2",
-        "laravel/framework": "~8",
-        "laravel/passport": "~10",
-        "laravel/tinker": "~2",
-        "sumra/sdk": "*"
-        "php": "^8.0",
         "ext-gmp": "*",
         "ext-json": "*",
-        "doctrine/dbal": "~3",
         "dusterio/lumen-passport": "^0.3.0",
-        "guzzlehttp/guzzle": "^7.0",
         "illuminate/redis": "*",
         "laravel/lumen-framework": "~8",
         "predis/predis": "^1.1",
@@ -24,29 +16,21 @@
     },
     "require-dev": {
         "fakerphp/faker": "~1",
-        "mockery/mockery": "~1"
-
+        "mockery/mockery": "~1",
+        "phpunit/phpunit": "~9"
     },
     "autoload": {
         "psr-4": {
-            "Tests\\": "tests/",
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }
     },
     "autoload-dev": {
-        "classmap": [
-            "tests/"
-        ]
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
     },
-    "config": {
-        "preferred-install": "dist",
-        "sort-packages": true,
-        "optimize-autoloader": true
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
     "repositories": [
         {
             "type": "path",
@@ -60,5 +44,12 @@
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ]
-    }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

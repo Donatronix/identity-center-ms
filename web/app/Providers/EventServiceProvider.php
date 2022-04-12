@@ -20,4 +20,14 @@ class EventServiceProvider extends ServiceProvider
             RechargeBalanceTransactionListener::class,
         ],
     ];
+
+    /**
+     * Determine if events and listeners should be automatically discovered.
+     *
+     * @return bool
+     */
+    public function shouldDiscoverEvents()
+    {
+        return false;
+    }
 }

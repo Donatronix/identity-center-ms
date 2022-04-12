@@ -1,15 +1,11 @@
 <?php
 
-use App\Api\V1\Controllers\OneStepId\VerifyPhoneNumber;
-use App\Api\V1\Controllers\OneStepId\UserSubmitsUsername;
-use App\Api\V1\Controllers\OneStepId\UserRequestsRegistrationByPhoneNumber;
-
-
 /**
  * @var Laravel\Lumen\Routing\Router $router
  */
 $router->group([
-    'prefix' => env('APP_API_VERSION', 'v1'),
+    'prefix' => env('APP_API_VERSION', ''),
+    'namespace' => '\App\Api\V1\Controllers'
 ], function ($router) {
     /**
      *
@@ -35,7 +31,7 @@ $router->group([
     $router->group([
         'prefix' => 'auth',
         'as' => 'users',
-        "namespace" => "\App\Api\V1\Controllers\OneStepId"
+        "namespace" => "OneStepId"
     ], function ($router) {
         $router->post('/send-phone/{botID}', "UserRequestsRegistrationByPhoneNumber");
         $router->post('/send-username', "UserSubmitsUsername");
@@ -48,7 +44,11 @@ $router->group([
      */
     $router->group([
         'prefix' => 'admin',
-        'namespace' => 'Admin'
+        'namespace' => 'Admin',
+        'middleware' => [
+            'checkUser',
+            'checkAdmin'
+        ]
     ], function ($router) {
         $router->group([
             'prefix' => 'users',
