@@ -1,21 +1,13 @@
 <?php
 
-namespace App\Api\V1\Controllers\OneStepId;
+namespace App\Api\V1\Controllers\SumraId;
 
-use Exception;
-use App\Models\User;
-use Illuminate\Http\Request;
-use App\Models\TwoFactorAuth;
 use App\Api\V1\Controllers\Controller;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 
 class RequestForSumraId extends Controller
 {
-
-
-
-     /**
+    /**
      * Request for sumra id
      *
      * @OA\Post(
@@ -72,7 +64,6 @@ class RequestForSumraId extends Controller
      *                 property="user_status",
      *                 type="number",
      *                 description="User Status INACTIVE = 0, ACTIVE = 1, BANNED = 2",
-
      *             )
      *         )
      *     ),
