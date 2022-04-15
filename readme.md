@@ -1,10 +1,17 @@
-### updates
+all of our microservices are started as follows
 
-To allow installation of sumra/sdk as a repository:
+1 do git clone
 
-Dockerfile: change workdir to var/www/htm/web
+2. go to the web folder and copy .env.example to .env
 
-docker-compose: change the volume mapping from ./web:/var/www/html:rw to ./::/var/www/html:rw
+3. go to ../
 
-start dev using docker-compose up -d instead of ./deploy.sh build ...start
+4. run ./deploy.sh build
+
+5. cd web & run composer i
+
+6. cd ../ & run ./deploy.sh start
+
+go to browser
+http://localhost:{port}/v1/docs
 
