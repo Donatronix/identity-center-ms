@@ -19,13 +19,14 @@ class CreateUsersTable extends Migration
             $table->string('first_name', 60)->nullable();
             $table->string('last_name', 60)->nullable();
             $table->string('username', 25)->nullable()->unique();
-            $table->bigInteger('phone_number')->unsigned()->unique();
+            $table->unsignedBigInteger('phone_number')->unique();
             $table->string('email', 150)->nullable()->unique();
             $table->date('birthday')->nullable();
             $table->string('password', 60)->nullable();
             $table->tinyInteger('status')->default(User::STATUS_INACTIVE);
             $table->timestamp('phone_number_verified_at')->nullable();
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('verify_token')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();
