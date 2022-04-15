@@ -2,13 +2,13 @@
 
 namespace App\Api\V1\Controllers\OneStepId;
 
-use Exception;
-use App\Models\User;
-use Illuminate\Http\Request;
-use App\Models\TwoFactorAuth;
 use App\Api\V1\Controllers\Controller;
+use App\Models\TwoFactorAuth;
+use App\Models\User;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 
 class VerifyPhoneNumber extends Controller
 {
@@ -19,7 +19,7 @@ class VerifyPhoneNumber extends Controller
      *     path="/auth/send-code",
      *     summary="Verify Phone Number",
      *     description="Verify Phone Number",
-     *     tags={"One-Step Users"},
+     *     tags={"Auth by OneStep"},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -115,8 +115,8 @@ class VerifyPhoneNumber extends Controller
         ]);
 
         try {
-            $twoFa = TwoFactorAuth::where("code",$request->auth_code_from_user)->firstOrFail();
-        } catch ( ModelNotFoundException $th) {
+            $twoFa = TwoFactorAuth::where("code", $request->auth_code_from_user)->firstOrFail();
+        } catch (ModelNotFoundException $th) {
             return response()->json([
                 "type" => "danger",
                 "message" => "Invalid Token",
@@ -127,24 +127,23 @@ class VerifyPhoneNumber extends Controller
         try {
             $user = $twoFa->user;
 
-            if($user->status == User::STATUS_BANNED){
+            if ($user->status == User::STATUS_BANNED) {
                 return response()->json([
                     "type" => "danger",
                     "user_status" => $user->status,
                     "sid" => $twoFa->sid,
                     "message" => "User has been banned from this platform."
-                ],403);
+                ], 403);
             }
 
             $user->phone_number_verified_at = Carbon::now();
             $user->save();
-
         } catch (Exception $th) {
             return response()->json([
-               "message" => "Unable to verify token",
-               "type" => "danger",
-               "validate_auth_code" => false,
-            ],400);
+                "message" => "Unable to verify token",
+                "type" => "danger",
+                "validate_auth_code" => false,
+            ], 400);
         }
 
         return response()->json([

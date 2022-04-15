@@ -2,9 +2,9 @@
 
 namespace App\Api\V1\Controllers;
 
+use App\Exceptions\SMSGatewayException;
 use Exception;
 use Illuminate\Support\Str;
-use App\Exceptions\SMSGatewayException;
 use Laravel\Lumen\Routing\Controller as BaseController;
 
 /**
@@ -53,14 +53,15 @@ use Laravel\Lumen\Routing\Controller as BaseController;
  */
 class Controller extends BaseController
 {
-    protected function sendSms($botID, $phoneNumber, $message){
-          try {
+    protected function sendSms($botID, $phoneNumber, $message)
+    {
+        try {
             //  api call to communication MS
-          } catch (Exception $th) {
-              throw new SMSGatewayException("Unable to send sms");
-          }
+        } catch (Exception $th) {
+            throw new SMSGatewayException("Unable to send sms");
+        }
 
-          return Str::random(16);
+        return Str::random(16);
     }
 }
 

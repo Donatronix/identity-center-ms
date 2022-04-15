@@ -2,19 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Str;
-use Sumra\SDK\Traits\UuidTrait;
-use Laravel\Passport\HasApiTokens;
 use Illuminate\Auth\Authenticatable;
-use Laravel\Lumen\Auth\Authorizable;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
-
-
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
+use Laravel\Lumen\Auth\Authorizable;
+use Laravel\Passport\HasApiTokens;
+use Sumra\SDK\Traits\UuidTrait;
 
 class User extends Model implements AuthenticatableContract, AuthorizableContract
 {
@@ -24,7 +22,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     use SoftDeletes;
     use HasFactory;
     use UuidTrait;
-    
+
     /**
      * Statuses of users
      */
@@ -94,6 +92,19 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         });
     }
 
+    public static function getBySid($sid)
+    {
+        try {
+            $twoFa = TwoFactorAuth::where("sid", $sid)->firstOrFail();
+            $user = $twoFa->user;
+
+            return $user;
+            //code...
+        } catch (ModelNotFoundException $e) {
+            throw $e;
+        }
+    }
+
     /**
      * Make display_name attribute
      *
@@ -113,20 +124,5 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         }
 
         return $this->attributes['display_name'] = $displayName;
-    }
-
-
-    public static function getBySid($sid){
-
-        try {
-
-            $twoFa = TwoFactorAuth::where("sid",$sid)->firstOrFail();
-            $user = $twoFa->user;
-            return $user;
-             //code...
-        } catch (ModelNotFoundException $e) {
-            throw $e;
-        }
-
     }
 }

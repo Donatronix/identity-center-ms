@@ -2,28 +2,27 @@
 
 namespace App\Api\V1\Controllers\OneStepId;
 
-use Exception;
-use App\Models\User;
-use Illuminate\Http\Request;
-use App\Models\TwoFactorAuth;
 use App\Api\V1\Controllers\Controller;
+use App\Models\TwoFactorAuth;
+use App\Models\User;
+use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 
 class UserSubmitsUsername extends Controller
 {
-
     const MAX_LOGIN_ATTEMPTS = 3;
     const LOGIN_ATTEMPTS_DURATION = 120; //secs
 
-     /**
+    /**
      * User Submits Account Username
      *
      * @OA\Post(
      *     path="/auth/send-username",
      *     summary="User Submits Account Username",
      *     description="Here the new user or the existing user submits username for login, along with the sid",
-     *     tags={"One-Step Users"},
+     *     tags={"Auth by OneStep"},
      *
      *
      *     @OA\RequestBody(
@@ -120,7 +119,6 @@ class UserSubmitsUsername extends Controller
      */
     public function __invoke(Request $request)
     {
-        // ...
         // Validate input data
         $this->validate($request, [
             'username' => 'required',
@@ -131,7 +129,7 @@ class UserSubmitsUsername extends Controller
         try {
             // retrieve user using the sid
             $user = User::getBySid($request->sid);
-        } catch ( ModelNotFoundException $th) {
+        } catch (ModelNotFoundException $th) {
             return response()->json([
                 "type" => "danger",
                 "message" => "Invalid sid Token",
@@ -139,34 +137,32 @@ class UserSubmitsUsername extends Controller
         }
 
         // check user status
-        if($user->status == User::STATUS_BANNED){
+        if ($user->status == User::STATUS_BANNED) {
             //report banned
             return response()->json([
                 "type" => "danger",
                 "user_status" => $user->status,
                 "message" => "User has been banned from this platform."
-            ],403);
-        }else if ($user->status == User::STATUS_ACTIVE){
+            ], 403);
+        } elseif ($user->status == User::STATUS_ACTIVE) {
             //login active user
-            return $this->login($user,$request->sid, $request->username);
+            return $this->login($user, $request->sid, $request->username);
         }
 
         // Only  inactive users gets to this part of the code
         // check if username is taken
-        $usernameExists = User::where("username",$request->username)->exists();
-        if ($usernameExists){
-             return response()->json([
-                 "type" => "danger",
-                 "message" => "Username already exists.",
-                 "user_status" => $user->status,
-                 "phone_exist" => true
-             ], 400);
-
+        $usernameExists = User::where("username", $request->username)->exists();
+        if ($usernameExists) {
+            return response()->json([
+                "type" => "danger",
+                "message" => "Username already exists.",
+                "user_status" => $user->status,
+                "phone_exist" => true
+            ], 400);
         }
 
         // check if username is empty
-        if (empty($user->username)){
-
+        if (empty($user->username)) {
             try {
                 $user->username = $request->username;
                 $user->status = User::STATUS_ACTIVE;
@@ -180,10 +176,9 @@ class UserSubmitsUsername extends Controller
                 ], 400);
             }
 
-            return $this->login($user,$request->sid, $request->username);
-
-        }else {
-        // username already exists for this SID
+            return $this->login($user, $request->sid, $request->username);
+        } else {
+            // username already exists for this SID
             return response()->json([
                 "type" => "danger",
                 "message" => "Username already exists for this SID"
@@ -191,53 +186,53 @@ class UserSubmitsUsername extends Controller
         }
     }
 
-
-
-    private function login(User $user, $sid, $username){
-
+    /**
+     * @param \App\Models\User $user
+     * @param                  $sid
+     * @param                  $username
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    private function login(User $user, $sid, $username)
+    {
         //check if its a malicious user
         try {
-
             $user = User::getBySid($sid);
             $redis = Redis::connection();
 
-            $userLoginAttemptsKey = "login_attempts:".$user->id;
+            $userLoginAttemptsKey = "login_attempts:" . $user->id;
 
-            if(!$redis->exists($userLoginAttemptsKey))
-            {
+            if (!$redis->exists($userLoginAttemptsKey)) {
                 //set the key
                 $redis->set($userLoginAttemptsKey, 1);
                 //set the expiration
                 //I understand this means expire in 120s.
-                $redis->expire($userLoginAttemptsKey,self::LOGIN_ATTEMPTS_DURATION);
+                $redis->expire($userLoginAttemptsKey, self::LOGIN_ATTEMPTS_DURATION);
 
-            }else {
+            } else {
                 $count = 0;
-                $count += (int) $redis->get($userLoginAttemptsKey);
-                $redis->set($userLoginAttemptsKey,$count);
+                $count += (int)$redis->get($userLoginAttemptsKey);
+                $redis->set($userLoginAttemptsKey, $count);
             }
 
-
-            if (strtolower($user->username) !== strtolower($username))
-            {
-
-                $loginAttempts = (int) $redis->get($userLoginAttemptsKey);
+            if (strtolower($user->username) !== strtolower($username)) {
+                $loginAttempts = (int)$redis->get($userLoginAttemptsKey);
 
                 if ($loginAttempts > self::MAX_LOGIN_ATTEMPTS - 1)
 
-                // malicious user, warn and block
-                //TODO count login attempts and block
-                return response()->json([
-                    "type" => "danger",
-                    "message" => "Unauthorized operation.",
-                    "user_status" => $user->status
-                ],403);
+                    // malicious user, warn and block
+                    //TODO count login attempts and block
+                    return response()->json([
+                        "type" => "danger",
+                        "message" => "Unauthorized operation.",
+                        "user_status" => $user->status
+                    ], 403);
             }
             // generate access token
             $token = $user->createToken("bearer")->accessToken;
             // delete sid
 
-            $twoFa = TwoFactorAuth::where("sid",$sid)->first();
+            $twoFa = TwoFactorAuth::where("sid", $sid)->first();
             $twoFa->delete();
 
             $redis->del($userLoginAttemptsKey);
@@ -249,13 +244,11 @@ class UserSubmitsUsername extends Controller
                 "token" => $token,
             ]);
 
-        }catch (Exception $e){
+        } catch (Exception $e) {
             return response()->json([
                 "type" => "danger",
                 "message" => "Invalid SID"
-            ],403);
+            ], 403);
         }
     }
-
-
 }

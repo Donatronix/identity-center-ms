@@ -40,7 +40,7 @@ class UserController extends Controller
      * Register User
      *
      * @OA\Post(
-     *     path="/admin",
+     *     path="/admin/users",
      *     summary="Create new user",
      *     description="Create new user",
      *     tags={"Admin / Users"},
@@ -170,7 +170,7 @@ class UserController extends Controller
      * Return user data
      *
      * @OA\Get(
-     *     path="/admin/{id}",
+     *     path="/admin/users/{id}",
      *     summary="Get user details",
      *     description="Get user details",
      *     tags={"Admin / Users"},
@@ -229,7 +229,7 @@ class UserController extends Controller
      * Update the specified resource in storage
      *
      * @OA\Patch(
-     *     path="/admin/{id}",
+     *     path="/admin/users/{id}",
      *     summary="update user",
      *     description="update user",
      *     tags={"Admin / Users"},
@@ -311,108 +311,4 @@ class UserController extends Controller
     {
         //
     }
-
-    /**
-     * Verify user email
-     *
-     * @OA\Post(
-     *     path="/admin/one-step/verify/send",
-     *     summary="Verify user email",
-     *     description="resend user email",
-     *     tags={"Admin / Users"},
-     *
-     *     security={{
-     *         "passport": {
-     *             "ManagerRead",
-     *             "ManagerWrite"
-     *         }
-     *     }},
-     *
-     *     @OA\Parameter(
-     *          name="email",
-     *          required=true,
-     *          in="query",
-     *          @OA\Schema (
-     *              type="string"
-     *          )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Success"
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Not found"
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Bad Request"
-     *     )
-     * )
-     *
-     * @param Request $request
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function verify_email(Request $request)
-    {
-        $this->validate($request, [
-            'email' => "required|email"
-        ]);
-
-        $user = User::where('email', $request->email)->firstOrFail();
-
-        PubSub::publish('sendVerificationEmail', [
-            'email' => $user->email,
-            'display_name' => $user->display_name,
-            'verify_token' => $user->verify_token,
-        ], 'mail');
-
-        return response()->jsonApi(["email sent"], 200);
-    }
-
-    /**
-     * @OA\Post(
-     *     path="/admin/one-step/verify",
-     *     summary="Verify user email",
-     *     description="Verify user email",
-     *     tags={"Admin / Users"},
-     *
-     *     security={{
-     *         "passport": {
-     *             "ManagerRead",
-     *             "ManagerWrite"
-     *         }
-     *     }},
-     *
-     *     @OA\Parameter(
-     *          name="email",
-     *          required=true,
-     *          in="query",
-     *          @OA\Schema (
-     *              type="string"
-     *          )
-     *     ),
-     *     @OA\Parameter(
-     *          name="verify_token",
-     *          required=true,
-     *          in="query",
-     *          @OA\Schema (
-     *              type="string"
-     *          )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Success",
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Not found",
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Bad Request",
-     *     )
-     * )
-     */
 }

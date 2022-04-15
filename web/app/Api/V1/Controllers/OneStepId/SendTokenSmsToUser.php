@@ -2,27 +2,23 @@
 
 namespace App\Api\V1\Controllers\OneStepId;
 
-use Exception;
-use Carbon\Carbon;
-use App\Models\User;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use App\Models\TwoFactorAuth;
-use Illuminate\Support\Facades\DB;
 use App\Api\V1\Controllers\Controller;
-use App\Exceptions\SMSGatewayException;
+use App\Models\TwoFactorAuth;
+use App\Models\User;
+use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 
 class SendTokenSmsToUser extends Controller
-{ 
-     /**
+{
+    /**
      * Create new user for One-Step
      *
      * @OA\Post(
      *     path="/auth/send-sms",
      *     summary="Create new user for One-Step",
      *     description="Create new user for One-Step",
-     *     tags={"One-Step Users"},
+     *     tags={"Auth by OneStep"},
      *
      *
      *     @OA\RequestBody(
@@ -116,26 +112,23 @@ class SendTokenSmsToUser extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function __invoke(Request $request,$botID)
-    { 
-        // ...
+    public function __invoke(Request $request, $botID)
+    {
         // Validate input data
         $this->validate($request, [
             'phone_number' => 'required|integer',
         ]);
+
         try {
-            
             $user = User::where("phone_number", $request->phone_number)->firstOrFail();
             // user already exists
-            if( $user->status == User::STATUS_BANNED)
-            {
-                 
+            if ($user->status == User::STATUS_BANNED) {
                 return response()->json([
-                     "phone_exists" => true,
-                     "user_status" => $user->status,
-                     "type" => "danger",
-                     "message" => "This user has been banned from this platform."
-                ],403);
+                    "phone_exists" => true,
+                    "user_status" => $user->status,
+                    "type" => "danger",
+                    "message" => "This user has been banned from this platform."
+                ], 403);
 
             }
         } catch (ModelNotFoundException $e) {
@@ -144,21 +137,19 @@ class SendTokenSmsToUser extends Controller
                 "message" => "This phone number does not exist",
                 "phone_exists" => false,
                 "type" => "danger"
-           ], 400);
+            ], 400);
         }
-
 
         // User is either active or inactive, we send token
         try {
-
             $token = TwoFactorAuth::generateToken();
-            
+
             $sid = $this->sendSms($botID, $request->phone_number, $token);
 
             $twoFa = TwoFactorAuth::create([
-                    "sid" => $sid,
-                    "user_id" => $user->id,
-                    "code" => $token
+                "sid" => $sid,
+                "user_id" => $user->id,
+                "code" => $token
             ]);
 
             // Return response
@@ -172,7 +163,6 @@ class SendTokenSmsToUser extends Controller
                 "test_purpose_token" => $token
             ], 200);
 
-
         } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
@@ -181,5 +171,4 @@ class SendTokenSmsToUser extends Controller
             ], 400);
         }
     }
-
 }

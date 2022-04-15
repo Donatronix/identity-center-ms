@@ -5,25 +5,26 @@ namespace App\Api\V1\Controllers;
 use App\Api\V1\Resources\UserResource;
 use App\Models\Category;
 use App\Models\User;
+use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use PubSub;
-use Exception;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-class UserOneStepController extends Controller
+class UserController extends Controller
 {
     /**
      * Create new user for One-Step
      *
      * @OA\Post(
-     *     path="/users/one-step",
+     *     path="/user-profile",
      *     summary="Create new user for One-Step",
      *     description="Create new user for One-Step",
-     *     tags={"One-Step Users"},
+     *     tags={"User Profile"},
      *
      *     security={{
      *         "passport": {
@@ -123,9 +124,8 @@ class UserOneStepController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request): \Illuminate\Http\JsonResponse
+    public function store(Request $request): JsonResponse
     {
-
         // Validate input data
         $this->validate($request, [
             'phone' => 'required|integer',
@@ -142,7 +142,7 @@ class UserOneStepController extends Controller
                 'message' => 'User was successful created',
                 'data' => $user
             ], 201);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
                 'title' => "Create new user. Step 1",
@@ -155,10 +155,10 @@ class UserOneStepController extends Controller
      * Return user data
      *
      * @OA\Get(
-     *     path="/users/one-step/me",
+     *     path="/user-profile/me",
      *     summary="Get current user profile",
      *     description="Get current user profile",
-     *     tags={"One-Step Users"},
+     *     tags={"User Profile"},
      *
      *     security={{
      *         "passport": {
@@ -197,7 +197,7 @@ class UserOneStepController extends Controller
 
         try {
             $user = $builder->firstOrFail();
-        } catch (Exception $e){
+        } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
                 'title' => "Not Found",
@@ -221,10 +221,10 @@ class UserOneStepController extends Controller
      * Update the specified resource in storage
      *
      * @OA\Patch(
-     *     path="/users/one-step/{id}",
+     *     path="/user-profile/{id}",
      *     summary="update user",
      *     description="update user",
-     *     tags={"One-Step Users"},
+     *     tags={"User Profile"},
      *
      *     security={{
      *         "passport": {
@@ -291,4 +291,108 @@ class UserOneStepController extends Controller
 
         throw new BadRequestHttpException();
     }
+
+    /**
+     * Verify user email
+     *
+     * @OA\Post(
+     *     path="/user-profile/verify/send",
+     *     summary="Verify user email",
+     *     description="resend user email",
+     *     tags={"User Profile"},
+     *
+     *     security={{
+     *         "passport": {
+     *             "ManagerRead",
+     *             "ManagerWrite"
+     *         }
+     *     }},
+     *
+     *     @OA\Parameter(
+     *          name="email",
+     *          required=true,
+     *          in="query",
+     *          @OA\Schema (
+     *              type="string"
+     *          )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Not found"
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request"
+     *     )
+     * )
+     *
+     * @param Request $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function verify_email(Request $request)
+    {
+        $this->validate($request, [
+            'email' => "required|email"
+        ]);
+
+        $user = User::where('email', $request->email)->firstOrFail();
+
+        PubSub::publish('sendVerificationEmail', [
+            'email' => $user->email,
+            'display_name' => $user->display_name,
+            'verify_token' => $user->verify_token,
+        ], 'mail');
+
+        return response()->jsonApi(["email sent"], 200);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/user-profile/verify",
+     *     summary="Verify user email",
+     *     description="Verify user email",
+     *     tags={"User Profile"},
+     *
+     *     security={{
+     *         "passport": {
+     *             "ManagerRead",
+     *             "ManagerWrite"
+     *         }
+     *     }},
+     *
+     *     @OA\Parameter(
+     *          name="email",
+     *          required=true,
+     *          in="query",
+     *          @OA\Schema (
+     *              type="string"
+     *          )
+     *     ),
+     *     @OA\Parameter(
+     *          name="verify_token",
+     *          required=true,
+     *          in="query",
+     *          @OA\Schema (
+     *              type="string"
+     *          )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Not found",
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request",
+     *     )
+     * )
+     */
 }

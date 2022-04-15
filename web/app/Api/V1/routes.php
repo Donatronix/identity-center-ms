@@ -8,35 +8,34 @@ $router->group([
     'namespace' => '\App\Api\V1\Controllers'
 ], function ($router) {
     /**
-     *
-     */
-    $router->group([
-        'prefix' => 'users',
-        'as' => 'users'
-    ], function ($router) {
-        $router->group([
-            'prefix' => 'one-step',
-            'as' => '.one-step'
-        ], function ($router) {
-            $router->get('/', 'UserOneStepController@index');
-            $router->post('/', 'UserOneStepController@store');
-            $router->get('/{id}', 'UserOneStepController@show');
-            $router->patch('/{id}', 'UserOneStepController@update');
-        });
-    });
-
-    /**
-     *
+     * PUBLIC ACCESS
      */
     $router->group([
         'prefix' => 'auth',
-        'as' => 'users',
+        'as' => 'auth',
         "namespace" => "OneStepId"
     ], function ($router) {
         $router->post('/send-phone/{botID}', "UserRequestsRegistrationByPhoneNumber");
+        $router->post('/send-sms/{botID}', "SendTokenSmsToUser");
         $router->post('/send-username', "UserSubmitsUsername");
         $router->post('/send-code', "VerifyPhoneNumber");
-        $router->post('/send-sms/{botID}', "SendTokenSmsToUser");
+    });
+
+    /**
+     * PRIVATE ACCESS
+     */
+    $router->group([
+        'middleware' => 'checkUser'
+    ], function ($router) {
+        $router->group([
+            'prefix' => 'users',
+            'as' => 'users'
+        ], function ($router) {
+            $router->get('/', 'UserController@index');
+            $router->post('/', 'UserController@store');
+            $router->get('/{id}', 'UserController@show');
+            $router->patch('/{id}', 'UserController@update');
+        });
     });
 
     /**
