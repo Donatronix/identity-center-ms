@@ -1,8 +1,6 @@
 /.idea
 /.vscode
 /__bkp
-/public/hot
-/public/storage
 /vendor
 .env
 .phpunit.result.cache

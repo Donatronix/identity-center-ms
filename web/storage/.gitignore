@@ -1,6 +1,1 @@
-*
-!app/
-!framework/
-!logs/
-!.gitignore
-!*.key
+api-docs/*
