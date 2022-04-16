@@ -22,8 +22,8 @@ class CreateBotUsersTable extends Migration
 
             $table->primary(['id', 'bot_id', 'user_id']);
 
-            $table->foreign(['user_id'], 'bot_users_ibfk_2')->references(['id'])->on('users')->onDelete('CASCADE');
-            $table->foreign(['bot_id'], 'bot_users_ibfk_1')->references(['id'])->on('bots')->onDelete('CASCADE');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('CASCADE');
+            $table->foreign('bot_id')->references('id')->on('bots')->onDelete('CASCADE');
         });
     }
 
