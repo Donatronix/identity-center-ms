@@ -13,7 +13,55 @@ use Illuminate\Support\Str;
 use Laravel\Lumen\Auth\Authorizable;
 use Laravel\Passport\HasApiTokens;
 use Sumra\SDK\Traits\UuidTrait;
-
+/**
+ * User Schema
+ *
+ * @package App\Models
+ *
+ * @OA\Schema(
+ *     schema="User",
+ * 
+ *     @OA\Property(
+ *         property="first_name",
+ *         type="string",
+ *         description="First name of the user",
+ *         example="Jhon"
+ *     ),
+ *     @OA\Property(
+ *         property="last_name",
+ *         type="string",
+ *         description="Last name of the user",
+ *         example="Smith"
+ *     ),
+ *     @OA\Property(
+ *         property="username",
+ *         type="string",
+ *         description="User's username",
+ *     ),
+ *     @OA\Property(
+ *         property="email",
+ *         type="string",
+ *         description="User's email",
+ *     ),
+ *     @OA\Property(
+ *         property="phone_number",
+ *         type="string",
+ *         description="Phone number of user",
+ *     ),
+ *     @OA\Property(
+ *         property="birthday",
+ *         type="date",
+ *         description="Birthday date of user",
+ *         example="1974-10-25"
+ *     ),
+ *     @OA\Property(
+ *         property="status",
+ *         type="number",
+ *         description="Status code",
+ *         enum={0, 1, 2},
+ *     ),
+ * )
+ */
 class User extends Model implements AuthenticatableContract, AuthorizableContract
 {
     use HasApiTokens;
