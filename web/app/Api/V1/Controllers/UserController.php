@@ -255,17 +255,17 @@ class UserController extends Controller
      *                  description="email of the user",
      *              ),
      *              @OA\Property(
-     *                  property="phone",
+     *                  property="phone_number",
      *                  type="string",
      *                  description="phone number of the user",
      *              ),
      *              @OA\Property(
-     *                  property="date_of_birth",
+     *                  property="birthday",
      *                  type="string",
      *                  description="Users date of birth in format DD-MM-YYYY",
      *              ),
      *              @OA\Property(
-     *                  property="subscribe_to_announcement",
+     *                  property="subscribed_to_announcement",
      *                  type="string",
      *                  description="Indicate whether or not the user should be subscribed for announcements",
      *              ),
@@ -290,10 +290,10 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $validatedData = $this->validate($request, [
-            'phone' => "sometimes|regex:/\+?\d{7,16}/i|unique:users,phone_number",
+            'phone_number' => "sometimes|regex:/\+?\d{7,16}/i|unique:users,phone_number",
             'email' => "sometimes|email|unique:users,email",
-            'current_password' => 'required_with:password|min:6',
-            'password' => 'required_with:current_password|confirmed|min:6|max:190',
+            'birthday' => 'sometimes|nullable|date_format:d-m-Y',
+            'subscribed_to_announcement' => 'sometimes|boolean',
         ]);
 
         $user = User::findOrFail($id);
@@ -311,19 +311,9 @@ class UserController extends Controller
             ], 'mail');
         }
 
-        $except = ['password', 'current_password'];
-        $update = collect($validatedData)->except($except);
 
-        if ($request->has('current_password')) {
-            if (Hash::check($request->current_password, $user->password)) {
-                $update['password'] = Hash::make($request->password);
-            } else {
-                throw new BadRequestHttpException('Invalid current_password');
-            }
-        }
-
-        if (!empty($update)) {
-            $user->fill($update);
+        if (!empty($validatedData)) {
+            $user->fill($validatedData);
             $user->save();
 
             return response()->jsonApi(["message" => "updated"], 200);
