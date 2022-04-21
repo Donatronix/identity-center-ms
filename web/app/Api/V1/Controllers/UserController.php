@@ -225,6 +225,18 @@ class UserController extends Controller
      *     summary="update user",
      *     description="update user",
      *     tags={"User Profile"},
+     * 
+     *     @OA\Parameter(
+     *          description="ID of User",
+     *          in="path",
+     *          name="id",
+     *          required=true,
+     *          example="1",
+     *          @OA\Schema(
+     *              type="integer",
+     *              format="int64"
+     *          ),
+     *     ),
      *
      *     security={{
      *         "passport": {
@@ -232,6 +244,34 @@ class UserController extends Controller
      *             "ManagerRead"
      *         }
      *     }},
+     * 
+     *     @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(
+     *              type="object",
+     *              @OA\Property(
+     *                  property="email",
+     *                  type="string",
+     *                  description="email of the user",
+     *              ),
+     *              @OA\Property(
+     *                  property="phone",
+     *                  type="string",
+     *                  description="phone number of the user",
+     *              ),
+     *              @OA\Property(
+     *                  property="date_of_birth",
+     *                  type="string",
+     *                  description="Users date of birth in format DD-MM-YYYY",
+     *              ),
+     *              @OA\Property(
+     *                  property="subscribe_to_announcement",
+     *                  type="string",
+     *                  description="Indicate whether or not the user should be subscribed for announcements",
+     *              ),
+     *          
+     *          ),
+     *     ),
      *
      *     @OA\Response(
      *         response=200,
@@ -243,16 +283,15 @@ class UserController extends Controller
      *     )
      * )
      *
-     * @param \Illuminate\Http\Request $request
-     * @param int                      $id
-     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
-        $this->validate($request, [
-            'phone' => "integer",
-            'email' => "email|unique:users,email",
+        $validatedData = $this->validate($request, [
+            'phone' => "sometimes|regex:/\+?\d{7,16}/i|unique:users,phone_number",
+            'email' => "sometimes|email|unique:users,email",
             'current_password' => 'required_with:password|min:6',
             'password' => 'required_with:current_password|confirmed|min:6|max:190',
         ]);
@@ -272,7 +311,8 @@ class UserController extends Controller
             ], 'mail');
         }
 
-        $update = $request->except(['password']);
+        $except = ['password', 'current_password'];
+        $update = collect($validatedData)->except($except);
 
         if ($request->has('current_password')) {
             if (Hash::check($request->current_password, $user->password)) {
