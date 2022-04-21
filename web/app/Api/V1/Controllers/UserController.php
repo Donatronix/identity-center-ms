@@ -11,7 +11,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use PubSub;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -379,6 +382,111 @@ class UserController extends Controller
         ], 'mail');
 
         return response()->jsonApi(["email sent"], 200);
+    }
+
+    
+    /**
+     * Validate the new phone number that a user whats to use
+     *
+     * @OA\Patch(
+     *     path="/user-profile/validate-edit-phone",
+     *     summary="Validate the new user phone number",
+     *     description="Validate the new phone number that a user whats to use",
+     *     tags={"User Profile"},
+     *
+     *     security={{
+     *         "passport": {
+     *             "User",
+     *             "ManagerRead"
+     *         }
+     *     }},
+     * 
+     *     @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(
+     *              type="object",
+     *              @OA\Property(
+     *                  property="phone_number",
+     *                  type="string",
+     *                  description="phone number of the user",
+     *              ),
+     *
+     *          ),
+     *     ),
+     *
+     *    @OA\Response(
+     *        response=200,
+     *        description="Validation success",
+     *        @OA\JsonContent(
+     *           @OA\Property(property="message", type="string", example="A 6-digit code has been sent to your phone number")"),
+     *        )
+     *     )
+     *
+     *    @OA\Response(
+     *        response=500,
+     *        description="Validation success",
+     *        @OA\JsonContent(
+     *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again.")"),
+     *        )
+     *     )
+     *    @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *            @OA\Property(property="message", type="string", example="The given data was invalid."),
+     *            @OA\Property(
+     *               property="errors",
+     *               type="object",
+     *               @OA\Property(
+     *                  property="phone_number",
+     *                  type="array",
+     *                  collectionFormat="multi",
+     *                  @OA\Items(
+     *                     type="string",
+     *                     example={"The phone number is already taken.","The phone number must is invalid."},
+     *                  )
+     *               )
+     *            )
+     *         )
+     *      )
+     * )
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @throws \Exception
+     * @return \Illuminate\Http\Response
+     */
+    public function validateEditPhoneNumber(Request $request)
+    {
+        $this->validate($request, [
+            'phone_number' => [
+                'required',
+                'regex:/\+?\d{7,16}/i',
+                "unique:users,phone_number," . Auth::user()->id,
+            ],
+        ]);
+
+        try {
+            $verificationCode = Str::random(6);
+            $user = User::first(Auth::user()->id);
+            $user->verification_code = Hash::make($verificationCode);
+
+            if (!$user->save()) {
+                throw new \Exception();
+            }
+
+            $response = Http::post('[COMMUNICATIONS_MS_URL]/messages/sms/send-message', [
+                'to' => $request->phone_number,
+                'message' => 'Your verification code is: ' . $verificationCode,
+            ]);
+
+            if (!$response->ok()) {
+                throw new \Exception();
+            }
+            
+            return response()->jsonApi(["message" => "A 6-digit code has been sent to your phone number"], 200);
+        } catch (\Exception $e) {
+            return response()->jsonApi(["message" => "An error occurred! Please, try again."], 500);
+        }   
     }
 
     /**

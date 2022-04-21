@@ -35,6 +35,7 @@ $router->group([
             $router->post('/', 'UserController@store');
             $router->get('/{id}', 'UserController@show');
             $router->patch('/{id}', 'UserController@update');
+            $router->post('/validate-edit-phone', 'UserController@validateEditPhoneNumber');
         });
     });
 
