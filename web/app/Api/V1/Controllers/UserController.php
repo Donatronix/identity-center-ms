@@ -383,7 +383,7 @@ class UserController extends Controller
 
         return response()->jsonApi(["email sent"], 200);
     }
-    
+
     /**
      * Validate the new phone number that a user whats to use
      *
@@ -460,7 +460,7 @@ class UserController extends Controller
             'phone_number' => [
                 'required',
                 'regex:/\+?\d{7,16}/i',
-                "unique:users,phone_number," . Auth::user()->id,
+                "unique:users,phone_number",
             ],
         ]);
 
@@ -473,6 +473,7 @@ class UserController extends Controller
                 throw new \Exception();
             }
 
+            // Should send SMS to the user's new phone number, contaiing the verification code
             $response = Http::post('[COMMUNICATIONS_MS_URL]/messages/sms/send-message', [
                 'to' => $request->phone_number,
                 'message' => 'Your verification code is: ' . $verificationCode,
@@ -488,8 +489,7 @@ class UserController extends Controller
         }   
     }
 
-    
-    
+
     /**
      * Validate the verification code and update phone number
      *
@@ -582,7 +582,7 @@ class UserController extends Controller
             'phone_number' => [
                 'required',
                 'regex:/\+?\d{7,16}/i',
-                "unique:users,phone_number," . Auth::user()->id,
+                "unique:users,phone_number",
             ],
             'verification_code' => [
                 'required',
@@ -609,6 +609,237 @@ class UserController extends Controller
                 throw new \Exception();
             }
             return response()->jsonApi(["message" => "Phone number updated"], 200);
+        } catch (\Exception $e) {
+            return response()->jsonApi(["message" => "An error occurred! Please, try again."], 500);
+        }
+    }
+
+
+    /**
+     * Validate the new email that a user whats to use
+     *
+     * @OA\Patch(
+     *     path="/user-profile/validate-edit-email",
+     *     summary="Validate the new user email",
+     *     description="Validate the new email that a user whats to use, and send verification code",
+     *     tags={"User Profile"},
+     *
+     *     security={{
+     *         "passport": {
+     *             "User",
+     *             "ManagerRead"
+     *         }
+     *     }},
+     * 
+     *     @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(
+     *              type="object",
+     *              @OA\Property(
+     *                  property="email",
+     *                  type="string",
+     *                  description="email of the user",
+     *              ),
+     *
+     *          ),
+     *     ),
+     *
+     *    @OA\Response(
+     *        response=200,
+     *        description="Validation success",
+     *        @OA\JsonContent(
+     *           @OA\Property(property="message", type="string", example="A 6-digit code has been sent to your email")"),
+     *        )
+     *     )
+     *
+     *    @OA\Response(
+     *        response=500,
+     *        description="Validation success",
+     *        @OA\JsonContent(
+     *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again.")"),
+     *        )
+     *     )
+     *    @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *            @OA\Property(property="message", type="string", example="The given data was invalid."),
+     *            @OA\Property(
+     *               property="errors",
+     *               type="object",
+     *               @OA\Property(
+     *                  property="email",
+     *                  type="array",
+     *                  collectionFormat="multi",
+     *                  @OA\Items(
+     *                     type="string",
+     *                     example={"The email is already taken.","The email is invalid."},
+     *                  )
+     *               )
+     *            )
+     *         )
+     *      )
+     * )
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @throws \Exception
+     * @return \Illuminate\Http\Response
+     */
+    public function validateEditEmail(Request $request)
+    {
+        $this->validate($request, [
+            'email' => [
+                'required',
+                'email',
+                "unique:users,email",
+            ],
+        ]);
+
+        try {
+            $verificationCode = Str::random(6);
+            $user = User::first(Auth::user()->id);
+            $user->verification_code = Hash::make($verificationCode);
+
+            if (!$user->save()) {
+                throw new \Exception();
+            }
+
+            // Should send SMS to the user's new email contaiing the verification code
+            $response = Http::post('[COMMUNICATIONS_MS_URL]/messages/email/send-message', [
+                'to' => $request->email,
+                'message' => 'Your verification code is: ' . $verificationCode,
+            ]);
+
+            if (!$response->ok()) {
+                throw new \Exception();
+            }
+            
+            return response()->jsonApi(["message" => "A 6-digit code has been sent to your email"], 200);
+        } catch (\Exception $e) {
+            return response()->jsonApi(["message" => "An error occurred! Please, try again."], 500);
+        }   
+    }
+
+        
+    /**
+     * Validate the verification code and update the current user's email
+     *
+     * @OA\Patch(
+     *     path="/user-profile/validate-edit-email",
+     *     summary="Update current user's email",
+     *     description="Validate the verification code and update the current user's email",
+     *     tags={"User Profile"},
+     *
+     *     security={{
+     *         "passport": {
+     *             "User",
+     *             "ManagerRead"
+     *         }
+     *     }},
+     * 
+     *     @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(
+     *              type="object",
+     *              @OA\Property(
+     *                  property="email",
+     *                  type="string",
+     *                  description="Email of the user",
+     *              ),
+     *              @OA\Property(
+     *                  property="verification_code",
+     *                  type="string",
+     *                  description="verification code previously send",
+     *              ),
+     *
+     *          ),
+     *     ),
+     *
+     *    @OA\Response(
+     *        response=200,
+     *        description="Validation success",
+     *        @OA\JsonContent(
+     *           @OA\Property(property="message", type="string", example="Email updated")"),
+     *        )
+     *     )
+     *
+     *    @OA\Response(
+     *        response=500,
+     *        description="Validation success",
+     *        @OA\JsonContent(
+     *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again.")"),
+     *        )
+     *     )
+     *
+     *    @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *            @OA\Property(property="message", type="string", example="The given data was invalid."),
+     *            @OA\Property(
+     *               property="errors",
+     *               type="object",
+     *               @OA\Property(
+     *                  property="phone_number",
+     *                  type="array",
+     *                  collectionFormat="multi",
+     *                  @OA\Items(
+     *                     type="string",
+     *                     example={"The email is already taken.","The email is invalid."},
+     *                  )
+     *               ),
+     * 
+     *               @OA\Property(
+     *                  property="verification_code",
+     *                  type="array",
+     *                  collectionFormat="multi",
+     *                  @OA\Items(
+     *                     type="string",
+     *                     example={"The verification code is invalid."},
+     *                  )
+     *               ),
+     *            )
+     *         )
+     *      )
+     * )
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @throws \Exception
+     * @return \Illuminate\Http\Response
+     */
+    public function updateMyEmail(Request $request)
+    {
+        $rules = [
+            'phone_number' => [
+                'required',
+                'email',
+                "unique:users,email",
+            ],
+            'verification_code' => [
+                'required',
+                'regex:/\d{6}/i',
+                function ($attribute, $value, $fail) {
+                    $user = User::first(Auth::user()->id);
+                    if (!Hash::check($value, $user->verification_code)) {
+                        $fail('The verification code is invalid.');
+                    }
+                },
+            ],
+        ];
+
+        $validationMessages = [
+            'verification_code.regex' => 'The verification code is invalid',
+        ];
+        $this->validate($request, $rules, $validationMessages);
+
+        try {
+            $user = User::first(Auth::user()->id);
+            $user->email = $request->email;
+            $user->verification_code = null;
+            if (!$user->save()) {
+                throw new \Exception();
+            }
+            return response()->jsonApi(["message" => "Email updated"], 200);
         } catch (\Exception $e) {
             return response()->jsonApi(["message" => "An error occurred! Please, try again."], 500);
         }
