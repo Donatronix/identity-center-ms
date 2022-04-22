@@ -383,7 +383,6 @@ class UserController extends Controller
 
         return response()->jsonApi(["email sent"], 200);
     }
-
     
     /**
      * Validate the new phone number that a user whats to use
@@ -443,7 +442,7 @@ class UserController extends Controller
      *                  collectionFormat="multi",
      *                  @OA\Items(
      *                     type="string",
-     *                     example={"The phone number is already taken.","The phone number must is invalid."},
+     *                     example={"The phone number is already taken.","The phone number is invalid."},
      *                  )
      *               )
      *            )
@@ -487,6 +486,132 @@ class UserController extends Controller
         } catch (\Exception $e) {
             return response()->jsonApi(["message" => "An error occurred! Please, try again."], 500);
         }   
+    }
+
+    
+    
+    /**
+     * Validate the verification code and update phone number
+     *
+     * @OA\Patch(
+     *     path="/user-profile/validate-edit-phone",
+     *     summary="Update user phone number",
+     *     description="Validate the verification code and update phone number",
+     *     tags={"User Profile"},
+     *
+     *     security={{
+     *         "passport": {
+     *             "User",
+     *             "ManagerRead"
+     *         }
+     *     }},
+     * 
+     *     @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(
+     *              type="object",
+     *              @OA\Property(
+     *                  property="phone_number",
+     *                  type="string",
+     *                  description="phone number of the user",
+     *              ),
+     *              @OA\Property(
+     *                  property="verification_code",
+     *                  type="string",
+     *                  description="verification code previously send",
+     *              ),
+     *
+     *          ),
+     *     ),
+     *
+     *    @OA\Response(
+     *        response=200,
+     *        description="Validation success",
+     *        @OA\JsonContent(
+     *           @OA\Property(property="message", type="string", example="Phone number updated")"),
+     *        )
+     *     )
+     *
+     *    @OA\Response(
+     *        response=500,
+     *        description="Validation success",
+     *        @OA\JsonContent(
+     *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again.")"),
+     *        )
+     *     )
+     *
+     *    @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *            @OA\Property(property="message", type="string", example="The given data was invalid."),
+     *            @OA\Property(
+     *               property="errors",
+     *               type="object",
+     *               @OA\Property(
+     *                  property="phone_number",
+     *                  type="array",
+     *                  collectionFormat="multi",
+     *                  @OA\Items(
+     *                     type="string",
+     *                     example={"The phone number is already taken.","The phone number is invalid."},
+     *                  )
+     *               ),
+     * 
+     *               @OA\Property(
+     *                  property="verification_code",
+     *                  type="array",
+     *                  collectionFormat="multi",
+     *                  @OA\Items(
+     *                     type="string",
+     *                     example={"The verification code is invalid."},
+     *                  )
+     *               ),
+     *            )
+     *         )
+     *      )
+     * )
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @throws \Exception
+     * @return \Illuminate\Http\Response
+     */
+    public function updateMyPhoneNumber(Request $request)
+    {
+        $rules = [
+            'phone_number' => [
+                'required',
+                'regex:/\+?\d{7,16}/i',
+                "unique:users,phone_number," . Auth::user()->id,
+            ],
+            'verification_code' => [
+                'required',
+                'regex:/\d{6}/i',
+                function ($attribute, $value, $fail) {
+                    $user = User::first(Auth::user()->id);
+                    if (!Hash::check($value, $user->verification_code)) {
+                        $fail('The verification code is invalid.');
+                    }
+                },
+            ],
+        ];
+
+        $validationMessages = [
+            'verification_code.regex' => 'The verification code is invalid',
+        ];
+        $this->validate($request, $rules, $validationMessages);
+
+        try {
+            $user = User::first(Auth::user()->id);
+            $user->phone_number = $request->phone_number;
+            $user->verification_code = null;
+            if (!$user->save()) {
+                throw new \Exception();
+            }
+            return response()->jsonApi(["message" => "Phone number updated"], 200);
+        } catch (\Exception $e) {
+            return response()->jsonApi(["message" => "An error occurred! Please, try again."], 500);
+        }
     }
 
     /**
