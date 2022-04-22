@@ -387,10 +387,10 @@ class UserController extends Controller
     /**
      * Validate the new phone number that a user whats to use
      *
-     * @OA\Patch(
+     * @OA\Post(
      *     path="/user-profile/validate-edit-phone",
      *     summary="Validate the new user phone number",
-     *     description="Validate the new phone number that a user whats to use",
+     *     description="Validate the new phone number that the current user whats to use",
      *     tags={"User Profile"},
      *
      *     security={{
@@ -413,22 +413,6 @@ class UserController extends Controller
      *     ),
      *
      *    @OA\Response(
-     *        response=200,
-     *        description="Validation success",
-     *        @OA\JsonContent(
-     *           @OA\Property(property="message", type="string", example="A 6-digit code has been sent to your phone number")"),
-     *        )
-     *     ),
-     *
-     *    @OA\Response(
-     *        response=500,
-     *        description="Validation success",
-     *        @OA\JsonContent(
-     *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again.")"),
-     *        )
-     *     ),
-     *
-     *    @OA\Response(
      *         response=422,
      *         description="Validation error",
      *         @OA\JsonContent(
@@ -443,11 +427,27 @@ class UserController extends Controller
      *                  @OA\Items(
      *                     type="string",
      *                     example={"The phone number is already taken.","The phone number is invalid."},
-     *                  )
-     *               )
-     *            )
-     *         )
-     *      )
+     *                  ),
+     *               ),
+     *            ),
+     *         ),
+     *      ),
+     *
+     *     @OA\Response(
+     *        response=200,
+     *        description="Validation success",
+     *        @OA\JsonContent(
+     *           @OA\Property(property="message", type="string", example="A 6-digit code has been sent to your phone number"),
+     *        )
+     *     ),
+     *
+     *    @OA\Response(
+     *        response=500,
+     *        description="Validation success",
+     *        @OA\JsonContent(
+     *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again."),
+     *        )
+     *     )
      * )
      *
      * @param  \Illuminate\Http\Request  $request
@@ -493,10 +493,10 @@ class UserController extends Controller
     /**
      * Validate the verification code and update phone number
      *
-     * @OA\Patch(
-     *     path="/user-profile/validate-edit-phone",
-     *     summary="Update user phone number",
-     *     description="Validate the verification code and update phone number",
+     * @OA\Post(
+     *     path="/user-profile/update-phone",
+     *     summary="Update current user's phone number",
+     *     description="Validate the verification code and update phone number of the current user",
      *     tags={"User Profile"},
      *
      *     security={{
@@ -528,7 +528,7 @@ class UserController extends Controller
      *        response=200,
      *        description="Validation success",
      *        @OA\JsonContent(
-     *           @OA\Property(property="message", type="string", example="Phone number updated")"),
+     *           @OA\Property(property="message", type="string", example="Phone number updated"),
      *        )
      *     ),
      *
@@ -536,7 +536,7 @@ class UserController extends Controller
      *        response=500,
      *        description="Validation success",
      *        @OA\JsonContent(
-     *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again.")"),
+     *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again."),
      *        )
      *     ),
      *
@@ -614,14 +614,14 @@ class UserController extends Controller
         }
     }
 
-
+ 
     /**
-     * Validate the new email that a user whats to use
+     * Validate the new email that the current user whats to use
      *
-     * @OA\Patch(
+     * @OA\Post(
      *     path="/user-profile/validate-edit-email",
      *     summary="Validate the new user email",
-     *     description="Validate the new email that a user whats to use, and send verification code",
+     *     description="Validate the new email that the current user whats to use, and send verification code",
      *     tags={"User Profile"},
      *
      *     security={{
@@ -648,7 +648,7 @@ class UserController extends Controller
      *        response=200,
      *        description="Validation success",
      *        @OA\JsonContent(
-     *           @OA\Property(property="message", type="string", example="A 6-digit code has been sent to your email")"),
+     *           @OA\Property(property="message", type="string", example="A 6-digit code has been sent to your email"),
      *        )
      *     ),
      *
@@ -656,7 +656,7 @@ class UserController extends Controller
      *        response=500,
      *        description="Validation success",
      *        @OA\JsonContent(
-     *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again.")"),
+     *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again."),
      *        )
      *     ),
      * 
@@ -721,12 +721,12 @@ class UserController extends Controller
         }   
     }
 
-        
+             
     /**
      * Validate the verification code and update the current user's email
      *
-     * @OA\Patch(
-     *     path="/user-profile/validate-edit-email",
+     * @OA\Post(
+     *     path="/user-profile/update-email",
      *     summary="Update current user's email",
      *     description="Validate the verification code and update the current user's email",
      *     tags={"User Profile"},
@@ -760,7 +760,7 @@ class UserController extends Controller
      *        response=200,
      *        description="Validation success",
      *        @OA\JsonContent(
-     *           @OA\Property(property="message", type="string", example="Email updated")"),
+     *           @OA\Property(property="message", type="string", example="Email updated"),
      *        )
      *     ),
      *
@@ -768,7 +768,7 @@ class UserController extends Controller
      *        response=500,
      *        description="Validation success",
      *        @OA\JsonContent(
-     *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again.")"),
+     *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again."),
      *        )
      *     ),
      *
