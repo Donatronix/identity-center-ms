@@ -409,7 +409,6 @@ class UserController extends Controller
      *                  type="string",
      *                  description="phone number of the user",
      *              ),
-     *
      *          ),
      *     ),
      *
@@ -419,7 +418,7 @@ class UserController extends Controller
      *        @OA\JsonContent(
      *           @OA\Property(property="message", type="string", example="A 6-digit code has been sent to your phone number")"),
      *        )
-     *     )
+     *     ),
      *
      *    @OA\Response(
      *        response=500,
@@ -427,7 +426,8 @@ class UserController extends Controller
      *        @OA\JsonContent(
      *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again.")"),
      *        )
-     *     )
+     *     ),
+     *
      *    @OA\Response(
      *         response=422,
      *         description="Validation error",
@@ -530,7 +530,7 @@ class UserController extends Controller
      *        @OA\JsonContent(
      *           @OA\Property(property="message", type="string", example="Phone number updated")"),
      *        )
-     *     )
+     *     ),
      *
      *    @OA\Response(
      *        response=500,
@@ -538,7 +538,7 @@ class UserController extends Controller
      *        @OA\JsonContent(
      *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again.")"),
      *        )
-     *     )
+     *     ),
      *
      *    @OA\Response(
      *         response=422,
@@ -650,7 +650,7 @@ class UserController extends Controller
      *        @OA\JsonContent(
      *           @OA\Property(property="message", type="string", example="A 6-digit code has been sent to your email")"),
      *        )
-     *     )
+     *     ),
      *
      *    @OA\Response(
      *        response=500,
@@ -658,7 +658,8 @@ class UserController extends Controller
      *        @OA\JsonContent(
      *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again.")"),
      *        )
-     *     )
+     *     ),
+     * 
      *    @OA\Response(
      *         response=422,
      *         description="Validation error",
@@ -761,7 +762,7 @@ class UserController extends Controller
      *        @OA\JsonContent(
      *           @OA\Property(property="message", type="string", example="Email updated")"),
      *        )
-     *     )
+     *     ),
      *
      *    @OA\Response(
      *        response=500,
@@ -769,7 +770,7 @@ class UserController extends Controller
      *        @OA\JsonContent(
      *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again.")"),
      *        )
-     *     )
+     *     ),
      *
      *    @OA\Response(
      *         response=422,
