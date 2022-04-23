@@ -272,6 +272,31 @@ class UserController extends Controller
      *                  type="string",
      *                  description="Indicate whether or not the user should be subscribed for announcements",
      *              ),
+     *              @OA\Property(
+     *                  property="address_country",
+     *                  type="string",
+     *                  description="Three letter country code",
+     *              ),
+     *              @OA\Property(
+     *                  property="address_line1",
+     *                  type="string",
+     *                  description="First line of address. may contain house number, street name, etc.",
+     *              ),
+     *              @OA\Property(
+     *                  property="address_line2",
+     *                  type="string",
+     *                  description="Second line of address.",
+     *              ),
+     *              @OA\Property(
+     *                  property="address_city",
+     *                  type="string",
+     *                  description="Name of city",
+     *              ),
+     *              @OA\Property(
+     *                  property="address_zip",
+     *                  type="string",
+     *                  description="Zip code",
+     *              ),
      *          
      *          ),
      *     ),
@@ -297,6 +322,11 @@ class UserController extends Controller
             'email' => "sometimes|email|unique:users,email",
             'birthday' => 'sometimes|nullable|date_format:d-m-Y',
             'subscribed_to_announcement' => 'sometimes|boolean',
+            'address_country' => 'sometimes|nullable|string|min:2|max:3',
+            'address_line1' => 'sometimes|nullable|string|max:150',
+            'address_line2' => 'sometimes|nullable|string|max:100',
+            'address_city' => 'sometimes|nullable|string|max:50',
+            'address_zip' => 'sometimes|nullable|string|max:10',
         ]);
 
         $user = User::findOrFail($id);
