@@ -60,6 +60,37 @@ use Sumra\SDK\Traits\UuidTrait;
  *         description="Status code",
  *         enum={0, 1, 2},
  *     ),
+ *     @OA\Property(
+ *         property="subscribed_to_announcement",
+ *         type="string",
+ *         description="Subscription to announcement",
+ *         enum={0, 1},
+ *     ),
+ *     @OA\Property(
+ *        property="address_country",
+ *        type="string",
+ *        description="Country code",
+ *     ),
+ *     @OA\Property(
+ *        property="address_line1",
+ *        type="string",
+ *        description="First line of address. may contain house number, street name, etc.",
+ *     ),
+ *     @OA\Property(
+ *        property="address_line2",
+ *        type="string",
+ *        description="Second line of address.",
+ *     ),
+ *     @OA\Property(
+ *        property="address_city",
+ *        type="string",
+ *        description="Name of city",
+ *     ),
+ *     @OA\Property(
+ *        property="address_zip",
+ *        type="string",
+ *        description="Zip code",
+ *     ),
  * )
  */
 class User extends Model implements AuthenticatableContract, AuthorizableContract
@@ -109,7 +140,14 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'email',
         'birthday',
         'password',
-        'status'
+        'status',
+
+        'subscribed_to_announcement',
+        'address_country',
+        'address_line1',
+        'address_line2',
+        'address_city',
+        'address_zip',
     ];
 
     /**
@@ -172,5 +210,32 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         }
 
         return $this->attributes['display_name'] = $displayName;
+    }
+
+    /**
+     * Rules to validate personal data
+     *
+     * @param  int|null  $id
+     * @return array
+     */
+    public static function personalValidationRules(?int $id = null): array
+    {
+        $rules = [
+            'first_name' => 'required|string|min:3|max:60',
+            'last_name' => 'required|string|min:3|max:60',
+            'email' => "sometimes|email|unique:users,email"
+                . ($id ? ",{$id}" : ''),
+            'phone_number' => "sometimes|regex:/\+?\d{7,16}/i|unique:users,phone_number"
+                . ($id ? ",{$id}" : ''),
+            'birthday' => 'sometimes|nullable|date_format:d-m-Y',
+            'subscribed_to_announcement' => 'sometimes|boolean',
+            'address_country' => 'required|string|min:2|max:3',
+            'address_line1' => 'required|string|max:150',
+            'address_line2' => 'sometimes|nullable|string|max:100',
+            'address_city' => 'sometimes|string|max:50',
+            'address_zip' => 'required|string|max:10',
+        ];
+
+        return $rules;
     }
 }

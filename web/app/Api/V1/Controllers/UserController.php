@@ -253,19 +253,29 @@ class UserController extends Controller
      *          @OA\JsonContent(
      *              type="object",
      *              @OA\Property(
+     *                  property="first_name",
+     *                  type="string",
+     *                  description="First name",
+     *              ),
+     *              @OA\Property(
+     *                  property="last_name",
+     *                  type="string",
+     *                  description="Last name",
+     *              ),
+     *              @OA\Property(
      *                  property="email",
      *                  type="string",
-     *                  description="email of the user",
+     *                  description="Email address",
      *              ),
      *              @OA\Property(
      *                  property="phone_number",
      *                  type="string",
-     *                  description="phone number of the user",
+     *                  description="Phone number",
      *              ),
      *              @OA\Property(
      *                  property="birthday",
      *                  type="string",
-     *                  description="Users date of birth in format DD-MM-YYYY",
+     *                  description="Date of birth in format DD-MM-YYYY",
      *              ),
      *              @OA\Property(
      *                  property="subscribed_to_announcement",
@@ -275,7 +285,7 @@ class UserController extends Controller
      *              @OA\Property(
      *                  property="address_country",
      *                  type="string",
-     *                  description="Three letter country code",
+     *                  description="Country code",
      *              ),
      *              @OA\Property(
      *                  property="address_line1",
@@ -317,17 +327,7 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validatedData = $this->validate($request, [
-            'phone_number' => "sometimes|regex:/\+?\d{7,16}/i|unique:users,phone_number",
-            'email' => "sometimes|email|unique:users,email",
-            'birthday' => 'sometimes|nullable|date_format:d-m-Y',
-            'subscribed_to_announcement' => 'sometimes|boolean',
-            'address_country' => 'sometimes|nullable|string|min:2|max:3',
-            'address_line1' => 'sometimes|nullable|string|max:150',
-            'address_line2' => 'sometimes|nullable|string|max:100',
-            'address_city' => 'sometimes|nullable|string|max:50',
-            'address_zip' => 'sometimes|nullable|string|max:10',
-        ]);
+        $validatedData = $this->validate($request, User::personalValidationRules((int) $id));
 
         $user = User::findOrFail($id);
 
