@@ -11,6 +11,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 use Psr\Http\Message\RequestInterface;
 
 class IdentityVerification
@@ -73,7 +74,7 @@ class IdentityVerification
         $body = [
             'json' => [
                 'verification' => [
-                    //'callback' => 'https://localhost:18105',
+                    'callback' => url('/user-profile/identify-webhook'),
                     'person' => [
                         'firstName' => $user->first_name,
                         'lastName' => $user->last_name,

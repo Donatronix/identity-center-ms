@@ -18,6 +18,8 @@ class CreateUsersTable extends Migration
             $table->uuid('id')->primary();
             $table->string('first_name', 60)->nullable();
             $table->string('last_name', 60)->nullable();
+            $table->enum('gender', [null, 'm', 'f'])->nullable();
+            $table->string('id_number')->nullable(); // National identification number
             $table->string('username', 25)->nullable()->unique();
             $table->unsignedBigInteger('phone_number')->unique();
             $table->string('email', 150)->nullable()->unique();
@@ -35,6 +37,15 @@ class CreateUsersTable extends Migration
             $table->string('address_country', 3)->nullable();
 
             $table->string('verification_code')->nullable();
+
+            
+            /**
+             * User document infp
+             */
+            $table->string('document_number')->nullable();  // Document number
+            $table->string('document_country', 3)->nullable(); // ISO-2- String Country that issued the document
+            $table->tinyInteger('document_type')->default(0);  // Document type
+            $table->text('document_file')->nullable();  // Document file
 
             $table->boolean('subscribed_to_announcement')->default(false);
             $table->string('verify_token')->nullable();
