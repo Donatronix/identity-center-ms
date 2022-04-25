@@ -26,6 +26,17 @@ class CreateUsersTable extends Migration
             $table->tinyInteger('status')->default(User::STATUS_INACTIVE);
             $table->timestamp('phone_number_verified_at')->nullable();
             $table->timestamp('email_verified_at')->nullable();
+
+            // User address information
+            $table->string('address_zip', 10)->nullable();
+            $table->string('address_city', 50)->nullable();
+            $table->string('address_line2', 100)->nullable();
+            $table->string('address_line1', 150)->nullable();
+            $table->string('address_country', 3)->nullable();
+
+            $table->string('verification_code')->nullable();
+
+            $table->boolean('subscribed_to_announcement')->default(false);
             $table->string('verify_token')->nullable();
             $table->rememberToken();
             $table->timestamps();
