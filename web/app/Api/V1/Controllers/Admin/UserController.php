@@ -3,37 +3,194 @@
 namespace App\Api\V1\Controllers\Admin;
 
 use App\Api\V1\Controllers\Controller;
-use App\Api\V1\Resources\UserResource;
+use App\Listeners\NewUserRegisteredListener;
 use App\Models\User;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use PubSub;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Throwable;
 
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     *  Display a listing of the users
+     *
+     * @OA\Get(
+     *     path="/admin/users",
+     *     description="Get all users",
+     *     tags={"Users"},
+     *
+     *     security={{
+     *          "default" :{
+     *              "ManagerRead",
+     *              "User",
+     *              "ManagerWrite"
+     *          },
+     *     }},
+     *
+     *     x={
+     *          "auth-type": "Applecation & Application Use",
+     *          "throttling-tier": "Unlimited",
+     *          "wso2-appliocation-security": {
+     *              "security-types": {"oauth2"},
+     *              "optional": "false"
+     *           },
+     *     },
+     *
+     *     @OA\Response(
+     *         response="200",
+     *         description="Output data",
+     *
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 description="User parameter list",
+     *                 @OA\Property(
+     *                     property="id",
+     *                     type="string",
+     *                     description="User uuid",
+     *                     example="9443407b-7eb8-4f21-8a5c-9614b4ec1bf9",
+     *                 ),
+     *                 @OA\Property(
+     *                     property="first_name",
+     *                     type="string",
+     *                     description="first_name",
+     *                     example="Vasya",
+     *                 ),
+     *                 @OA\Property(
+     *                     property="last_name",
+     *                     type="string",
+     *                     description="last_name",
+     *                     example="Vasya",
+     *                 ),
+     *                 @OA\Property(
+     *                     property="username",
+     *                     type="string",
+     *                     description="Username",
+     *                     example="Vasya",
+     *                 ),
+     *                 @OA\Property(
+     *                     property="phone_number",
+     *                     type="string",
+     *                     description="User phone number",
+     *                     example="2348065302534",
+     *                 ),
+     *                 @OA\Property(
+     *                     property="birthday",
+     *                     type="string",
+     *                     description="User birthday",
+     *                     example="2348065302534",
+     *                 ),
+     *                 @OA\Property(
+     *                     property="status",
+     *                     type="string",
+     *                     description="User status",
+     *                     example="1",
+     *                 ),
+     *             ),
+     *         ),
+     *     ),
+     *
+     *     @OA\Response(
+     *          response="401",
+     *          description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid request"
+     *     ),
+     *
+     *     @OA\Response(
+     *          response="404",
+     *          description="Not found",
+     *          @OA\JsonContent(
+     *              type="object",
+     *              @OA\Property(
+     *                  property="id",
+     *                  type="string",
+     *                  description="Uuid user not found"
+     *              ),
+     *              @OA\Property(
+     *                  property="username",
+     *                  type="string",
+     *                  description="Username not found"
+     *              ),
+     *              @OA\Property(
+     *                  property="platform",
+     *                  type="string",
+     *                  description="Platform not found"
+     *              ),
+     *              @OA\Property(
+     *                  property="total_users",
+     *                  type="string",
+     *                  description="Total user not found"
+     *              ),
+     *              @OA\Property(
+     *                  property="new_users_count_week",
+     *                  type="string",
+     *                  description="No new users this week"
+     *              ),
+     *              @OA\Property(
+     *                  property="new_users_count_month",
+     *                  type="string",
+     *                  description="No new users this month"
+     *              ),
+     *              @OA\Property(
+     *                  property="total_earning",
+     *                  type="string",
+     *                  description="No total earnings information found"
+     *              ),
+     *          ),
+     *     ),
+     *
+     *     @OA\Response(
+     *         response="500",
+     *         description="Unknown error"
+     *     ),
+     * )
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\Response
+     * @return mixed
      */
-    public function index(Request $request)
+    public function index(Request $request): mixed
     {
-        $rules = [
-            'id' => 'required|distinct|min:1'
-        ];
+        try {
+            $users = User::query()->paginate($request->get('limit', config('settings.pagination_limit')));
 
-        $this->validate($request, $rules);
+            return response()->jsonApi(
+                array_merge([
+                    'type' => 'success',
+                    'title' => 'Operation was success',
+                    'message' => 'The data was displayed successfully',
+                ], $users->toArray()),
+                200);
 
-        $id = explode(',', $request->id);
-
-        $users = User::select('id', 'display_name')->whereIn('id', $id)->get();
-
-        return response()->jsonApi($users, 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title' => "Not operation",
+                'message' => "Error showing all transactions",
+                'data' => null,
+            ], 404);
+        } catch (Throwable $e) {
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title' => "Update failed",
+                'message' => $e->getMessage(),
+                'data' => null,
+            ], 404);
+        }
     }
 
     /**
@@ -132,38 +289,52 @@ class UserController extends Controller
      *
      * @param Request $request
      *
-     * @return User|\Illuminate\Http\JsonResponse
+     * @return User|JsonResponse
+     * @throws ValidationException
      */
-    public function store(Request $request)
+    public function store(Request $request): User|JsonResponse
     {
-        // TODO fix date format (for birthday)
-        $rules = [
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|confirmed|min:6',
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'birthday' => 'required|date_format:Y-m-d',
-            'phone' => 'required|integer',
-            'accept_terms' => 'required|boolean'
-        ];
+        try {
+            DB::transaction(function () use ($request) { // TODO fix date format (for birthday)
+                $rules = [
+                    'email' => 'required|email|unique:users,email',
+                    'password' => 'required|confirmed|min:6',
+                    'first_name' => 'required|string',
+                    'last_name' => 'required|string',
+                    'username' => 'required|string',
+                    'birthday' => 'required|date_format:Y-m-d',
+                    'phone' => 'required|integer',
+                    'accept_terms' => 'required|boolean',
+                ];
 
-        $this->validate($request, $rules);
+                $validated = $this->validate($request, $rules);
 
-        $input = $request->all();
-        $user = User::create($input);
-        $user->password = Hash::make($input['password']);
-        //$user->status = User::STATUS_ACTIVE;
-        $user->verify_token = Str::random(32);
+                $input = array_merge($validated, [
+                    'phone_number' => $validated['phone'],
+                    'password' => Hash::make($validated['password']),
+                    'status' => User::STATUS_ACTIVE,
+                    'verify_token' => Str::random(32),
+                ]);
+                $user = User::query()->create($input);
 
-        PubSub::transaction(function () use ($user) {
-            $user->save();
-        })->publish('sendVerificationEmail', [
-            'email' => $user->email,
-            'display_name' => $user->display_name,
-            'verify_token' => $user->verify_token,
-        ], 'mail');
+                PubSub::transaction(function () {
 
-        return response()->jsonApi(null, 201);
+                })->publish('sendVerificationEmail', [
+                    'email' => $user->email,
+                    'display_name' => $user->display_name,
+                    'verify_token' => $user->verify_token,
+                ], 'mail');
+
+                PubSub::transaction(function () {
+                })->publish('NewUserRegisteredListener', [
+                    'user' => $user->toArray(),
+                ], 'new-user-registered');
+
+            });
+        } catch (Throwable $th) {
+            return response()->jsonApi(['message' => $th->getMessage()], 400);
+        }
+        return response()->jsonApi(["message" => "User registered successfully!"], 200);
     }
 
     /**
@@ -192,14 +363,14 @@ class UserController extends Controller
      *     )
      * )
      *
-     * @param         $id
+     * @param mixed   $id
      * @param Request $request
      *
      * @return mixed
      */
-    public function show(Request $request, $id)
+    public function show(Request $request, mixed $id): mixed
     {
-        $builder = User::where('id', $id);
+        $builder = User::query()->where('id', $id);
         //$builder = User::where('id', Auth::user()->id);
 
         $user = new User();
@@ -218,11 +389,8 @@ class UserController extends Controller
         //if (Auth::id() == $user->id) {
         //    return $user;
         //}
-        if ($user) {
-            UserResource::withoutWrapping();
+        return $user;
 
-            return new UserResource($user);
-        }
     }
 
     /**
@@ -251,64 +419,202 @@ class UserController extends Controller
      *     )
      * )
      *
-     * @param \Illuminate\Http\Request $request
-     * @param int                      $id
+     * @param Request $request
+     * @param mixed   $id
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
+     * @throws ValidationException
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, mixed $id): Response
     {
-        $this->validate($request, [
-            'phone' => "integer",
-            'email' => "email|unique:users,email",
-            'current_password' => 'required_with:password|min:6',
-            'password' => 'required_with:current_password|confirmed|min:6|max:190',
-        ]);
+        try {
+            DB::transaction(function () use ($request, $id) {
 
-        $user = User::findOrFail($id);
+                $validated = $this->validate($request, [
+                    'phone' => "sometimes|integer",
+                    'email' => "required|email|unique:users,email",
+                    'current_password' => 'required_with:password|min:6',
+                    'password' => 'required_with:current_password|confirmed|min:6|max:190',
+                ]);
 
-        if (!empty($request->email)) {
-            $user->status = User::STATUS_INACTIVE;
-            $user->verify_token = Str::random(32);
+                $user = User::query()->findOrFail($id);
 
-            PubSub::transaction(function () use ($user) {
-                $user->save();
-            })->publish('sendVerificationEmail', [
-                'email' => $user->email,
-                'display_name' => $user->display_name,
-                'verify_token' => $user->verify_token,
-            ], 'mail');
+                if (empty($user)) {
+                    throw new Exception("User does not exist!");
+                }
+
+                if (!empty($validated['email']) && ($user->email == $validated['email'])) {
+                    $user->status = User::STATUS_INACTIVE;
+                    $user->verify_token = Str::random(32);
+                    $user->save();
+                } else {
+                    throw new BadRequestHttpException('Invalid credentials');
+                }
+
+
+                if ($request->has('current_password')) {
+                    if (Hash::check($validated['current_password'], $user->password)) {
+                        $validated['password'] = Hash::make($validated['password']);
+                    } else {
+                        throw new BadRequestHttpException('Invalid credentials');
+                    }
+                }
+
+                if (!empty($validated)) {
+                    $user->update($validated);
+                    return response()->jsonApi(["message" => "Updated successfully"], 200);
+                }
+                throw new BadRequestHttpException();
+
+            });
+        } catch (Throwable $th) {
+            return response()->jsonApi(["message" => $th->getMessage()], 200);
         }
-
-        $update = $request->except(['password']);
-
-        if ($request->has('current_password')) {
-            if (Hash::check($request->current_password, $user->password)) {
-                $update['password'] = Hash::make($request->password);
-            } else {
-                throw new BadRequestHttpException('Invalid current_password');
-            }
-        }
-
-        if (!empty($update)) {
-            $user->fill($update);
-            $user->save();
-
-            return response()->jsonApi(["message" => "updated"], 200);
-        }
-
-        throw new BadRequestHttpException();
+        return response()->jsonApi(["message" => "Updated successfully"], 200);
     }
 
     /**
+     *  Delete user record
+     *
+     * @OA\Delete(
+     *     path="/admin/users/{id}",
+     *     description="Delete user",
+     *     tags={"Users"},
+     *
+     *     security={{
+     *          "default" :{
+     *              "ManagerRead",
+     *              "user",
+     *              "ManagerWrite"
+     *          },
+     *     }},
+     *
+     *     x={
+     *          "auth-type": "Applecation & Application Use",
+     *          "throttling-tier": "Unlimited",
+     *          "wso2-appliocation-security": {
+     *              "security-types": {"oauth2"},
+     *              "optional": "false"
+     *           },
+     *     },
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="user user id",
+     *         @OA\Schema(
+     *             type="string"
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response="200",
+     *         description="Output data",
+     *
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 description="Success or error message",
+     *             ),
+     *         ),
+     *     ),
+     *
+     *     @OA\Response(
+     *          response="401",
+     *          description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid request"
+     *     ),
+     *
+     *     @OA\Response(
+     *          response="404",
+     *          description="Not found",
+     *          @OA\JsonContent(
+     *              type="object",
+     *              @OA\Property(
+     *                  property="id",
+     *                  type="string",
+     *                  description="Uuid user not found"
+     *              ),
+     *              @OA\Property(
+     *                  property="username",
+     *                  type="string",
+     *                  description="Username not found"
+     *              ),
+     *              @OA\Property(
+     *                  property="platform",
+     *                  type="string",
+     *                  description="Platform not found"
+     *              ),
+     *              @OA\Property(
+     *                  property="total_users",
+     *                  type="string",
+     *                  description="Total user not found"
+     *              ),
+     *              @OA\Property(
+     *                  property="new_users_count_week",
+     *                  type="string",
+     *                  description="No new users this week"
+     *              ),
+     *              @OA\Property(
+     *                  property="new_users_count_month",
+     *                  type="string",
+     *                  description="No new users this month"
+     *              ),
+     *              @OA\Property(
+     *                  property="total_earning",
+     *                  type="string",
+     *                  description="No total earnings information found"
+     *              ),
+     *          ),
+     *     ),
+     *
+     *     @OA\Response(
+     *         response="500",
+     *         description="Unknown error"
+     *     ),
+     * )
+     *
+     *
      * Remove the specified resource from storage.
      *
-     * @param int $id
+     * @param mixed $id
      *
-     * @return \Illuminate\Http\Response
+     * @return mixed
      */
-    public function destroy($id)
+    public function destroy(mixed $id): mixed
     {
-        //
+        try {
+            $users = null;
+            DB::transaction(function () use ($id, &$users) {
+                $user = User::query()->findOrFail($id);
+                $user->delete();
+                $users = User::query()->paginate(config('settings.pagination_limit'));
+            });
+
+        } catch (ModelNotFoundException $e) {
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title' => "Delete failed",
+                'message' => "User does not exist",
+                'data' => null,
+            ], 404);
+        } catch (Throwable $th) {
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title' => "Delete failed",
+                'message' => $th->getMessage(),
+                'data' => null,
+            ], 404);
+        }
+        return response()->jsonApi([
+            'type' => 'success',
+            'title' => 'Operation was a success',
+            'message' => 'User was deleted successfully',
+            'data' => $users->toArray(),
+        ], 200);
     }
 }

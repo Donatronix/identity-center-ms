@@ -2,16 +2,16 @@
 
 namespace App\Api\V1\Controllers;
 
-use App\Api\V1\Resources\UserResource;
-use App\Models\Category;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use PubSub;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -120,33 +120,39 @@ class UserController extends Controller
      *     )
      * )
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
+     * @throws ValidationException
      */
     public function store(Request $request): JsonResponse
     {
         // Validate input data
         $this->validate($request, [
-            'phone' => 'required|integer',
+            'phone' => 'required',
         ]);
 
         // Try to create new user
         try {
-            $user = User::create($request->all());
+            $user = null;
+            PubSub::transaction(function () use ($request, &$user) {
+                $user = User::create(array_merge($request->all(), ['phone_number' => $request->get('phone')]));
+            })->publish('NewUserRegistered', [
+                'user' => $user?->toArray(),
+            ], 'new_user');
 
             // Return response
             return response()->json([
                 'type' => 'success',
                 'title' => "Create new user. Step 1",
                 'message' => 'User was successful created',
-                'data' => $user
+                'data' => $user,
             ], 201);
         } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
                 'title' => "Create new user. Step 1",
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 400);
         }
     }
@@ -182,7 +188,7 @@ class UserController extends Controller
      *
      * @return mixed
      */
-    public function show(Request $request)
+    public function show(Request $request): mixed
     {
         $builder = User::where('id', Auth::user()->id);
 
@@ -201,7 +207,7 @@ class UserController extends Controller
             return response()->json([
                 'type' => 'danger',
                 'title' => "Not Found",
-                'message' => " User not found"
+                'message' => " User not found",
             ], 404);
         }
 
@@ -213,7 +219,7 @@ class UserController extends Controller
 
         return response()->jsonApi([
             'type' => 'success',
-            'data' => $user
+            'data' => $user,
         ]);
     }
 
@@ -243,12 +249,13 @@ class UserController extends Controller
      *     )
      * )
      *
-     * @param \Illuminate\Http\Request $request
-     * @param int                      $id
+     * @param Request $request
+     * @param int     $id
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
+     * @throws ValidationException
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id): Response
     {
         $this->validate($request, [
             'phone' => "integer",
@@ -332,15 +339,16 @@ class UserController extends Controller
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
+     * @throws ValidationException
      */
-    public function verify_email(Request $request)
+    public function verify_email(Request $request): JsonResponse
     {
         $this->validate($request, [
-            'email' => "required|email"
+            'email' => "required|email",
         ]);
 
-        $user = User::where('email', $request->email)->firstOrFail();
+        $user = User::query()->where('email', $request->email)->firstOrFail();
 
         PubSub::publish('sendVerificationEmail', [
             'email' => $user->email,
