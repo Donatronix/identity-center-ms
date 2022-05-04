@@ -5,6 +5,7 @@ namespace App\Api\V1\Controllers\Admin;
 use App\Api\V1\Controllers\Controller;
 use App\Listeners\NewUserRegisteredListener;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -13,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use PubSub;
@@ -615,6 +617,185 @@ class UserController extends Controller
             'title' => 'Operation was a success',
             'message' => 'User was deleted successfully',
             'data' => $users->toArray(),
+        ], 200);
+    }
+
+    /**
+     * Verify User
+     *
+     * @OA\Post(
+     *     path="/admin/verify",
+     *     summary="Create new user",
+     *     description="Create new user",
+     *     tags={"Admin / Users"},
+     *
+     *     security={{
+     *         "passport": {
+     *             "ManagerRead",
+     *             "ManagerWrite"
+     *         }
+     *     }},
+     *
+     *     @OA\Parameter(
+     *          name="token",
+     *          required=true,
+     *          in="query",
+     *          @OA\Schema (
+     *              type="string"
+     *          )
+     *     ),
+     *     @OA\Response(
+     *          response=200,
+     *          description="Success"
+     *     ),
+     *     @OA\Response(
+     *          response=400,
+     *          description="Bad Request"
+     *     )
+     * )
+     *
+     * @param Request $request
+     *
+     * @return mixed
+     */
+    public function verify(Request $request): mixed
+    {
+        try {
+            DB::transaction(function () use ($request) {
+
+
+                $validator = Validator::make($request->all(), [
+                    'token' => ['required'],
+                ]);
+
+                if ($validator->fails()) {
+                    throw new Exception($validator->messages()->first());
+                }
+                $select = DB::table('password_resets')
+                    ->where('token', $request->token);
+
+                if ($select->get()->isEmpty()) {
+                    throw new Exception('Invalid verification token');
+                }
+
+
+                $user = User::query()->where('email', $select->first()->email)->first();
+                $user->email_verified_at = Carbon::now()->getTimestamp();
+                $user->save();
+
+                DB::table('password_resets')
+                    ->where('token', $request->token)
+                    ->delete();
+            });
+        } catch (Throwable $th) {
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title' => "Verification failed",
+                'message' => $th->getMessage(),
+                'data' => null,
+            ], 404);
+        }
+
+        return response()->jsonApi([
+            'type' => 'success',
+            'title' => "Verification successful",
+            'message' => "Email is verified",
+            'data' => null,
+        ], 200);
+    }
+
+    /**
+     * Send verification email
+     *
+     * @OA\Post(
+     *     path="/admin/verify/send",
+     *     summary="Create new user",
+     *     description="Create new user",
+     *     tags={"Admin / Users"},
+     *
+     *     security={{
+     *         "passport": {
+     *             "ManagerRead",
+     *             "ManagerWrite"
+     *         }
+     *     }},
+     *
+     *     @OA\Parameter(
+     *          name="email",
+     *          required=true,
+     *          in="query",
+     *          @OA\Schema (
+     *              type="string"
+     *          )
+     *     ),
+     *     @OA\Response(
+     *          response=200,
+     *          description="Success"
+     *     ),
+     *     @OA\Response(
+     *          response=400,
+     *          description="Bad Request"
+     *     )
+     * )
+     *
+     * @param Request $request
+     *
+     * @return mixed
+     */
+    public function verifyEmail(Request $request): mixed
+    {
+        try {
+            DB::transaction(function () use ($request) {
+                $validator = Validator::make($request->all(), [
+                    'email' => ['required', 'string', 'email', 'max:255'],
+                ]);
+
+                if ($validator->fails()) {
+                    throw new Exception($validator->messages()->first());
+                }
+
+                $validated = $validator->validated();
+
+                $user = User::query()->where('email', $validated['email'])->first();
+
+                $verify = DB::table('password_resets')->where([
+                    'email' => $validated['email'],
+                ]);
+
+                if ($verify->exists()) {
+                    $verify->delete();
+                }
+
+                $token = Str::random(60);
+                $password_reset = DB::table('password_resets')->insert([
+                    'email' => $validated['email'],
+                    'token' => $token,
+                    'created_at' => Carbon::now(),
+                ]);
+
+                if ($password_reset) {
+                    PubSub::transaction(function () {
+
+                    })->publish('sendVerificationEmail', [
+                        'email' => $user->email,
+                        'display_name' => $user->display_name,
+                        'verify_token' => $user->verify_token,
+                    ], 'mail');
+                }
+            });
+        } catch (Throwable $th) {
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title' => "Verification failed",
+                'message' => $th->getMessage(),
+                'data' => null,
+            ], 404);
+        }
+        return response()->jsonApi([
+            'type' => 'success',
+            'title' => "Verification email",
+            'message' => "A verification mail has been sent",
+            'data' => null,
         ], 200);
     }
 }
