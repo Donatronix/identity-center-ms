@@ -93,7 +93,65 @@ use Sumra\SDK\Traits\UuidTrait;
  *     ),
  * )
  */
-class User extends Model implements AuthenticatableContract, AuthorizableContract
+/**
+ * User Identity Schema
+ *
+ * @package App\Models
+ *
+ * @OA\Schema(
+ *     schema="UserIdentify",
+ *
+ *     @OA\Property(
+ *         property="id_number",
+ *         type="string",
+ *         description="National identification number",
+ *     ),
+ *     @OA\Property(
+ *         property="gender",
+ *         type="string",
+ *         description="Gender of user",
+ *         enum={"", "m", "f"},
+ *         example="m"
+ *     ),
+ *     @OA\Property(
+ *         property="birthday",
+ *         type="date",
+ *         description="Birthday date of user",
+ *         example="1974-10-25"
+ *     ),
+ *     @OA\Property(
+ *         property="document",
+ *         type="object",
+ *         description="Document of users",
+ *
+ *         @OA\Property(
+ *             property="number",
+ *             type="integer",
+ *             description="Document number",
+ *             example="FG1452635"
+ *         ),
+ *         @OA\Property(
+ *             property="country",
+ *             type="string",
+ *             description="Document country",
+ *             example=""
+ *         ),
+ *         @OA\Property(
+ *             property="type",
+ *             type="string",
+ *             description="Document type (1 = PASSPORT, 2 = ID_CARD, 3 = DRIVERS_LICENSE, 4 = RESIDENCE_PERMIT)",
+ *             example="1"
+ *         ),
+ *         @OA\Property(
+ *             property="file",
+ *             type="string",
+ *             description="Document file",
+ *             example=""
+ *         )
+ *     )
+ * )
+ */
+ class User extends Model implements AuthenticatableContract, AuthorizableContract
 {
     use HasApiTokens;
     use Authenticatable;
@@ -135,6 +193,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     protected $fillable = [
         'first_name',
         'last_name',
+        'gender',
         'username',
         'phone_number',
         'email',
@@ -148,6 +207,11 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'address_line2',
         'address_city',
         'address_zip',
+
+        'document_number',
+        'document_country',
+        'document_type',
+        'document_file',
     ];
 
     /**
@@ -237,5 +301,25 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         ];
 
         return $rules;
+    }
+
+    
+    /**
+     * Validation rules for identity verification
+     * 
+     * @return string[]
+     */
+    public static function identifyValidationRules(): array
+    {
+        return [
+            'gender' => 'required|string',
+            'birthday' => 'required|string',
+            'id_number' => 'required|string|max:100',
+            'document' => 'required|array:number,country,type,file',
+            'document.number' => 'required|string',
+            'document.country' => 'required|string|max:3',
+            'document.type' => 'required|integer|min:1|max:4',
+            'document.file' => 'required|string'
+        ];
     }
 }
