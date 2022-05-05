@@ -228,7 +228,7 @@ class UserController extends Controller
      *     summary="update user",
      *     description="update user",
      *     tags={"User Profile"},
-     * 
+     *
      *     @OA\Parameter(
      *          description="ID of User",
      *          in="path",
@@ -247,7 +247,7 @@ class UserController extends Controller
      *             "ManagerRead"
      *         }
      *     }},
-     * 
+     *
      *     @OA\RequestBody(
      *          required=true,
      *          @OA\JsonContent(
@@ -307,7 +307,7 @@ class UserController extends Controller
      *                  type="string",
      *                  description="Zip code",
      *              ),
-     *          
+     *
      *          ),
      *     ),
      *
@@ -343,7 +343,6 @@ class UserController extends Controller
                 'verify_token' => $user->verify_token,
             ], 'mail');
         }
-
 
         if (!empty($validatedData)) {
             $user->fill($validatedData);
@@ -429,7 +428,7 @@ class UserController extends Controller
      *             "ManagerRead"
      *         }
      *     }},
-     * 
+     *
      *     @OA\RequestBody(
      *          required=true,
      *          @OA\JsonContent(
@@ -512,13 +511,12 @@ class UserController extends Controller
             if (!$response->ok()) {
                 throw new \Exception();
             }
-            
+
             return response()->jsonApi(["message" => "A 6-digit code has been sent to your phone number"], 200);
         } catch (\Exception $e) {
             return response()->jsonApi(["message" => "An error occurred! Please, try again."], 500);
-        }   
+        }
     }
-
 
     /**
      * Validate the verification code and update phone number
@@ -535,7 +533,7 @@ class UserController extends Controller
      *             "ManagerRead"
      *         }
      *     }},
-     * 
+     *
      *     @OA\RequestBody(
      *          required=true,
      *          @OA\JsonContent(
@@ -587,7 +585,7 @@ class UserController extends Controller
      *                     example={"The phone number is already taken.","The phone number is invalid."},
      *                  )
      *               ),
-     * 
+     *
      *               @OA\Property(
      *                  property="verification_code",
      *                  type="array",
@@ -644,7 +642,6 @@ class UserController extends Controller
         }
     }
 
- 
     /**
      * Validate the new email that the current user whats to use
      *
@@ -660,7 +657,7 @@ class UserController extends Controller
      *             "ManagerRead"
      *         }
      *     }},
-     * 
+     *
      *     @OA\RequestBody(
      *          required=true,
      *          @OA\JsonContent(
@@ -689,7 +686,7 @@ class UserController extends Controller
      *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again."),
      *        )
      *     ),
-     * 
+     *
      *    @OA\Response(
      *         response=422,
      *         description="Validation error",
@@ -744,14 +741,13 @@ class UserController extends Controller
             if (!$response->ok()) {
                 throw new \Exception();
             }
-            
+
             return response()->jsonApi(["message" => "A 6-digit code has been sent to your email"], 200);
         } catch (\Exception $e) {
             return response()->jsonApi(["message" => "An error occurred! Please, try again."], 500);
-        }   
+        }
     }
 
-             
     /**
      * Validate the verification code and update the current user's email
      *
@@ -767,7 +763,7 @@ class UserController extends Controller
      *             "ManagerRead"
      *         }
      *     }},
-     * 
+     *
      *     @OA\RequestBody(
      *          required=true,
      *          @OA\JsonContent(
@@ -819,7 +815,7 @@ class UserController extends Controller
      *                     example={"The email is already taken.","The email is invalid."},
      *                  )
      *               ),
-     * 
+     *
      *               @OA\Property(
      *                  property="verification_code",
      *                  type="array",
