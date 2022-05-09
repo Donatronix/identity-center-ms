@@ -35,8 +35,13 @@ $router->group([
             $router->post('/', 'UserController@store');
             $router->get('/{id}', 'UserController@show');
             $router->patch('/{id}', 'UserController@update');
+            $router->post('/validate-edit-phone', 'UserController@validateEditPhoneNumber');
+            $router->post('/update-phone', 'UserController@updateMyPhoneNumber');
+            $router->post('/identify', 'UserController@identifyStart');
+            $router->post('/identify-webhook', 'UserController@identifyWebHook');
         });
     });
+
 
     /**
      * ADMIN PANEL
