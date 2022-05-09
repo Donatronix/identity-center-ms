@@ -5,16 +5,15 @@
  */
 $router->group([
     'prefix' => env('APP_API_VERSION', ''),
-    'namespace' => '\App\Api\V1\Controllers',
+    'namespace' => '\App\Api\V1\Controllers'
 ], function ($router) {
     /**
      * PUBLIC ACCESS
      */
-
     $router->group([
         'prefix' => 'auth',
         'as' => 'auth',
-        "namespace" => "OneStepId",
+        "namespace" => "OneStepId"
     ], function ($router) {
         $router->post('/send-phone/{botID}', "UserRequestsRegistrationByPhoneNumber");
         $router->post('/send-sms/{botID}', "SendTokenSmsToUser");
@@ -22,16 +21,15 @@ $router->group([
         $router->post('/send-code', "VerifyPhoneNumber");
     });
 
-
     /**
      * PRIVATE ACCESS
      */
     $router->group([
-        'middleware' => 'checkUser',
+        'middleware' => 'checkUser'
     ], function ($router) {
         $router->group([
             'prefix' => 'users',
-            'as' => 'users',
+            'as' => 'users'
         ], function ($router) {
             $router->get('/', 'UserController@index');
             $router->post('/', 'UserController@store');
@@ -48,12 +46,12 @@ $router->group([
         'namespace' => 'Admin',
         'middleware' => [
             'checkUser',
-            'checkAdmin',
-        ],
+            'checkAdmin'
+        ]
     ], function ($router) {
         $router->group([
             'prefix' => 'users',
-            'as' => 'admin.users',
+            'as' => 'admin.users'
         ], function () use ($router) {
             $router->get('/', 'UserController@index');
             $router->post('/', 'UserController@store');

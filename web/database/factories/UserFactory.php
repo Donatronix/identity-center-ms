@@ -34,7 +34,7 @@ class UserFactory extends Factory
 //            'birthday' => '',
             'password' => Hash::make($this->faker->password(8)),
 //            'remember_token' => Str::random(10),
-            'status' => Arr::random(User::$statuses),
+            'status' => Arr::random(User::$statuses)
         ];
     }
 
