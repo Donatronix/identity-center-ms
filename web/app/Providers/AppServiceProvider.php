@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Carbon\Carbon;
+use Laravel\Passport\Client;
 use Laravel\Passport\Passport;
 use Illuminate\Support\ServiceProvider;
 use Dusterio\LumenPassport\LumenPassport;

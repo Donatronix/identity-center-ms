@@ -874,7 +874,7 @@ class UserController extends Controller
         }
     }
 
-    
+
     /**
      * Initialize identity verification session
      *
@@ -891,7 +891,7 @@ class UserController extends Controller
      *             "ManagerRead"
      *         }
      *     }},
-     * 
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -973,7 +973,7 @@ class UserController extends Controller
         }
     }
 
-    
+
     /**
      * Webhook to handle Veriff response
      *
