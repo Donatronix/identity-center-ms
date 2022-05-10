@@ -238,7 +238,6 @@ class UserSubmitsUsername extends Controller
             $redis->del($userLoginAttemptsKey);
 
             return response()->json([
-
                 "message" => "Login successful",
                 "type" => "success",
                 "token" => $token,

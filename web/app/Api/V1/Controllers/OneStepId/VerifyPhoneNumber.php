@@ -136,7 +136,7 @@ class VerifyPhoneNumber extends Controller
                 ], 403);
             }
 
-            $user->phone_number_verified_at = Carbon::now();
+            $user->phone_verified_at = Carbon::now();
             $user->save();
         } catch (Exception $th) {
             return response()->json([
