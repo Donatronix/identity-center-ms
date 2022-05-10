@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
@@ -138,7 +139,12 @@ class UserController extends Controller
 
         // Try to create new user
         try {
-            $user = User::create($request->all());
+            $user = null;
+            PubSub::transaction(function () use ($request, &$user) {
+                $user = User::create(array_merge($request->all(), ['phone' => $request->get('phone')]));
+            })->publish('NewUserRegistered', [
+                'user' => $user?->toArray(),
+            ], 'new_user');
 
             // Return response
             return response()->json([
@@ -270,7 +276,7 @@ class UserController extends Controller
      *                  description="Email address",
      *              ),
      *              @OA\Property(
-     *                  property="phone_number",
+     *                  property="phone",
      *                  type="string",
      *                  description="Phone number",
      *              ),
@@ -323,12 +329,22 @@ class UserController extends Controller
      *     )
      * )
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+
+     * @param Request $request
+     * @param int     $id
+     *
+     * @return Response
+     * @throws ValidationException
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id): Response
     {
+//        $this->validate($request, [
+//            'phone' => "integer",
+//            'email' => "email|unique:users,email",
+//            'current_password' => 'required_with:password|min:6',
+//            'password' => 'required_with:current_password|confirmed|min:6|max:190',
+//        ]);
+
         $validatedData = $this->validate($request, User::personalValidationRules((int) $id));
 
         $user = User::findOrFail($id);
@@ -345,6 +361,20 @@ class UserController extends Controller
                 'verify_token' => $user->verify_token,
             ], 'mail');
         }
+
+//        $update = $request->except(['password']);
+//
+//        if ($request->has('current_password')) {
+//            if (Hash::check($request->current_password, $user->password)) {
+//                $update['password'] = Hash::make($request->password);
+//            } else {
+//                throw new BadRequestHttpException('Invalid current_password');
+//            }
+//        }
+//
+//        if (!empty($update)) {
+//            $user->fill($update);
+//            $user->save();
 
         if (!empty($validatedData)) {
             $user->fill($validatedData);
@@ -436,7 +466,7 @@ class UserController extends Controller
      *          @OA\JsonContent(
      *              type="object",
      *              @OA\Property(
-     *                  property="phone_number",
+     *                  property="phone",
      *                  type="string",
      *                  description="phone number of the user",
      *              ),
@@ -452,7 +482,7 @@ class UserController extends Controller
      *               property="errors",
      *               type="object",
      *               @OA\Property(
-     *                  property="phone_number",
+     *                  property="phone",
      *                  type="array",
      *                  collectionFormat="multi",
      *                  @OA\Items(
@@ -488,10 +518,10 @@ class UserController extends Controller
     public function validateEditPhoneNumber(Request $request)
     {
         $this->validate($request, [
-            'phone_number' => [
+            'phone' => [
                 'required',
                 'regex:/\+?\d{7,16}/i',
-                "unique:users,phone_number",
+                "unique:users,phone",
             ],
         ]);
 
@@ -506,7 +536,7 @@ class UserController extends Controller
 
             // Should send SMS to the user's new phone number, contaiing the verification code
             $response = Http::post('[COMMUNICATIONS_MS_URL]/messages/sms/send-message', [
-                'to' => $request->phone_number,
+                'to' => $request->phone,
                 'message' => 'Your verification code is: ' . $verificationCode,
             ]);
 
@@ -541,7 +571,7 @@ class UserController extends Controller
      *          @OA\JsonContent(
      *              type="object",
      *              @OA\Property(
-     *                  property="phone_number",
+     *                  property="phone",
      *                  type="string",
      *                  description="phone number of the user",
      *              ),
@@ -579,7 +609,7 @@ class UserController extends Controller
      *               property="errors",
      *               type="object",
      *               @OA\Property(
-     *                  property="phone_number",
+     *                  property="phone",
      *                  type="array",
      *                  collectionFormat="multi",
      *                  @OA\Items(
@@ -609,10 +639,10 @@ class UserController extends Controller
     public function updateMyPhoneNumber(Request $request)
     {
         $rules = [
-            'phone_number' => [
+            'phone' => [
                 'required',
                 'regex:/\+?\d{7,16}/i',
-                "unique:users,phone_number",
+                "unique:users,phone",
             ],
             'verification_code' => [
                 'required',
@@ -633,7 +663,7 @@ class UserController extends Controller
 
         try {
             $user = User::first(Auth::user()->id);
-            $user->phone_number = $request->phone_number;
+            $user->phone = $request->phone;
             $user->verification_code = null;
             if (!$user->save()) {
                 throw new \Exception();
@@ -809,7 +839,7 @@ class UserController extends Controller
      *               property="errors",
      *               type="object",
      *               @OA\Property(
-     *                  property="phone_number",
+     *                  property="phone",
      *                  type="array",
      *                  collectionFormat="multi",
      *                  @OA\Items(
@@ -839,7 +869,7 @@ class UserController extends Controller
     public function updateMyEmail(Request $request)
     {
         $rules = [
-            'phone_number' => [
+            'phone' => [
                 'required',
                 'email',
                 "unique:users,email",
@@ -874,7 +904,6 @@ class UserController extends Controller
         }
     }
 
-    
     /**
      * Initialize identity verification session
      *
@@ -891,7 +920,7 @@ class UserController extends Controller
      *             "ManagerRead"
      *         }
      *     }},
-     * 
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -973,7 +1002,6 @@ class UserController extends Controller
         }
     }
 
-    
     /**
      * Webhook to handle Veriff response
      *
@@ -1083,5 +1111,4 @@ class UserController extends Controller
             ], 500);
         }
     }
-
 }

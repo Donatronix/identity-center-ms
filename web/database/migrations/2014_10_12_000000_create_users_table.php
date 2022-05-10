@@ -21,12 +21,12 @@ class CreateUsersTable extends Migration
             $table->enum('gender', [null, 'm', 'f'])->nullable();
             $table->string('id_number')->nullable(); // National identification number
             $table->string('username', 25)->nullable()->unique();
-            $table->unsignedBigInteger('phone_number')->unique();
+            $table->unsignedBigInteger('phone')->unique();
             $table->string('email', 150)->nullable()->unique();
             $table->date('birthday')->nullable();
             $table->string('password', 60)->nullable();
             $table->tinyInteger('status')->default(User::STATUS_INACTIVE);
-            $table->timestamp('phone_number_verified_at')->nullable();
+            $table->timestamp('phone_verified_at')->nullable();
             $table->timestamp('email_verified_at')->nullable();
 
             // User address information
@@ -38,7 +38,7 @@ class CreateUsersTable extends Migration
 
             $table->string('verification_code')->nullable();
 
-            
+
             /**
              * User document infp
              */

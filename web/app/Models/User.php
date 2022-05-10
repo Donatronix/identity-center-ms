@@ -20,7 +20,7 @@ use Sumra\SDK\Traits\UuidTrait;
  *
  * @OA\Schema(
  *     schema="User",
- * 
+ *
  *     @OA\Property(
  *         property="first_name",
  *         type="string",
@@ -44,7 +44,7 @@ use Sumra\SDK\Traits\UuidTrait;
  *         description="User's email",
  *     ),
  *     @OA\Property(
- *         property="phone_number",
+ *         property="phone",
  *         type="string",
  *         description="Phone number of user",
  *     ),
@@ -195,7 +195,7 @@ use Sumra\SDK\Traits\UuidTrait;
         'last_name',
         'gender',
         'username',
-        'phone_number',
+        'phone',
         'email',
         'birthday',
         'password',
@@ -238,7 +238,7 @@ use Sumra\SDK\Traits\UuidTrait;
         parent::boot();
 
         static::creating(function ($model) {
-            $model->phone_number = Str::after($model->phone_number, '+');
+            $model->phone = Str::after($model->phone, '+');
         });
     }
 
@@ -289,7 +289,7 @@ use Sumra\SDK\Traits\UuidTrait;
             'last_name' => 'required|string|min:3|max:60',
             'email' => "sometimes|email|unique:users,email"
                 . ($id ? ",{$id}" : ''),
-            'phone_number' => "sometimes|regex:/\+?\d{7,16}/i|unique:users,phone_number"
+            'phone' => "sometimes|regex:/\+?\d{7,16}/i|unique:users,phone"
                 . ($id ? ",{$id}" : ''),
             'birthday' => 'sometimes|nullable|date_format:d-m-Y',
             'subscribed_to_announcement' => 'sometimes|boolean',
@@ -303,10 +303,10 @@ use Sumra\SDK\Traits\UuidTrait;
         return $rules;
     }
 
-    
+
     /**
      * Validation rules for identity verification
-     * 
+     *
      * @return string[]
      */
     public static function identifyValidationRules(): array
