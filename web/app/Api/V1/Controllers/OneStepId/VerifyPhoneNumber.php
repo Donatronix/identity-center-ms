@@ -8,7 +8,10 @@ use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use PubSub;
 
 class VerifyPhoneNumber extends Controller
 {
@@ -103,11 +106,12 @@ class VerifyPhoneNumber extends Controller
      *     )
      * )
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
+     * @throws ValidationException
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): JsonResponse
     {
         // Validate input data
         $this->validate($request, [
@@ -120,7 +124,7 @@ class VerifyPhoneNumber extends Controller
             return response()->json([
                 "type" => "danger",
                 "message" => "Invalid Token",
-                "validate_auth_code" => false
+                "validate_auth_code" => false,
             ], 400);
         }
 
@@ -132,7 +136,7 @@ class VerifyPhoneNumber extends Controller
                     "type" => "danger",
                     "user_status" => $user->status,
                     "sid" => $twoFa->sid,
-                    "message" => "User has been banned from this platform."
+                    "message" => "User has been banned from this platform.",
                 ], 403);
             }
 
@@ -146,12 +150,17 @@ class VerifyPhoneNumber extends Controller
             ], 400);
         }
 
+        PubSub::transaction(function () {
+        })->publish('NewUserRegisteredListener', [
+            'user' => $user->toArray(),
+        ], 'new-user-registered');
+
         return response()->json([
             "message" => "Phone Number Verification successful",
             "type" => "success",
             "sid" => $twoFa->sid,
             "user_status" => $user->status,
-            "validate_auth_code" => true
+            "validate_auth_code" => true,
         ]);
     }
 }
