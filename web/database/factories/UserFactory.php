@@ -28,7 +28,7 @@ class UserFactory extends Factory
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
             'username' => $this->faker->userName(),
-            'phone_number' => Str::after($this->faker->e164PhoneNumber(), '+'),
+            'phone' => Str::after($this->faker->e164PhoneNumber(), '+'),
             'email' => $this->faker->unique()->safeEmail(),
 //            'email_verified_at' => now(),
 //            'birthday' => '',
@@ -41,7 +41,7 @@ class UserFactory extends Factory
     /**
      * Indicate that the model's email address should be unverified.
      *
-     * @return Factory
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
      */
     public function unverified(): Factory
     {

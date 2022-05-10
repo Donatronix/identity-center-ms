@@ -3,6 +3,7 @@
 namespace App\Api\V1\Controllers\Admin;
 
 use App\Api\V1\Controllers\Controller;
+use App\Api\V1\Resources\UserResource;
 use App\Listeners\NewUserRegisteredListener;
 use App\Models\User;
 use Carbon\Carbon;
@@ -82,7 +83,7 @@ class UserController extends Controller
      *                     example="Vasya",
      *                 ),
      *                 @OA\Property(
-     *                     property="phone_number",
+     *                     property="phone",
      *                     type="string",
      *                     description="User phone number",
      *                     example="2348065302534",
@@ -312,7 +313,7 @@ class UserController extends Controller
                 $validated = $this->validate($request, $rules);
 
                 $input = array_merge($validated, [
-                    'phone_number' => $validated['phone'],
+                    'phone' => $validated['phone'],
                     'password' => Hash::make($validated['password']),
                     'status' => User::STATUS_ACTIVE,
                     'verify_token' => Str::random(32),
@@ -393,6 +394,11 @@ class UserController extends Controller
         //}
         return $user;
 
+//        if ($user) {
+//            UserResource::withoutWrapping();
+//
+//            return new UserResource($user);
+//        }
     }
 
     /**
@@ -431,7 +437,6 @@ class UserController extends Controller
     {
         try {
             DB::transaction(function () use ($request, $id) {
-
                 $validated = $this->validate($request, [
                     'phone' => "sometimes|integer",
                     'email' => "required|email|unique:users,email",
@@ -449,6 +454,15 @@ class UserController extends Controller
                     $user->status = User::STATUS_INACTIVE;
                     $user->verify_token = Str::random(32);
                     $user->save();
+
+                    PubSub::transaction(function () use ($user) {
+                        $user->save();
+                    })->publish('sendVerificationEmail', [
+                        'email' => $user->email,
+                        'display_name' => $user->display_name,
+                        'verify_token' => $user->verify_token,
+                    ], 'mail');
+
                 } else {
                     throw new BadRequestHttpException('Invalid credentials');
                 }
@@ -467,7 +481,6 @@ class UserController extends Controller
                     return response()->jsonApi(["message" => "Updated successfully"], 200);
                 }
                 throw new BadRequestHttpException();
-
             });
         } catch (Throwable $th) {
             return response()->jsonApi(["message" => $th->getMessage()], 200);

@@ -42,7 +42,6 @@ $router->group([
         });
     });
 
-
     /**
      * ADMIN PANEL
      */
@@ -64,7 +63,7 @@ $router->group([
             $router->patch('/{id}', 'UserController@approve');
             $router->delete('/{id}', 'UserController@destroy');
             $router->post('/verify', 'UserController@verify');
-            $router->post('/verify/send', 'UserController@verifyEmail');
+            $router->post('/verify/send', 'UserController@verify_email');
         });
     });
 });
