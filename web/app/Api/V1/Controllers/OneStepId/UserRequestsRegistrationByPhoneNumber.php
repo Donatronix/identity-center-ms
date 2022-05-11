@@ -8,8 +8,10 @@ use App\Models\TwoFactorAuth;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class UserRequestsRegistrationByPhoneNumber extends Controller
 {
@@ -121,19 +123,21 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
      *     )
      * )
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request                  $request
+     * @param                          $botID
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
+     * @throws ValidationException
      */
-    public function __invoke(Request $request, $botID)
+    public function __invoke(Request $request, $botID): JsonResponse
     {
         // Validate input data
         $this->validate($request, [
-            'phone_number' => 'required|integer',
+            'phone' => 'required|integer',
         ]);
 
         try {
-            $user = User::where("phone_number", $request->phone_number)->firstOrFail();
+            $user = User::query()->where("phone", $request->phone)->firstOrFail();
 
             // user already exists
             if ($user->status == User::STATUS_BANNED) {
@@ -142,7 +146,7 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
                     "phone_exists" => true,
                     "user_status" => $user->status,
                     "type" => "danger",
-                    "message" => "This user has been banned from this platform."
+                    "message" => "This user has been banned from this platform.",
                 ], 403);
             } elseif ($user->status == User::STATUS_INACTIVE) {
                 return response()->json([
@@ -150,7 +154,7 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
                     "message" => "This user already exists. Required send verification code",
                     "phone_exists" => true,
                     "user_status" => $user->status,
-                    "type" => "success"
+                    "type" => "success",
                 ], 200);
 
             } elseif ($user->status == User::STATUS_ACTIVE) {
@@ -160,7 +164,7 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
                     "message" => "This user already exists.",
                     "phone_exists" => true,
                     "user_status" => $user->status,
-                    "type" => "success"
+                    "type" => "success",
                 ], 200);
             }
         } catch (ModelNotFoundException $e) {
@@ -173,17 +177,17 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
         try {
             $token = TwoFactorAuth::generateToken();
 
-            $sid = $this->sendSms($botID, $request->phone_number, $token);
+            $sid = $this->sendSms($botID, $request->phone, $token);
 
             $user = User::create([
-                "phone_number" => $request->phone_number,
-                "status" => User::STATUS_INACTIVE
+                "phone" => $request->phone,
+                "status" => User::STATUS_INACTIVE,
             ]);
 
             $twoFa = TwoFactorAuth::create([
                 "sid" => $sid,
                 "user_id" => $user->id,
-                "code" => $token
+                "code" => $token,
             ]);
             // Send the code to the user
             DB::commit();
@@ -195,14 +199,14 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
                 'message' => 'User was successful created',
                 'sid' => $sid,
                 // TODO Remove this before shipping
-                "test_purpose_token" => $token
+                "test_purpose_token" => $token,
             ], 201);
         } catch (Exception $e) {
             if ($e instanceof SMSGatewayException) {
                 return response()->json([
                     'type' => 'danger',
                     'title' => "Create new user. Step 1",
-                    'message' => "Unable to send sms to phone Number."
+                    'message' => "Unable to send sms to phone Number.",
                 ], 400);
             } else {
                 DB::rollBack();
@@ -210,7 +214,7 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
                 return response()->json([
                     'type' => 'danger',
                     'title' => "Create new user. Step 1",
-                    'message' => "Unable to create user."
+                    'message' => "Unable to create user.",
                 ], 400);
             }
         }

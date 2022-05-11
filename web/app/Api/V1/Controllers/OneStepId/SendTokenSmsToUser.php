@@ -116,11 +116,11 @@ class SendTokenSmsToUser extends Controller
     {
         // Validate input data
         $this->validate($request, [
-            'phone_number' => 'required|integer',
+            'phone' => 'required|integer',
         ]);
 
         try {
-            $user = User::where("phone_number", $request->phone_number)->firstOrFail();
+            $user = User::where("phone", $request->phone)->firstOrFail();
             // user already exists
             if ($user->status == User::STATUS_BANNED) {
                 return response()->json([
@@ -144,7 +144,7 @@ class SendTokenSmsToUser extends Controller
         try {
             $token = TwoFactorAuth::generateToken();
 
-            $sid = $this->sendSms($botID, $request->phone_number, $token);
+            $sid = $this->sendSms($botID, $request->phone, $token);
 
             $twoFa = TwoFactorAuth::create([
                 "sid" => $sid,

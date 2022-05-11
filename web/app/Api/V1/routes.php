@@ -41,7 +41,6 @@ $router->group([
         });
     });
 
-
     /**
      * ADMIN PANEL
      */
@@ -58,6 +57,7 @@ $router->group([
             'as' => 'admin.users'
         ], function () use ($router) {
             $router->get('/', 'UserController@index');
+            $router->post('/', 'UserController@store');
             $router->get('/{id}', 'UserController@show');
             $router->patch('/{id}', 'UserController@approve');
             $router->delete('/{id}', 'UserController@destroy');
