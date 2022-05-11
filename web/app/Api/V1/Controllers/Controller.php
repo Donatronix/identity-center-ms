@@ -47,6 +47,17 @@ use Laravel\Lumen\Routing\Controller as BaseController;
  */
 
 /**
+* @OA\SecurityScheme(
+*      in="header",
+*      type="http",
+*      scheme="bearer",
+*      name="bearerAuth",
+*      bearerFormat="JWT",
+*      securityScheme="bearerAuth",
+* ),
+*/
+
+/**
  * Api Base Class Controller
  *
  * @package App\Api\V1\Controllers
