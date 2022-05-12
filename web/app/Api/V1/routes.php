@@ -19,6 +19,7 @@ $router->group([
         $router->post('/send-sms/{botID}', "SendTokenSmsToUser");
         $router->post('/send-username', "UserSubmitsUsername");
         $router->post('/send-code', "VerifyPhoneNumber");
+        $router->post('/refresh-token', 'AuthController@refresh');
     });
 
     /**

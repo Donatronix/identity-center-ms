@@ -20,9 +20,12 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use PubSub;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use App\Traits\TokenHandler;
 
 class UserController extends Controller
 {
+    use TokenHandler;
+
      /**
      * Return user data
      *

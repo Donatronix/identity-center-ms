@@ -6,12 +6,16 @@ use App\Api\V1\Controllers\Controller;
 use App\Models\TwoFactorAuth;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
+use App\Traits\TokenHandler;
 
 class UserSubmitsUsername extends Controller
 {
+    use TokenHandler;
+
     const MAX_LOGIN_ATTEMPTS = 3;
     const LOGIN_ATTEMPTS_DURATION = 120; //secs
 
@@ -166,10 +170,11 @@ class UserSubmitsUsername extends Controller
             try {
                 $user->username = $request->username;
                 $user->status = User::STATUS_ACTIVE;
+                $user->password = Hash::make(config('settings.password'));
                 $user->save();
-
-            } catch (Exception $th) {
-                //throw $th;
+                $user->assignRole('client');
+            }
+            catch (Exception $th) {
                 return response()->json([
                     "type" => "danger",
                     "message" => "Unable to save username."
@@ -228,10 +233,12 @@ class UserSubmitsUsername extends Controller
                         "user_status" => $user->status
                     ], 403);
             }
-            // generate access token
-            $token = $user->createToken("bearer")->accessToken;
-            // delete sid
 
+            // generate access token
+            //$token = $user->createToken("bearer")->accessToken;
+            $token = $this->createToken($user->username, config('settings.password'));
+
+            // delete sid
             $twoFa = TwoFactorAuth::where("sid", $sid)->first();
             $twoFa->delete();
 
