@@ -3,8 +3,6 @@
 namespace App\Api\V1\Controllers\Admin;
 
 use App\Api\V1\Controllers\Controller;
-use App\Api\V1\Resources\UserResource;
-use App\Listeners\NewUserRegisteredListener;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
