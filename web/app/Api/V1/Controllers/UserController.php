@@ -20,14 +20,86 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use PubSub;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use App\Traits\TokenHandler;
 
 class UserController extends Controller
 {
+    use TokenHandler;
+
+     /**
+     * Return user data
+     *
+     * @OA\Get(
+     *     path="/users",
+     *     summary="Get current user profile",
+     *     description="Get current user profile",
+     *     tags={"User Profile"},
+     *
+     *     security={{
+     *         "bearerAuth": {}
+     *     }},
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *              type="object",
+     *
+     *              @OA\Property(
+     *                 property="type",
+     *                 type="string",
+     *                 example="success"
+     *             ),
+     *
+     *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="Valid Token"
+     *             ),
+     *
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="User Profile found"
+     *             ),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 description="User object",
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Not found"),
+     *     @OA\Response(response=401, description="Unauthorized")
+     * )
+     *
+     */
+
+    public function index()
+    {
+        $user = Auth::user();
+        if ($user) {
+            return response([
+                'type' => 'success',
+                'title' => "Valid Token",
+                'message' => 'User Profile found',
+                'data' => Auth::user()
+            ]);
+        }
+        else {
+            return response([
+                'type' => 'danger',
+                'title' => "Invalid Token",
+                'message' => 'User Profile not found',
+            ], 401);
+        }
+    }
+
     /**
      * Create new user for One-Step
      *
      * @OA\Post(
-     *     path="/user-profile",
+     *     path="/users",
      *     summary="Create new user for One-Step",
      *     description="Create new user for One-Step",
      *     tags={"User Profile"},

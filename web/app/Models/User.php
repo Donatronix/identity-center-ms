@@ -13,6 +13,8 @@ use Illuminate\Support\Str;
 use Laravel\Lumen\Auth\Authorizable;
 use Laravel\Passport\HasApiTokens;
 use Sumra\SDK\Traits\UuidTrait;
+use Spatie\Permission\Traits\HasRoles;
+
 /**
  * User Schema
  *
@@ -159,6 +161,7 @@ use Sumra\SDK\Traits\UuidTrait;
     use SoftDeletes;
     use HasFactory;
     use UuidTrait;
+    use HasRoles;
 
     /**
      * Statuses of users
@@ -321,5 +324,16 @@ use Sumra\SDK\Traits\UuidTrait;
             'document.type' => 'required|integer|min:1|max:4',
             'document.file' => 'required|string'
         ];
+    }
+
+    /**
+     * Find the user instance for the given username.
+     *
+     * @param  string  $username
+     * @return \App\Models\User
+     */
+    public function findForPassport($username)
+    {
+        return $this->where('username', $username)->first();
     }
 }

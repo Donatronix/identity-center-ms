@@ -19,19 +19,19 @@ $router->group([
         $router->post('/send-sms/{botID}', "SendTokenSmsToUser");
         $router->post('/send-username', "UserSubmitsUsername");
         $router->post('/send-code', "VerifyPhoneNumber");
+        $router->post('/refresh-token', 'AuthController@refresh');
     });
 
     /**
      * PRIVATE ACCESS
      */
-    $router->group([
-        'middleware' => 'checkUser'
-    ], function ($router) {
-        $router->group([
-            'prefix' => 'users',
-            'as' => 'users'
-        ], function ($router) {
-            $router->get('/', 'UserController@index');
+
+    $router->group(['middleware' => 'auth:api'], function ($router) {
+        $router->get('users/', 'UserController@index');
+    });
+
+    $router->group(['middleware' => 'checkUser'], function ($router) {
+        $router->group([ 'prefix' => 'users', 'as' => 'users'], function ($router) {
             $router->post('/', 'UserController@store');
             $router->get('/{id}', 'UserController@show');
             $router->patch('/{id}', 'UserController@update');

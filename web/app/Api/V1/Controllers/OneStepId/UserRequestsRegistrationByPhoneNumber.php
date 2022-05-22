@@ -19,10 +19,22 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
      * Create new user for One-Step
      *
      * @OA\Post(
-     *     path="/auth/send-phone",
+     *     path="/auth/send-phone/{botID}",
      *     summary="Create new user for One-Step",
      *     description="Create new user for One-Step",
      *     tags={"Auth by OneStep"},
+     *
+     *     @OA\Parameter(
+     *          description="Bot ID",
+     *          in="path",
+     *          name="botID",
+     *          required=true,
+     *          example="1",
+     *          @OA\Schema(
+     *              type="integer",
+     *              format="int64"
+     *          ),
+     *     ),
      *
      *     @OA\RequestBody(
      *         required=true,

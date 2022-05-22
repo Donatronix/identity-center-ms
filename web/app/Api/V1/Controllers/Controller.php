@@ -47,6 +47,39 @@ use Laravel\Lumen\Routing\Controller as BaseController;
  */
 
 /**
+ * @OA\SecurityScheme(
+ *     type="oauth2",
+ *     description="Auth Scheme",
+ *     name="Password Grant Access",
+ *     securityScheme="passport",
+ *
+ *     @OA\Flow(
+ *         flow="password",
+ *         tokenUrl= "http://localhost:8200/oauth/token",
+ *         refreshUrl="http://localhost:8200/oauth/token",
+ *         scopes={
+ *             "Client"="",
+ *             "Admin":"",
+ *             "Staff":"",
+ *             "Super Admin": ""
+ *         }
+ *     )
+ * )
+ */
+
+/**
+* @OA\SecurityScheme(
+*      in="header",
+*      type="http",
+*      scheme="bearer",
+*      name="bearerAuth",
+*      bearerFormat="JWT",
+*      description="Auth Token",
+*      securityScheme="bearerAuth",
+* ),
+*/
+
+/**
  * Api Base Class Controller
  *
  * @package App\Api\V1\Controllers
