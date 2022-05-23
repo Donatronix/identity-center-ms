@@ -19,6 +19,14 @@ $router->group([
         $router->post('/send-sms/{botID}', "SendTokenSmsToUser");
         $router->post('/send-username', "UserSubmitsUsername");
         $router->post('/send-code', "VerifyPhoneNumber");
+
+        $router->group(['prefix' => 'create'], function($router) {
+
+        });
+
+        $router->group(['prefix' => 'recovery'], function($router) {
+
+        });
     });
 
     /**
@@ -26,7 +34,7 @@ $router->group([
      */
 
     $router->group(['middleware' => 'auth:api'], function ($router) {
-        $router->get('users/', 'UserController@index');
+        $router->get('users', 'UserController@index');
     });
 
     $router->group(['middleware' => 'checkUser'], function ($router) {
