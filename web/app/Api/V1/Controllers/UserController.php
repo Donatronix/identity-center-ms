@@ -20,9 +20,12 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use PubSub;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use App\Traits\TokenHandler;
 
 class UserController extends Controller
 {
+    use TokenHandler;
+
      /**
      * Return user data
      *
@@ -74,12 +77,22 @@ class UserController extends Controller
 
     public function index()
     {
-        return response([
-            'type' => 'success',
-            'title' => "Valid Token",
-            'message' => 'User Profile found',
-            'data' => Auth::user()
-        ]);
+        $user = Auth::user();
+        if ($user) {
+            return response([
+                'type' => 'success',
+                'title' => "Valid Token",
+                'message' => 'User Profile found',
+                'data' => Auth::user()
+            ]);
+        }
+        else {
+            return response([
+                'type' => 'danger',
+                'title' => "Invalid Token",
+                'message' => 'User Profile not found',
+            ], 401);
+        }
     }
 
     /**

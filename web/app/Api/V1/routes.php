@@ -20,13 +20,7 @@ $router->group([
         $router->post('/send-username', "UserSubmitsUsername");
         $router->post('/send-code', "VerifyPhoneNumber");
 
-        $router->group(['prefix' => 'create'], function($router) {
-
-        });
-
-        $router->group(['prefix' => 'recovery'], function($router) {
-
-        });
+        $router->post('/refresh-token', 'AuthController@refresh');
     });
 
     /**

@@ -40,10 +40,10 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             type="object",
-     *             required={"phone_number"},
+     *             required={"phone"},
      *
      *             @OA\Property(
-     *                 property="phone_number",
+     *                 property="phone",
      *                 type="number",
      *                 description="Phone number of user",
      *                 example="380971829100"
