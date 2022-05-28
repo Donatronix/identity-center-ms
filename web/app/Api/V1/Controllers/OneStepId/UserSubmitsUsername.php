@@ -6,15 +6,19 @@ use App\Api\V1\Controllers\Controller;
 use App\Models\TwoFactorAuth;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Validation\ValidationException;
 use PubSub;
+use App\Traits\TokenHandler;
 
 class UserSubmitsUsername extends Controller
 {
+    use TokenHandler;
+
     const MAX_LOGIN_ATTEMPTS = 3;
     const LOGIN_ATTEMPTS_DURATION = 120; //secs
 
@@ -170,6 +174,7 @@ class UserSubmitsUsername extends Controller
             try {
                 $user->username = $request->username;
                 $user->status = User::STATUS_ACTIVE;
+                $user->password = Hash::make(config('settings.password'));
                 $user->save();
 
                 PubSub::transaction(function () {
@@ -177,8 +182,9 @@ class UserSubmitsUsername extends Controller
                     'user' => $user->toArray(),
                 ], 'new-user-registered');
 
-            } catch (Exception $th) {
                 //throw $th;
+                $user->assignRole('client');
+            } catch (Exception $th) {
                 return response()->json([
                     "type" => "danger",
                     "message" => "Unable to save username.",
@@ -217,7 +223,6 @@ class UserSubmitsUsername extends Controller
                 //set the expiration
                 //I understand this means expire in 120s.
                 $redis->expire($userLoginAttemptsKey, self::LOGIN_ATTEMPTS_DURATION);
-
             } else {
                 $count = 0;
                 $count += (int)$redis->get($userLoginAttemptsKey);
@@ -227,8 +232,7 @@ class UserSubmitsUsername extends Controller
             if (strtolower($user->username) !== strtolower($username)) {
                 $loginAttempts = (int)$redis->get($userLoginAttemptsKey);
 
-                if ($loginAttempts > self::MAX_LOGIN_ATTEMPTS - 1)
-
+                if ($loginAttempts > self::MAX_LOGIN_ATTEMPTS - 1) {
                     // malicious user, warn and block
                     //TODO count login attempts and block
                     return response()->json([
@@ -236,11 +240,14 @@ class UserSubmitsUsername extends Controller
                         "message" => "Unauthorized operation.",
                         "user_status" => $user->status,
                     ], 403);
+                }
             }
-            // generate access token
-            $token = $user->createToken("bearer")->accessToken;
-            // delete sid
 
+            // generate access token
+            //$token = $user->createToken("bearer")->accessToken;
+            $token = $this->createToken($user->username, config('settings.password'));
+
+            // delete sid
             $twoFa = TwoFactorAuth::where("sid", $sid)->first();
             $twoFa->delete();
 
@@ -251,7 +258,6 @@ class UserSubmitsUsername extends Controller
                 "type" => "success",
                 "token" => $token,
             ]);
-
         } catch (Exception $e) {
             return response()->json([
                 "type" => "danger",

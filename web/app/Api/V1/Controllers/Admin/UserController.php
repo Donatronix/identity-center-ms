@@ -28,14 +28,10 @@ class UserController extends Controller
      * @OA\Get(
      *     path="/admin/users",
      *     description="Get all users",
-     *     tags={"Users"},
+     *     tags={"Admin / Users"},
      *
      *     security={{
-     *          "default" :{
-     *              "ManagerRead",
-     *              "User",
-     *              "ManagerWrite"
-     *          },
+     *          "default":{},
      *     }},
      *
      *     x={
@@ -492,7 +488,7 @@ class UserController extends Controller
      * @OA\Delete(
      *     path="/admin/users/{id}",
      *     description="Delete user",
-     *     tags={"Users"},
+     *     tags={"Admin / Users"},
      *
      *     security={{
      *          "default" :{
