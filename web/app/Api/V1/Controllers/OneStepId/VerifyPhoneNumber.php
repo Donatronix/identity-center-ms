@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use PubSub;
 
 class VerifyPhoneNumber extends Controller
 {
@@ -149,11 +148,6 @@ class VerifyPhoneNumber extends Controller
                 "validate_auth_code" => false,
             ], 400);
         }
-
-        PubSub::transaction(function () {
-        })->publish('NewUserRegisteredListener', [
-            'user' => $user->toArray(),
-        ], 'new-user-registered');
 
         return response()->json([
             "message" => "Phone Number Verification successful",

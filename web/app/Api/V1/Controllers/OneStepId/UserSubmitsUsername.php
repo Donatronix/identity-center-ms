@@ -8,8 +8,11 @@ use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Validation\ValidationException;
+use PubSub;
 use App\Traits\TokenHandler;
 
 class UserSubmitsUsername extends Controller
@@ -117,16 +120,17 @@ class UserSubmitsUsername extends Controller
      *     )
      * )
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
+     * @throws ValidationException
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): JsonResponse
     {
         // Validate input data
         $this->validate($request, [
             'username' => 'required',
-            "sid" => "required"
+            "sid" => "required",
         ]);
 
         // try to retrieve user using sid
@@ -146,7 +150,7 @@ class UserSubmitsUsername extends Controller
             return response()->json([
                 "type" => "danger",
                 "user_status" => $user->status,
-                "message" => "User has been banned from this platform."
+                "message" => "User has been banned from this platform.",
             ], 403);
         } elseif ($user->status == User::STATUS_ACTIVE) {
             //login active user
@@ -161,7 +165,7 @@ class UserSubmitsUsername extends Controller
                 "type" => "danger",
                 "message" => "Username already exists.",
                 "user_status" => $user->status,
-                "phone_exist" => true
+                "phone_exist" => true,
             ], 400);
         }
 
@@ -172,12 +176,18 @@ class UserSubmitsUsername extends Controller
                 $user->status = User::STATUS_ACTIVE;
                 $user->password = Hash::make(config('settings.password'));
                 $user->save();
+
+                PubSub::transaction(function () {
+                })->publish('NewUserRegisteredListener', [
+                    'user' => $user->toArray(),
+                ], 'new-user-registered');
+
+                //throw $th;
                 $user->assignRole('client');
-            }
-            catch (Exception $th) {
+            } catch (Exception $th) {
                 return response()->json([
                     "type" => "danger",
-                    "message" => "Unable to save username."
+                    "message" => "Unable to save username.",
                 ], 400);
             }
 
@@ -186,19 +196,19 @@ class UserSubmitsUsername extends Controller
             // username already exists for this SID
             return response()->json([
                 "type" => "danger",
-                "message" => "Username already exists for this SID"
+                "message" => "Username already exists for this SID",
             ]);
         }
     }
 
     /**
-     * @param \App\Models\User $user
+     * @param User             $user
      * @param                  $sid
      * @param                  $username
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    private function login(User $user, $sid, $username)
+    private function login(User $user, $sid, $username): JsonResponse
     {
         //check if its a malicious user
         try {
@@ -213,7 +223,6 @@ class UserSubmitsUsername extends Controller
                 //set the expiration
                 //I understand this means expire in 120s.
                 $redis->expire($userLoginAttemptsKey, self::LOGIN_ATTEMPTS_DURATION);
-
             } else {
                 $count = 0;
                 $count += (int)$redis->get($userLoginAttemptsKey);
@@ -223,15 +232,15 @@ class UserSubmitsUsername extends Controller
             if (strtolower($user->username) !== strtolower($username)) {
                 $loginAttempts = (int)$redis->get($userLoginAttemptsKey);
 
-                if ($loginAttempts > self::MAX_LOGIN_ATTEMPTS - 1)
-
+                if ($loginAttempts > self::MAX_LOGIN_ATTEMPTS - 1) {
                     // malicious user, warn and block
                     //TODO count login attempts and block
                     return response()->json([
                         "type" => "danger",
                         "message" => "Unauthorized operation.",
-                        "user_status" => $user->status
+                        "user_status" => $user->status,
                     ], 403);
+                }
             }
 
             // generate access token
@@ -249,11 +258,10 @@ class UserSubmitsUsername extends Controller
                 "type" => "success",
                 "token" => $token,
             ]);
-
         } catch (Exception $e) {
             return response()->json([
                 "type" => "danger",
-                "message" => "Invalid SID"
+                "message" => "Invalid SID",
             ], 403);
         }
     }
