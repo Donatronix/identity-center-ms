@@ -22,7 +22,7 @@ services:
 #    command: /bin/bash -c "php artisan swagger-lume:generate && php artisan queue:listen rabbitmq --queue=GlobalIdentityCentreMS --timeout=0 > /dev/null"
 
   redis:
-    image: redis:7.0-rc-alpine3.15
+    image: redis:alpine
     ports:
       - "6379:6379"
     networks:
