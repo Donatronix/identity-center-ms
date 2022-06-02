@@ -5,7 +5,7 @@
  */
 $router->group([
     'prefix' => env('APP_API_VERSION', ''),
-    'namespace' => '\App\Api\V1\Controllers'
+    'namespace' => '\App\Api\V1\Controllers',
 ], function ($router) {
     /**
      * PUBLIC ACCESS
@@ -13,7 +13,7 @@ $router->group([
     $router->group([
         'prefix' => 'auth',
         'as' => 'auth',
-        "namespace" => "OneStepId"
+        "namespace" => "OneStepId",
     ], function ($router) {
         $router->post('/send-phone/{botID}', "UserRequestsRegistrationByPhoneNumber");
         $router->post('/send-sms/{botID}', "SendTokenSmsToUser");
@@ -32,7 +32,7 @@ $router->group([
     });
 
     $router->group(['middleware' => 'checkUser'], function ($router) {
-        $router->group([ 'prefix' => 'users', 'as' => 'users'], function ($router) {
+        $router->group(['prefix' => 'users', 'as' => 'users'], function ($router) {
             $router->post('/', 'UserController@store');
             $router->get('/{id}', 'UserController@show');
             $router->patch('/{id}', 'UserController@update');
@@ -51,12 +51,12 @@ $router->group([
         'namespace' => 'Admin',
         'middleware' => [
             'checkUser',
-            'checkAdmin'
-        ]
+            'checkAdmin',
+        ],
     ], function ($router) {
         $router->group([
             'prefix' => 'users',
-            'as' => 'admin.users'
+            'as' => 'admin.users',
         ], function () use ($router) {
             $router->get('/', 'UserController@index');
             $router->post('/', 'UserController@store');
@@ -66,5 +66,13 @@ $router->group([
             $router->post('/verify', 'UserController@verify');
             $router->post('/verify/send', 'UserController@verify_email');
         });
+
+        /**
+         * Add Admins to waiting-lists-ms
+         */
+
+        $router->post('waiting-lists/admins', 'WaitingListsAdminController@store');
+        $router->patch('waiting-lists/admins/{id}', 'WaitingListsAdminController@updateRole');
     });
+
 });
