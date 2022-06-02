@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\V1\Controllers\OneStepId;
+namespace App\Api\V1\Controllers\OneStepId1;
 
 use App\Api\V1\Controllers\Controller;
 use App\Models\TwoFactorAuth;
@@ -26,7 +26,7 @@ class UserSubmitsUsername extends Controller
      *     path="/auth/send-username",
      *     summary="User Submits Account Username",
      *     description="Here the new user or the existing user submits username for login, along with the sid",
-     *     tags={"Auth by OneStep"},
+     *     tags={"Auth by OneStep 1.0"},
      *
      *
      *     @OA\RequestBody(

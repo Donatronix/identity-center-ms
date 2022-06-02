@@ -13,7 +13,7 @@ $router->group([
     $router->group([
         'prefix' => 'auth',
         'as' => 'auth',
-        "namespace" => "OneStepId"
+        "namespace" => "OneStepId1"
     ], function ($router) {
         $router->post('/send-phone/{botID}', "UserRequestsRegistrationByPhoneNumber");
         $router->post('/send-sms/{botID}', "SendTokenSmsToUser");
@@ -21,6 +21,21 @@ $router->group([
         $router->post('/send-code', "VerifyPhoneNumber");
 
         $router->post('/refresh-token', 'AuthController@refresh');
+    });
+
+    /**
+     * PUBLIC ACCESS - CREATE USER ACCOUNT
+     */
+    $router->group([
+        'prefix' => 'user-account',
+        // 'as' => 'auth',
+        "namespace" => "OneStepId2"
+    ], function ($router) {
+        $router->post('/create', "CreateUserIDController@createAccount");
+        $router->post('/otp/resend', "CreateUserIDController@resendOTP");
+        $router->post('/otp/verify', "CreateUserIDController@verifyOTP");
+        $router->post('/update', "CreateUserIDController@updateUser");
+        $router->post('/update/recovery', "CreateUserIDController@updateRecoveryQuestion");
     });
 
     /**
