@@ -103,6 +103,11 @@ class CreateUserIDController extends Controller
      *                     example="+4492838989290"
      *                 ),
      *                 @OA\Property(
+     *                     property="username",
+     *                     type="string",
+     *                     example="john.kiels"
+     *                 ),
+     *                 @OA\Property(
      *                     property="channel",
      *                     type="string",
      *                     example="sms"
@@ -152,30 +157,22 @@ class CreateUserIDController extends Controller
       //validate input date
       $input = $this->validate($request, VerifyStepInfo::roles());
       
+      $sendto = $this->getTokenReceiver($input);
+
        try{
-            $sendto = null;
-            // $channel = $request->input('channel');
-            // $phone = $request->input('phone');
-            // $handler = $request->input('handler');
-            // $messenger = $request->input('messenger');
-            
-            // Check whether user already exist
-            $userExist = User::where('phone', $input['phone'])->doesntExist();
-            
+           // Check whether user already exist
+           $userExist = User::where([
+               'phone'=> $input['phone'], 
+               'username'=>$input['username']
+               ])->doesntExist();
+               
             if($userExist){
                 // Create verification token (OTP - One Time Password)
                 $token = VerifyStepInfo::generateOTP();
-
+                
                 //Generate token expiry time in minutes
-                $validity = time()+(60*60);
-
-                //Select OTP destination
-                if($input['channel']==='sms'){
-                    $sendto = $input['phone'];
-                }elseif($input['channel']==='messenger'){
-                    $sendto = $input['handler'];
-                }
-
+                $validity = VerifyStepInfo::tokenValidity(30);
+                
                 //Create user Account
                 $user = new User;
                 $user->username = $input['username'];
@@ -186,6 +183,7 @@ class CreateUserIDController extends Controller
                 PubSub::transaction(function () use ($input, $token, $sendto, $validity) {
                     // save verification token
                     VerifyStepInfo::create([
+                        'username'=>$input['username'],
                         'channel'=>$input['channel'],
                         'receiver'=>$sendto,
                         'code'=>$token,
@@ -201,7 +199,11 @@ class CreateUserIDController extends Controller
                 return response()->json([
                     'type' => 'success',
                     'message' => "{$channel} verification code sent to {$sendto}.",
-                    "data" => ['channel'=>$input['channel'], 'id'=>$sendto]
+                    "data" => [
+                            'channel'=>$input['channel'], 
+                            'username'=>$input['username'],
+                            'receiver'=>$sendto 
+                        ]
                 ], 200);
 
             }else{
@@ -302,25 +304,16 @@ class CreateUserIDController extends Controller
            'channel'=>'required|string'
        ]);
       
+        $sendto = $input['receiver'];
         try{
             // Create verification token (OTP - One Time Password)
             $token = VerifyStepInfo::generateOTP();
 
             //Generate token expiry time in minutes
-            $validity = time()+(60*60);
-
-            $sendto = $input['receiver'];
+            $validity = VerifyStepInfo::tokenValidity(30);
             
             // Send verification token (SMS or Massenger)
-            PubSub::transaction(function () use ($input, $token, $validity) {
-                // save verification token
-                VerifyStepInfo::create([
-                    'channel'=>$input['channel'],
-                    'receiver'=>$input['receiver'],
-                    'code'=>$token,
-                    'validity'=>$validity
-                ]);
-            })->publish('SendSMS', [
+            PubSub::transaction(function () {})->publish('SendSMS', [
                 'to' => $sendto,
                 'instance' => $input['channel'],
                 'message' => $token,
@@ -336,7 +329,7 @@ class CreateUserIDController extends Controller
         }catch(Exception $e){
             return response()->json([
                 'type' => 'danger',
-                'message' => "Unable to send {$channel} verification code to {$sendto}. Try again.",
+                'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again.",
                 "data" => null
             ], 400);
         }
@@ -362,12 +355,11 @@ class CreateUserIDController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             type="object",
-     *
-     *             @OA\Property(
+     *              @OA\Property(
      *                 property="token",
      *                 type="number",
-     *                 description="Save and Verify phone number of user",
-     *                 required={"phone"},
+     *                 description="Verify new user token for One-Step 2.0",
+     *                 required={"token"},
      *                 example="9398303039"
      *             )
      *         )
@@ -412,12 +404,42 @@ class CreateUserIDController extends Controller
     public function  verifyOTP(Request $request): JsonResponse
     {
        // Validate user input data
-       $input = $this->validate($request, ['token'=>'required|numeric|max:10']);
-      
+       $input = $this->validate($request, ['token'=>'required']);
+       
        try{
-          
+            //find the token
+            $existQuery = VerifyStepInfo::where(['code'=>$input['token']]);
+            
+            //Check validity and availability
+            if($existQuery->exists()){
+                $userData = $existQuery->first();
+                $username = $userData->username;
+                $id = "{$username}@onestep.com";
+                
+                //Delete the token
+                $existQuery->delete();
+                
+                //Send success response
+                return response()->json([
+                    'type' => 'success',
+                    'message' => "New user verification was successful.",
+                    "data" => ['username'=>$username, 'id'=>$id]
+                ], 200);
+            }else{
+                //Send invalid token response
+                return response()->json([
+                    'type' => 'danger',
+                    'message' => "New user verification FAILED. Try again.",
+                    "data" => null
+                ], 400);
+            }
        }catch(Exception $e){
-          
+            // Error occured
+            return response()->json([
+                'type' => 'danger',
+                'message' => "Unable to verify new use with token {$input['token']}. Try again.",
+                "data" => null
+            ], 400);
        }
 
     }
@@ -425,7 +447,7 @@ class CreateUserIDController extends Controller
     /**
      * Create new user for One-Step 2.0
      *
-     * @OA\Patch(
+     * @OA\Post(
      *     path="/user-account/update",
      *     summary="Update new user personal info",
      *     description="Update new user for One-Step 2.0",
@@ -437,6 +459,47 @@ class CreateUserIDController extends Controller
      *             "ManagerRead"
      *         }
      *     }},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *              @OA\Property(
+     *                 property="username",
+     *                 type="string",
+     *                 description="New user username",
+     *                 required={"username"},
+     *                 example="john.kiels"
+     *             ),
+     *             @OA\Property(
+     *                 property="fullname",
+     *                 type="string",
+     *                 description="New user full name update",
+     *                 required={"fullname"},
+     *                 example="Ben Jones"
+     *             ),
+     *             @OA\Property(
+     *                 property="country",
+     *                 type="string",
+     *                 description="New user country update",
+     *                 required={"country"},
+     *                 example="United Kindom"
+     *             ),
+     *             @OA\Property(
+     *                 property="address",
+     *                 type="string",
+     *                 description="New user address update",
+     *                 required={"address"},
+     *                 example="23 Kinston Street, Bolton"
+     *             ),
+     *             @OA\Property(
+     *                 property="birthday",
+     *                 type="string",
+     *                 description="New user birthday update",
+     *                 required={"birthday"},
+     *                 example="20/02/2001"
+     *             )
+     *         )
+     *     ),
      *     @OA\Response(
      *          response=201,
      *          description="Success",
@@ -450,30 +513,9 @@ class CreateUserIDController extends Controller
      *                 example="success"
      *             ),
      *             @OA\Property(
-     *                 property="title",
-     *                 type="string",
-     *                 example="Create new user. Step 1"
-     *             ),
-     *             @OA\Property(
      *                 property="message",
      *                 type="string",
-     *                 example="User was successful created"
-     *             ),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 description="User object",
-     *
-     *                 @OA\Property(
-     *                     property="id",
-     *                     type="string",
-     *                     example="50000005-5005-5005-5005-500000000005"
-     *                 ),
-     *                 @OA\Property(
-     *                     property="phone",
-     *                     type="number",
-     *                     example="380971829100"
-     *                 )
+     *                 example="User personal data updated"
      *             )
      *         )
      *     ),
@@ -490,20 +532,9 @@ class CreateUserIDController extends Controller
      *                 example="danger"
      *             ),
      *             @OA\Property(
-     *                 property="title",
-     *                 type="string",
-     *                 example="Create new user account step 1"
-     *             ),
-     *             @OA\Property(
      *                 property="message",
      *                 type="string",
-     *                 example=""
-     *             ),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 description="User object",
-     *                 example=""
+     *                 example="User personal data update FAILED"
      *             )
      *         )
      *     )
@@ -517,34 +548,48 @@ class CreateUserIDController extends Controller
     public function updateUser(Request $request): JsonResponse
     {
         // Validate user input data
-        $this->validate($request, User::roles());
-
-        
+        $input = $this->validate($request, User::rules());
+       
         try {
-            // Try to create new user account
-            $user = User::update(User::roles());
+            // Update user account
+            $user = User::where('username', $input['username'])->first();
+            $names = explode(" ", $input['fullname']);
             
-            if($user){
+            if(is_array($names) && count($names)>=2){
+                $firstname = $names[0];
+                $lastname = $names[1];
+            }else{
+                $firstname = $input['fullname'];
+                $lastname = null;
+            }
+
+            $user->first_name = $firstname;
+            $user->last_name = $lastname;
+            $user->address_country = $input['country'];
+            $user->address_line1 = $input['address'];
+            $user->birthday = $input['birthday'];
+            
+            if($user->save()){
                 // Return response
                 return response()->json([
                     'type' => 'success',
-                    'title' => "Create new user account step 3",
+                    'title' => "Update user account step 3",
                     'message' => 'User account was successful updated',
-                    'data' => $user
+                    'data' => ['username'=>$input['username']]
                 ], 200);
             }else{
                 return response()->json([
                     'type' => 'danger',
-                    'title' => "Create new user account step 1",
-                    'message' => 'User account was NOT created',
-                    'data' => $user
+                    'title' => "Update user account step 1",
+                    'message' => 'User account was NOT  updated',
+                    'data' => null
                 ], 400);
             }
             
         } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
-                'title' => "Create new user. Step 1",
+                'title' => "Update user account",
                 'message' => $e->getMessage()
             ], 400);
         }
@@ -553,7 +598,7 @@ class CreateUserIDController extends Controller
     /**
      * Save new user recovery questions for One-Step 2.0
      *
-     * @OA\Patch(
+     * @OA\Post(
      *     path="/user-account/update/recovery",
      *     summary="Update new user recovery questions",
      *     description="Update new user recovery questions for One-Step 2.0",
@@ -572,6 +617,13 @@ class CreateUserIDController extends Controller
      *             type="object",
      *             
      *             @OA\Property(
+     *                 property="username",
+     *                 type="string",
+     *                 description="New user  recovery username",
+     *                 required={"username"},
+     *                 example="richard.brown"
+     *             ),
+     *              @OA\Property(
      *                 property="question1",
      *                 type="string",
      *                 description="New user  recovery question 1",
@@ -634,11 +686,59 @@ class CreateUserIDController extends Controller
     public function updateRecoveryQuestion(Request $request): JsonResponse
     {
         // Validate user input data
-        
+        $input = $this->validate($request, [
+                    'username'=>'required|string',
+                    'question1'=>'required|string',
+                    'question2'=>'required|string',
+                    'question3'=>'required|string'
+                ]);
+       
         try {
-        
+            // Update user account
+            $user = User::where('username', $input['username'])->first();
+            
+            //$user->question = $input['question1'];
+            
+            if($user->save()){
+                // Return response
+                return response()->json([
+                    'type' => 'success',
+                    'title' => "Update user account step 3",
+                    'message' => 'User account was successful updated',
+                    'data' => ['username'=>$input['username']]
+                ], 200);
+            }else{
+                return response()->json([
+                    'type' => 'danger',
+                    'title' => "Update user account step 1",
+                    'message' => 'User account was NOT  updated',
+                    'data' => null
+                ], 400);
+            }
+            
         } catch (Exception $e) {
-           
+            return response()->json([
+                'type' => 'danger',
+                'title' => "Update user account",
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+    
+    /**
+     * Get the OTP reciever based on channel
+     * 
+     * @param array $input
+     * 
+     * @return string
+     */
+    public function getTokenReceiver(array $input): string
+    {
+        //Select OTP destination
+        if($input['channel']==='sms'){
+            return $input['phone'];
+        }elseif($input['channel']==='messenger'){
+            return  $input['handler'];
         }
     }
 }

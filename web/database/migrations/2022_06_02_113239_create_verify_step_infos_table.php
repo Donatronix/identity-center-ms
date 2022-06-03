@@ -15,6 +15,7 @@ class CreateVerifyStepInfosTable extends Migration
     {
         Schema::create('verify_step_infos', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->string('username');
             $table->string('channel');
             $table->string('receiver');
             $table->string('code')->unique();

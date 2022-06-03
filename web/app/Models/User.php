@@ -341,12 +341,13 @@ use Spatie\Permission\Traits\HasRoles;
      *
      * @return array
      */
-    public static function roles():array
+    public static function rules():array
     {
         return [
-            'first-name' => 'required|string',
-            'last-name' => 'required|string',
+            'username' => 'required|string',
+            'fullname' => 'required|string',
             'country' => 'required|string',
+            'address' => 'required|string',
             'birthday' => 'required|string' 
         ];
     }

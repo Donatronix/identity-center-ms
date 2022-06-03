@@ -9,6 +9,7 @@ class VerifyStepInfo extends Model
     protected $table = 'verify_step_infos';
     
     protected $fillable = [
+        "username",
         "channel",
         "receiver",
         "code",
@@ -22,7 +23,6 @@ class VerifyStepInfo extends Model
      /**
      *  Create an One-Time-password (for phone number verification)
      * 
-     * @param integer $length
      * @return integer 
      */
     public static function generateOTP():int
@@ -31,6 +31,17 @@ class VerifyStepInfo extends Model
         $randome = sprintf("%04d", rand(0,9999));
 
         return $randome.$timstamp;
+    }
+
+    /**
+     *  Create a One-Time-password validity period
+     * 
+     * @param integer $minutes
+     * @return integer 
+     */
+    public static function tokenValidity($minutes):int
+    {
+       return time()+($minute*60*60);
     }
 
     /**
