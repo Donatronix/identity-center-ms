@@ -11,12 +11,12 @@ use PubSub;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use App\Services\SendVerifyToken;
 
 class CreateUserIDController extends Controller
 {
-    
+
     /**
      * Create new user for One-Step 2.0
      *
@@ -148,11 +148,12 @@ class CreateUserIDController extends Controller
      * )
      *
      * @param Request $request
+     * @param SendVerifyToken $sendOTP
      *
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function createAccount(Request $request): JsonResponse
+    public function createAccount(Request $request, SendVerifyToken $sendOTP): JsonResponse
     {
       //validate input date
       $input = $this->validate($request, VerifyStepInfo::roles());
@@ -168,7 +169,7 @@ class CreateUserIDController extends Controller
                
             if($userExist){
                 // Create verification token (OTP - One Time Password)
-                $token = VerifyStepInfo::generateOTP();
+                $token = VerifyStepInfo::generateOTP(7);
                 
                 //Generate token expiry time in minutes
                 $validity = VerifyStepInfo::tokenValidity(30);
@@ -179,21 +180,17 @@ class CreateUserIDController extends Controller
                 $user->phone = $input['phone'];
                 $user->save();
 
+                // save verification token
+                VerifyStepInfo::create([
+                    'username'=>$input['username'],
+                    'channel'=>$input['channel'],
+                    'receiver'=>$sendto,
+                    'code'=>$token,
+                    'validity'=>$validity
+                ]);
+
                 // Send verification token (SMS or Massenger)
-                PubSub::transaction(function () use ($input, $token, $sendto, $validity) {
-                    // save verification token
-                    VerifyStepInfo::create([
-                        'username'=>$input['username'],
-                        'channel'=>$input['channel'],
-                        'receiver'=>$sendto,
-                        'code'=>$token,
-                        'validity'=>$validity
-                    ]);
-                })->publish('SendSMS', [
-                    'to' => $sendto,
-                    'instance' => $input['channel'],
-                    'message' => $token,
-                ], 'new_user_verify');
+                $sendOTP->dispatchOTP($input['channel'], $sendto, $token);
                 
                 //Show response
                 return response()->json([
@@ -296,7 +293,7 @@ class CreateUserIDController extends Controller
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function  resendOTP(Request $request): JsonResponse
+    public function  resendOTP(Request $request, SendVerifyToken $sendOTP): JsonResponse
     {
        //validate input date
        $input = $this->validate($request, [
@@ -307,17 +304,13 @@ class CreateUserIDController extends Controller
         $sendto = $input['receiver'];
         try{
             // Create verification token (OTP - One Time Password)
-            $token = VerifyStepInfo::generateOTP();
+            $token = VerifyStepInfo::generateOTP(7);
 
             //Generate token expiry time in minutes
             $validity = VerifyStepInfo::tokenValidity(30);
             
             // Send verification token (SMS or Massenger)
-            PubSub::transaction(function () {})->publish('SendSMS', [
-                'to' => $sendto,
-                'instance' => $input['channel'],
-                'message' => $token,
-            ], 'new_user_verify');
+            $sendOTP->dispatchOTP($input['channel'], $sendto, $token);
             
             //Show response
             return response()->json([
@@ -357,10 +350,10 @@ class CreateUserIDController extends Controller
      *             type="object",
      *              @OA\Property(
      *                 property="token",
-     *                 type="number",
+     *                 type="string",
      *                 description="Verify new user token for One-Step 2.0",
      *                 required={"token"},
-     *                 example="9398303039"
+     *                 example="h433ui6"
      *             )
      *         )
      *     ),
@@ -404,7 +397,7 @@ class CreateUserIDController extends Controller
     public function  verifyOTP(Request $request): JsonResponse
     {
        // Validate user input data
-       $input = $this->validate($request, ['token'=>'required']);
+       $input = $this->validate($request, ['token'=>'required|string']);
        
        try{
             //find the token

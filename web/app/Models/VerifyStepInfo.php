@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class VerifyStepInfo extends Model
 {
+    
     protected $table = 'verify_step_infos';
     
     protected $fillable = [
@@ -23,14 +25,13 @@ class VerifyStepInfo extends Model
      /**
      *  Create an One-Time-password (for phone number verification)
      * 
-     * @return integer 
+     * @param int $strlength
+     * 
+     * @return string 
      */
-    public static function generateOTP():int
+    public static function generateOTP($strlength):string
     {
-        $timstamp = date("Gis");
-        $randome = sprintf("%04d", rand(0,9999));
-
-        return $randome.$timstamp;
+        return Str::random($strlength);
     }
 
     /**

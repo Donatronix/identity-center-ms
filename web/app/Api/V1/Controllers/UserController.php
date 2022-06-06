@@ -6,6 +6,7 @@ use App\Api\V1\Resources\UserResource;
 use App\Models\Category;
 use App\Models\User;
 use App\Services\IdentityVerification;
+use App\Traits\TokenHandler;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
@@ -14,19 +15,16 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use PubSub;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use App\Traits\TokenHandler;
 
 class UserController extends Controller
 {
     use TokenHandler;
 
-     /**
+    /**
      * Return user data
      *
      * @OA\Get(
@@ -82,10 +80,9 @@ class UserController extends Controller
                 'type' => 'success',
                 'title' => "Valid Token",
                 'message' => 'User Profile found',
-                'data' => Auth::user()
+                'data' => Auth::user(),
             ]);
-        }
-        else {
+        } else {
             return response([
                 'type' => 'danger',
                 'title' => "Invalid Token",
@@ -197,9 +194,9 @@ class UserController extends Controller
      *     )
      * )
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function store(Request $request): JsonResponse
     {
@@ -222,13 +219,13 @@ class UserController extends Controller
                 'type' => 'success',
                 'title' => "Create new user. Step 1",
                 'message' => 'User was successful created',
-                'data' => $user
+                'data' => $user,
             ], 201);
         } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
                 'title' => "Create new user. Step 1",
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 400);
         }
     }
@@ -283,7 +280,7 @@ class UserController extends Controller
             return response()->json([
                 'type' => 'danger',
                 'title' => "Not Found",
-                'message' => " User not found"
+                'message' => " User not found",
             ], 404);
         }
 
@@ -295,7 +292,7 @@ class UserController extends Controller
 
         return response()->jsonApi([
             'type' => 'success',
-            'data' => $user
+            'data' => $user,
         ]);
     }
 
@@ -400,7 +397,6 @@ class UserController extends Controller
      *     )
      * )
      *
-
      * @param Request $request
      * @param int     $id
      *
@@ -416,7 +412,7 @@ class UserController extends Controller
 //            'password' => 'required_with:current_password|confirmed|min:6|max:190',
 //        ]);
 
-        $validatedData = $this->validate($request, User::personalValidationRules((int) $id));
+        $validatedData = $this->validate($request, User::personalValidationRules((int)$id));
 
         $user = User::findOrFail($id);
 
@@ -497,12 +493,12 @@ class UserController extends Controller
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function verify_email(Request $request)
+    public function verify_email(Request $request): JsonResponse
     {
         $this->validate($request, [
-            'email' => "required|email"
+            'email' => "required|email",
         ]);
 
         $user = User::where('email', $request->email)->firstOrFail();
@@ -582,9 +578,10 @@ class UserController extends Controller
      *     )
      * )
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @throws \Exception
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     *
+     * @return Response
+     * @throws Exception
      */
     public function validateEditPhoneNumber(Request $request)
     {
@@ -602,7 +599,7 @@ class UserController extends Controller
             $user->verification_code = Hash::make($verificationCode);
 
             if (!$user->save()) {
-                throw new \Exception();
+                throw new Exception();
             }
 
             // Should send SMS to the user's new phone number, contaiing the verification code
@@ -612,11 +609,11 @@ class UserController extends Controller
             ]);
 
             if (!$response->ok()) {
-                throw new \Exception();
+                throw new Exception();
             }
 
             return response()->jsonApi(["message" => "A 6-digit code has been sent to your phone number"], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->jsonApi(["message" => "An error occurred! Please, try again."], 500);
         }
     }
@@ -703,9 +700,10 @@ class UserController extends Controller
      *      )
      * )
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @throws \Exception
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     *
+     * @return Response
+     * @throws Exception
      */
     public function updateMyPhoneNumber(Request $request)
     {
@@ -738,10 +736,10 @@ class UserController extends Controller
             $user->phone = $request->phone;
             $user->verification_code = null;
             if (!$user->save()) {
-                throw new \Exception();
+                throw new Exception();
             }
             return response()->jsonApi(["message" => "Phone number updated"], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->jsonApi(["message" => "An error occurred! Please, try again."], 500);
         }
     }
@@ -813,9 +811,10 @@ class UserController extends Controller
      *      )
      * )
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @throws \Exception
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     *
+     * @return Response
+     * @throws Exception
      */
     public function validateEditEmail(Request $request)
     {
@@ -833,7 +832,7 @@ class UserController extends Controller
             $user->verification_code = Hash::make($verificationCode);
 
             if (!$user->save()) {
-                throw new \Exception();
+                throw new Exception();
             }
 
             // Should send SMS to the user's new email contaiing the verification code
@@ -843,11 +842,11 @@ class UserController extends Controller
             ]);
 
             if (!$response->ok()) {
-                throw new \Exception();
+                throw new Exception();
             }
 
             return response()->jsonApi(["message" => "A 6-digit code has been sent to your email"], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->jsonApi(["message" => "An error occurred! Please, try again."], 500);
         }
     }
@@ -934,9 +933,10 @@ class UserController extends Controller
      *      )
      * )
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @throws \Exception
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     *
+     * @return Response
+     * @throws Exception
      */
     public function updateMyEmail(Request $request)
     {
@@ -968,10 +968,10 @@ class UserController extends Controller
             $user->email = $request->email;
             $user->verification_code = null;
             if (!$user->save()) {
-                throw new \Exception();
+                throw new Exception();
             }
             return response()->jsonApi(["message" => "Email updated"], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->jsonApi(["message" => "An error occurred! Please, try again."], 500);
         }
     }
@@ -1035,6 +1035,7 @@ class UserController extends Controller
      *     )
      * )
      * @param Request $request
+     *
      * @return mixed
      */
     public function identifyStart(Request $request): mixed
@@ -1047,7 +1048,7 @@ class UserController extends Controller
                 'type' => 'danger',
                 'title' => "Get user",
                 'message' => "User with id #{$id} not found!",
-                'data' => ''
+                'data' => '',
             ], 404);
         }
 
@@ -1055,21 +1056,21 @@ class UserController extends Controller
         $data = (new IdentityVerification())->startSession($user, $request);
 
         // Return response to client
-        if($data->status === 'success'){
+        if ($data->status === 'success') {
             return response()->jsonApi([
                 'type' => 'success',
                 'title' => 'Start KYC verification',
                 'message' => "Session started successfully",
-                'data' => $data->verification
+                'data' => $data->verification,
             ], 200);
-        }else{
+        } else {
             return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'Start KYC verification',
                 'message' => $data->message,
                 'data' => [
-                    'code' => $data->code ?? ''
-                ]
+                    'code' => $data->code ?? '',
+                ],
             ], 400);
         }
     }
@@ -1126,6 +1127,7 @@ class UserController extends Controller
      * )
      *
      * @param Request $request
+     *
      * @return mixed
      */
     public function identifyWebHook(Request $request): mixed
@@ -1138,7 +1140,7 @@ class UserController extends Controller
                 'type' => 'warning',
                 'title' => 'User data identification',
                 'message' => "Validation error",
-                'data' => $e->getMessage()
+                'data' => $e->getMessage(),
             ], 400);
         }
 
@@ -1151,7 +1153,7 @@ class UserController extends Controller
                     'type' => 'danger',
                     'title' => "Get user",
                     'message' => "User with id #" . Auth::user()->id . " not found!",
-                    'data' => ''
+                    'data' => '',
                 ], 404);
             }
 
@@ -1172,14 +1174,14 @@ class UserController extends Controller
                 'type' => 'success',
                 'title' => 'New user registration',
                 'message' => "User identity verified successfully",
-                'data' => []
+                'data' => [],
             ], 200);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'warning',
                 'title' => 'User data identification',
                 'message' => "Unknown error",
-                'data' => $e->getMessage()
+                'data' => $e->getMessage(),
             ], 500);
         }
     }

@@ -17,10 +17,10 @@ class CreateIdentificationsTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('session_id')->index();
 
-            // $table->foreignId('user_id')
-            //     ->constrained()
-            //     ->onUpdate('cascade')
-            //     ->onDelete('cascade');
+            $table->uuid('user_id');
+            $table->foreign('user_id')->references('id')->on('users')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
 
             $table->unsignedSmallInteger('status')->default(0);
             $table->text('payload')->nullable();
