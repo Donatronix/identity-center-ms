@@ -5,6 +5,7 @@ namespace App\Api\V1\Controllers\OneStepId2;
 use App\Api\V1\Controllers\Controller;
 use App\Exceptions\SMSGatewayException;
 use App\Models\VerifyStepInfo;
+use App\Models\RecoveryQuestion;
 use App\Models\User;
 use Exception;
 use PubSub;
@@ -337,24 +338,24 @@ class UserInfoRecoveryController extends Controller
      *                 example="richard.brown"
      *             ),
      *              @OA\Property(
-     *                 property="question1",
+     *                 property="answer1",
      *                 type="string",
-     *                 description="User account  recovery question 1",
-     *                 required={"question1"},
+     *                 description="User account recovery answer 1",
+     *                 required={"answer1"},
      *                 example="Kathrine"
      *             ),
      *             @OA\Property(
-     *                 property="question2",
+     *                 property="answer2",
      *                 type="string",
-     *                 description="User account  recovery question 2",
-     *                 required={"question2"},
+     *                 description="User account  recovery answer 2",
+     *                 required={"answer2"},
      *                 example="Mikky"
      *             ),
      *              @OA\Property(
-     *                 property="question3",
+     *                 property="answer3",
      *                 type="string",
-     *                 description="User account  recovery question 3",
-     *                 required={"question3"},
+     *                 description="User account  recovery answer 3",
+     *                 required={"answer3"},
      *                 example="United Kindom"
      *             )
      *         )
@@ -393,44 +394,53 @@ class UserInfoRecoveryController extends Controller
      */
     public function recoveryQuestions(Request $request): JsonResponse
     {
-        // Validate user input data
-        $input = $this->validate($request, [
-                    'username'=>'required|string',
-                    'question1'=>'required|string',
-                    'question2'=>'required|string',
-                    'question3'=>'required|string'
-                ]);
+         // Validate user input data
+         $input = $this->validate($request, RecoveryQuestion::rules());
        
-        try {
-            // Update user account
-            $user = User::where('username', $input['username'])->first();
-            
-            //$user->question = $input['question1'];
-            
-            if($user->save()){
-                // Return response
-                return response()->json([
-                    'type' => 'success',
-                    'title' => "Update user account step 3",
-                    'message' => 'User account was successful updated',
-                    'data' => ['username'=>$input['username']]
-                ], 200);
-            }else{
-                return response()->json([
-                    'type' => 'danger',
-                    'title' => "Update user account step 1",
-                    'message' => 'User account was NOT  updated',
-                    'data' => null
-                ], 400);
-            }
-            
-        } catch (Exception $e) {
-            return response()->json([
-                'type' => 'danger',
-                'title' => "Update user account",
-                'message' => $e->getMessage()
-            ], 400);
-        }
+         try {
+             // Update user account
+             $userQuery = User::where('username', $input['username']);
+             
+             //Does the user account exist?
+             if($userQuery->exists()){
+                 //get the user ID
+                 $userId=$userQuery->first()->id;
+ 
+                 //Retrieve recovery question
+                 $questions = RecoveryQuestion::where('user_id', $userId)->first();
+
+                 if(
+                     $questions->answer_one===$input['question1'] 
+                    && $questions->answer_two===$input['question2'] 
+                    && $questions->answer_three===$input['question3']
+                 ){
+                     // Return response
+                     return response()->json([
+                         'type' => 'success',
+                         'message' => 'User account security questions verified.',
+                         'data' => ['username'=>$input['username']]
+                     ], 200);
+                 }else{
+                     return response()->json([
+                         'type' => 'danger',
+                         'message' => 'User account security questions NOT verified.',
+                         'data' => null
+                     ], 400);
+                 }
+             }else{
+                 return response()->json([
+                     'type' => 'danger',
+                     'message' => 'User account was not found!',
+                     'data' => null
+                 ], 404);
+             }   
+         } catch (Exception $e) {
+             return response()->json([
+                 'type' => 'danger',
+                 'message' => $e->getMessage(),
+                 'data' => null
+             ], 400);
+         }
     }
 
     /**
@@ -455,16 +465,24 @@ class UserInfoRecoveryController extends Controller
      *             type="object",
      *             
      *             @OA\Property(
-     *                 property="phone",
+     *                 property="username",
      *                 type="string",
-     *                 description="Send recovered ID to phone",
-     *                 example="+448594048303"
+     *                 description="User account recovery username",
+     *                 example="kiels.john"
      *             ),
      *              @OA\Property(
-     *                 property="messenger",
-     *                 type="string",
-     *                 description="Send recovered ID to messenger",
-     *                 example="whatsapp"
+     *                 property="sendby",
+     *                 type="array",
+     *                 description="Send recovered ID to phone or messenger",
+     *                 example={"phone","messenger"},
+     *                 @OA\Items( 
+     *                      @OA\Property(
+     *                           property="option",
+     *                           type="string",
+     *                           description="Send recovered option",
+     *                           example="phone"
+     *                       )
+     *                  )
      *             )
      *         )
      *     ),
@@ -521,13 +539,62 @@ class UserInfoRecoveryController extends Controller
      * )
      *
      * @param Request $request
+     * @param 
      *
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function sendRecoveredID(Request $request): JsonResponse
+    public function sendRecoveredID(Request $request, SendVerifyToken $sendOTP): JsonResponse
     {
-        
+        // Validate user input data
+        $input = $this->validate($request, [
+            'username'=>'required|string',
+            'sendby'=>'required|array'
+        ]);
+       
+        try {
+            // Update user account
+            $username= $input['username'];
+            $userQuery = User::where('username', $username);
+            
+            //Does the user account exist?
+            if($userQuery->exists()){
+                //get the user ID
+                $user=$userQuery->first();
+
+                $sendby = $input['sendby'];
+                $id = "{$username}@onestep.com";
+
+                // Send retrieved ID to user (SMS or Massenger)
+                if(!empty($sendby)){
+                    if(in_array('phone', $sendby)){
+                        $sendOTP->dispatchOTP('sms',$user->phone, $id); 
+                    }elseif(in_array('messenger', $sendby)){
+                        $sendOTP->dispatchOTP('whatsapp',$user->phone, $id); 
+                    }
+                }
+                
+                // Return response
+                return response()->json([
+                    'type' => 'success',
+                    'message' => 'User account ID has been sent.',
+                    'data' => ['username'=>$input['username']]
+                ], 200);
+               
+            }else{
+                return response()->json([
+                    'type' => 'danger',
+                    'message' => 'User account was not found!',
+                    'data' => null
+                ], 404);
+            }   
+        } catch (Exception $e) {
+            return response()->json([
+                'type' => 'danger',
+                'message' => $e->getMessage(),
+                'data' => null
+            ], 400);
+        }
     }
 
 }

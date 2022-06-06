@@ -50,7 +50,7 @@ class VerifyStepInfo extends Model
      * 
      * @return array 
      */
-    public static function roles():array
+    public static function rules():array
     {
         return [
             'username'=>'required|string',

@@ -52,6 +52,6 @@ class SendVerifyToken {
             return false;
         }
 
-        return $response->json();
+        return $response->successful();
     }
 }

@@ -5,6 +5,7 @@ namespace App\Api\V1\Controllers\OneStepId2;
 use App\Api\V1\Controllers\Controller;
 use App\Exceptions\SMSGatewayException;
 use App\Models\VerifyStepInfo;
+use App\Models\RecoveryQuestion;
 use App\Models\User;
 use Exception;
 use PubSub;
@@ -156,7 +157,7 @@ class CreateUserIDController extends Controller
     public function createAccount(Request $request, SendVerifyToken $sendOTP): JsonResponse
     {
       //validate input date
-      $input = $this->validate($request, VerifyStepInfo::roles());
+      $input = $this->validate($request, VerifyStepInfo::rules());
       
       $sendto = $this->getTokenReceiver($input);
 
@@ -245,13 +246,19 @@ class CreateUserIDController extends Controller
      *             @OA\Property(
      *                 property="receiver",
      *                 type="string",
-     *                 description="Resent OTP channel for OneStep 2.0 user account.",
+     *                 description="Resend OTP channel for OneStep 2.0 user account.",
      *                 example="+4492838989290"
+     *             ),
+     *             @OA\Property(
+     *                 property="username",
+     *                 type="string",
+     *                 description="Resend OTP username for OneStep 2.0 user account.",
+     *                 example="kiels.john"
      *             ),
      *             @OA\Property(
      *                 property="channel",
      *                 type="string",
-     *                 description="Resent OTP channel for OneStep 2.0 user account.",
+     *                 description="Resend OTP channel for OneStep 2.0 user account.",
      *                 example="sms"
      *             )
      *         )
@@ -298,10 +305,12 @@ class CreateUserIDController extends Controller
        //validate input date
        $input = $this->validate($request, [
            'receiver'=>'required|string',
-           'channel'=>'required|string'
+           'channel'=>'required|string',
+           'username'=>'required|string'
        ]);
       
         $sendto = $input['receiver'];
+
         try{
             // Create verification token (OTP - One Time Password)
             $token = VerifyStepInfo::generateOTP(7);
@@ -309,6 +318,15 @@ class CreateUserIDController extends Controller
             //Generate token expiry time in minutes
             $validity = VerifyStepInfo::tokenValidity(30);
             
+            // save verification token
+            VerifyStepInfo::create([
+                'username'=>$input['username'],
+                'channel'=>$input['channel'],
+                'receiver'=>$sendto,
+                'code'=>$token,
+                'validity'=>$validity
+            ]);
+
             // Send verification token (SMS or Massenger)
             $sendOTP->dispatchOTP($input['channel'], $sendto, $token);
             
@@ -333,7 +351,7 @@ class CreateUserIDController extends Controller
      *
      * @OA\Post(
      *     path="/user-account/otp/verify",
-     *     summary="Create new user for One-Step 2.0",
+     *     summary="Verify new user OTP for One-Step 2.0",
      *     description="Verify phone number or handler to create new user for One-Step 2.0",
      *     tags={"User Account by OneStep 2.0"},
      *
@@ -652,14 +670,34 @@ class CreateUserIDController extends Controller
      *                 example="danger"
      *             ),
      *             @OA\Property(
-     *                 property="title",
+     *                 property="message",
      *                 type="string",
      *                 example="Create new user account step 1"
      *             ),
      *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 description="User object",
+     *                 example=""
+     *             )
+     *         )
+     *     ),
+     *      @OA\Response(
+     *          response=404,
+     *          description="User Account Not Found",
+     *
+     *          @OA\JsonContent(
+     *             type="object",
+     *
+     *             @OA\Property(
+     *                 property="type",
+     *                 type="string",
+     *                 example="danger"
+     *             ),
+     *             @OA\Property(
      *                 property="message",
      *                 type="string",
-     *                 example=""
+     *                 example="User account not found."
      *             ),
      *             @OA\Property(
      *                 property="data",
@@ -679,41 +717,50 @@ class CreateUserIDController extends Controller
     public function updateRecoveryQuestion(Request $request): JsonResponse
     {
         // Validate user input data
-        $input = $this->validate($request, [
-                    'username'=>'required|string',
-                    'question1'=>'required|string',
-                    'question2'=>'required|string',
-                    'question3'=>'required|string'
-                ]);
+        $input = $this->validate($request, RecoveryQuestion::rules());
        
         try {
             // Update user account
-            $user = User::where('username', $input['username'])->first();
+            $userQuery = User::where('username', $input['username']);
             
-            //$user->question = $input['question1'];
-            
-            if($user->save()){
-                // Return response
-                return response()->json([
-                    'type' => 'success',
-                    'title' => "Update user account step 3",
-                    'message' => 'User account was successful updated',
-                    'data' => ['username'=>$input['username']]
-                ], 200);
+            //Does the user account exist?
+            if($userQuery->exists()){
+                //get the user ID
+                $userId=$userQuery->first()->id;
+
+                //Save recovery question
+                $question = new RecoveryQuestion;
+                $question->user_id=$userId;
+                $question->answer_one=$input['question1'];
+                $question->answer_two=$input['question2'];
+                $question->answer_three=$input['question3'];
+                
+                if($question->save()){
+                    // Return response
+                    return response()->json([
+                        'type' => 'success',
+                        'message' => 'User account security questions was successful saved',
+                        'data' => ['username'=>$input['username']]
+                    ], 200);
+                }else{
+                    return response()->json([
+                        'type' => 'danger',
+                        'message' => 'User account security questions was NOT  saved',
+                        'data' => null
+                    ], 400);
+                }
             }else{
                 return response()->json([
                     'type' => 'danger',
-                    'title' => "Update user account step 1",
-                    'message' => 'User account was NOT  updated',
+                    'message' => 'User account was not found!',
                     'data' => null
-                ], 400);
-            }
-            
+                ], 404);
+            }   
         } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
-                'title' => "Update user account",
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'data' => null
             ], 400);
         }
     }

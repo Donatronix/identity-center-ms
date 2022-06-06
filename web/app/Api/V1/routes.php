@@ -47,7 +47,7 @@ $router->group([
         $router->post('/userinfo', "UserInfoRecoveryController@recoveryInfo");
         $router->post('/otp/verify', "UserInfoRecoveryController@verifyOTP");
         $router->post('/questions', "UserInfoRecoveryController@recoveryQuestions");
-        $router->post('/sendid', "CreateUserIDController@sendRecoveredID");
+        $router->post('/sendid', "UserInfoRecoveryController@sendRecoveredID");
     });
 
     /**
