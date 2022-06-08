@@ -4,6 +4,7 @@ namespace App\Api\V1\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,16 +13,16 @@ use OpenApi\Annotations as OA;
 use PubSub;
 use Throwable;
 
-class WaitingListsAdminController extends Controller
+class ServiceAdminController extends Controller
 {
 
     /**
      *  Add new admin
      *
      * @OA\Post(
-     *     path="/admin/waiting-lists/admins",
+     *     path="/admin/service/admins",
      *     description="Add new admin",
-     *     tags={"Waiting Lists Admins"},
+     *     tags={"Microservice Admins"},
      *
      *     security={{
      *          "default" :{
@@ -32,7 +33,7 @@ class WaitingListsAdminController extends Controller
      *     }},
      *
      *     x={
-     *          "auth-type": "Applecation & Application Use",
+     *          "auth-type": "Application & Application Use",
      *          "throttling-tier": "Unlimited",
      *          "wso2-appliocation-security": {
      *              "security-types": {"oauth2"},
@@ -58,6 +59,15 @@ class WaitingListsAdminController extends Controller
      *         )
      *     ),
      *
+     *     @OA\Parameter(
+     *         name="service",
+     *         in="query",
+     *         description="Microservice Admin",
+     *         @OA\Schema(
+     *             type="string"
+     *         )
+     *     ),
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Output data",
@@ -78,6 +88,12 @@ class WaitingListsAdminController extends Controller
      *                     type="string",
      *                     description="Admin role",
      *                     example="admin",
+     *                 ),
+     *                 @OA\Property(
+     *                     property="service",
+     *                     type="string",
+     *                     description="Microservice",
+     *                     example="waiting-lists-ms",
      *                 ),
      *             ),
      *         ),
@@ -128,6 +144,7 @@ class WaitingListsAdminController extends Controller
                 $validator = Validator::make($request->all(), [
                     'user_id' => 'required|string|exists:users,id',
                     'role' => 'required|string|exists:roles,name',
+                    'service' => 'required|string',
                 ]);
 
                 if ($validator->fails()) {
@@ -142,22 +159,21 @@ class WaitingListsAdminController extends Controller
                 // Retrieve the validated input...
                 $validated = $validator->validated();
 
-
-                if ($admin = User::find('id', $validated['user_id'])) {
-                    return response()->jsonApi([
-                        'type' => 'danger',
-                        'title' => "Adding new admin failed",
-                        'message' => "Admin already exists",
-                        'data' => null,
-                    ], 404);
+                $admin = User::find($validated['user_id']);
+                if (empty($admin)) {
+                    throw new Exception('User does not exist');
                 }
+
 
                 PubSub::transaction(function () use ($validated, &$admin) {
                     $admin = User::find($validated['user_id']);
-                })->publish('NewAdminAdded', [
-                    'admin' => $admin?->toArray(),
+                })->publish('AdminManagerEvent', [
+                    'user_id' => $validated['user_id'],
                     'role' => $validated['role'],
-                ], 'new_admin');
+                    'service' => $validated['service'],
+                    'action' => 'store',
+                ], 'service_admin');
+
             });
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
@@ -187,9 +203,9 @@ class WaitingListsAdminController extends Controller
      *  Update admin role
      *
      * @OA\Patch(
-     *     path="/admin/waiting-lists/admins/{id}",
-     *     description="Update admin role",
-     *     tags={"Waiting Lists Admins"},
+     *     path="/admin/service/admins",
+     *     description="Update admin",
+     *     tags={"Microservice Admins"},
      *
      *     security={{
      *          "default" :{
@@ -200,7 +216,7 @@ class WaitingListsAdminController extends Controller
      *     }},
      *
      *     x={
-     *          "auth-type": "Applecation & Application Use",
+     *          "auth-type": "Application & Application Use",
      *          "throttling-tier": "Unlimited",
      *          "wso2-appliocation-security": {
      *              "security-types": {"oauth2"},
@@ -217,12 +233,20 @@ class WaitingListsAdminController extends Controller
      *         ),
      *     ),
      *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
+     *         name="user_id",
+     *         in="query",
      *         description="Admin user id",
      *         @OA\Schema(
      *             type="string"
      *         ),
+     *     ),     *
+     *     @OA\Parameter(
+     *         name="service",
+     *         in="query",
+     *         description="Microservice Admin",
+     *         @OA\Schema(
+     *             type="string"
+     *         )
      *     ),
      *
      *     @OA\Response(
@@ -302,11 +326,10 @@ class WaitingListsAdminController extends Controller
      * )
      *
      * @param Request $request
-     * @param         $id
      *
      * @return mixed
      */
-    public function updateRole(Request $request, $id): mixed
+    public function updateRole(Request $request): mixed
     {
         try {
 
@@ -314,6 +337,7 @@ class WaitingListsAdminController extends Controller
                 $validator = Validator::make($request->all(), [
                     'user_id' => 'required|string|exists:users,id',
                     'role' => 'required|string',
+                    'service' => 'required|string',
                 ]);
 
                 if ($validator->fails()) {
@@ -328,11 +352,19 @@ class WaitingListsAdminController extends Controller
                 // Retrieve the validated input...
                 $validated = $validator->validated();
 
+                $admin = User::find($validated['user_id']);
+                if (empty($admin)) {
+                    throw new Exception('User does not exist');
+                }
+
+
                 PubSub::transaction(function () {
 
-                })->publish('AdminRoleUpdate', [
+                })->publish('AdminManagerEvent', [
                     'user_id' => $validated['user_id'],
                     'role' => $validated['role'],
+                    'service' => $validated['service'],
+                    'action' => 'update',
                 ], 'admin_update');
             });
         } catch (ModelNotFoundException $e) {
@@ -356,6 +388,13 @@ class WaitingListsAdminController extends Controller
             'message' => 'Admin was updated successfully',
             'data' => User::find($request->user_id),
         ], 200);
+    }
+
+    public function index(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'service' => 'required|string',
+        ]);
     }
 
 }
