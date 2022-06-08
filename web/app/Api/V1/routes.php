@@ -72,7 +72,8 @@ $router->group([
          */
 
         $router->post('/service/admins', 'ServiceAdminController@store');
-        $router->patch('/service/admins', 'ServiceAdminController@updateRole');
+        $router->patch('/service/admins', 'ServiceAdminController@update');
+        $router->delete('/service/admins', 'ServiceAdminController@destroy');
     });
 
 });
