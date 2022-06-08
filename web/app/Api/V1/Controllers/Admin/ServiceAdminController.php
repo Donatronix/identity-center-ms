@@ -168,7 +168,7 @@ class ServiceAdminController extends Controller
                 PubSub::transaction(function () use ($validated, &$admin) {
                     $admin = User::find($validated['user_id']);
                 })->publish('AdminManagerEvent', [
-                    'user_id' => $validated['user_id'],
+                    'admin' => $admin,
                     'role' => $validated['role'],
                     'service' => $validated['service'],
                     'action' => 'store',
@@ -361,11 +361,11 @@ class ServiceAdminController extends Controller
                 PubSub::transaction(function () {
 
                 })->publish('AdminManagerEvent', [
-                    'user_id' => $validated['user_id'],
+                    'admin' => $admin,
                     'role' => $validated['role'],
                     'service' => $validated['service'],
                     'action' => 'update',
-                ], 'admin_update');
+                ], 'service_admin');
             });
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
