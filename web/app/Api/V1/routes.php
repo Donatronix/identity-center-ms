@@ -45,8 +45,10 @@ $router->group([
         "namespace" => "OneStepId2"
     ], function ($router) {
         $router->get('/{id}/details', "UserProfileController@getProfile");
-        $router->get('/update/{id}', "UserProfileController@updateInfo");
-        $router->put('/update', "UserProfileController@updateSave");
+        $router->put('/password/change', "UserProfileController@updatePassword");
+        $router->put('/username/update', "UserProfileController@updateUsername");
+        $router->put('/fullname/update', "UserProfileController@updateFullname");
+        $router->put('/country/update', "UserProfileController@updateCountry");
     });
     
     /**
