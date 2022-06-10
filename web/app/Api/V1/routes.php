@@ -24,6 +24,33 @@ $router->group([
     });
 
     /**
+     * PUBLIC ACCESS - CREATE USER ACCOUNT
+     */
+    $router->group([
+        'prefix' => 'user-account',
+        "namespace" => "OneStepId2"
+    ], function ($router) {
+        $router->post('/create', "CreateUserIDController@createAccount");
+        $router->post('/otp/resend', "CreateUserIDController@resendOTP");
+        $router->post('/otp/verify', "CreateUserIDController@verifyOTP");
+        $router->post('/update', "CreateUserIDController@updateUser");
+        $router->post('/update/recovery', "CreateUserIDController@updateRecoveryQuestion");
+    });
+    
+    /**
+     * PUBLIC ACCESS - RECOVER USER ACCOUNT
+     */
+    $router->group([
+        'prefix' => 'user-account/recovery',
+        "namespace" => "OneStepId2"
+    ], function ($router) {
+        $router->post('/userinfo', "UserInfoRecoveryController@recoveryInfo");
+        $router->post('/otp/verify', "UserInfoRecoveryController@verifyOTP");
+        $router->post('/questions', "UserInfoRecoveryController@recoveryQuestions");
+        $router->post('/sendid', "UserInfoRecoveryController@sendRecoveredID");
+    });
+
+    /**
      * PRIVATE ACCESS
      */
 

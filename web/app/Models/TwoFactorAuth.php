@@ -24,7 +24,7 @@ class TwoFactorAuth extends Model
 
         return $token;
     }
-
+   
     public static function verifyToken(User $user, $token)
     {
         try {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\V1\Controllers\OneStepId;
+namespace App\Api\V1\Controllers\OneStepId1;
 
 use App\Api\V1\Controllers\Controller;
 use App\Models\TwoFactorAuth;
@@ -21,7 +21,7 @@ class VerifyPhoneNumber extends Controller
      *     path="/auth/send-code",
      *     summary="Verify Phone Number",
      *     description="Verify Phone Number",
-     *     tags={"Auth by OneStep"},
+     *     tags={"Auth by OneStep 1.0"},
      *
      *     @OA\RequestBody(
      *         required=true,
