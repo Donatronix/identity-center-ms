@@ -68,11 +68,12 @@ $router->group([
         });
 
         /**
-         * Add Admins to waiting-lists-ms
+         * Add Admins to microservice
          */
 
-        $router->post('waiting-lists/admins', 'WaitingListsAdminController@store');
-        $router->patch('waiting-lists/admins/{id}', 'WaitingListsAdminController@updateRole');
+        $router->post('/service/admins', 'ServiceAdminController@store');
+        $router->patch('/service/admins', 'ServiceAdminController@update');
+        $router->delete('/service/admins', 'ServiceAdminController@destroy');
     });
 
 });
