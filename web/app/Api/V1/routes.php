@@ -36,6 +36,18 @@ $router->group([
         $router->post('/update', "CreateUserIDController@updateUser");
         $router->post('/update/recovery', "CreateUserIDController@updateRecoveryQuestion");
     });
+
+    /**
+     * PUBLIC ACCESS - CREATE USER ACCOUNT
+     */
+    $router->group([
+        'prefix' => 'user-profile',
+        "namespace" => "OneStepId2"
+    ], function ($router) {
+        $router->get('/{id}/details', "UserProfileController@getProfile");
+        $router->get('/update/{id}', "UserProfileController@updateInfo");
+        $router->put('/update', "UserProfileController@updateSave");
+    });
     
     /**
      * PUBLIC ACCESS - RECOVER USER ACCOUNT
