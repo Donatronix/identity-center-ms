@@ -35,9 +35,9 @@ class UserProfileController extends Controller
      *          in="path",
      *          description="One-Step user ID",
      *          required=true,
-     *          example="23",
+     *          example="373458be-3f01-40ca-b6f3-245239c7889f",
      *          @OA\Schema(
-     *              type="integer"
+     *              type="string"
      *          ),
      *     ),
      *
@@ -113,12 +113,12 @@ class UserProfileController extends Controller
      *     )
      * )
      *
-     * @param int $id
+     * @param string $id
      *
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function getProfile(int $id): JsonResponse
+    public function getProfile(string $id): JsonResponse
     {
         try{
            // Check whether user already exist
@@ -177,9 +177,9 @@ class UserProfileController extends Controller
      *          in="path",
      *          description="One-Step user ID",
      *          required=true,
-     *          example="23",
+     *          example="373458be-3f01-40ca-b6f3-245239c7889f",
      *          @OA\Schema(
-     *              type="integer"
+     *              type="string"
      *          ),
      *     ),
      *
@@ -239,7 +239,7 @@ class UserProfileController extends Controller
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function updateInfo(int $id): JsonResponse
+    public function updateInfo(string $id): JsonResponse
     {
         try{
             // Check whether user already exist
@@ -295,10 +295,10 @@ class UserProfileController extends Controller
      *
      *              @OA\Property(
      *                 property="id",
-     *                 type="integer",
+     *                 type="string",
      *                 description="User ID for user profile update",
      *                 required={"true"},
-     *                 example="45"
+     *                 example="373458be-3f01-40ca-b6f3-245239c7889f"
      *             ),
      *              @OA\Property(
      *                 property="email",
