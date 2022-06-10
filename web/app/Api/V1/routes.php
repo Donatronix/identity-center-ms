@@ -24,6 +24,33 @@ $router->group([
     });
 
     /**
+     * PUBLIC ACCESS - CREATE USER ACCOUNT
+     */
+    $router->group([
+        'prefix' => 'user-account',
+        "namespace" => "OneStepId2"
+    ], function ($router) {
+        $router->post('/create', "CreateUserIDController@createAccount");
+        $router->post('/otp/resend', "CreateUserIDController@resendOTP");
+        $router->post('/otp/verify', "CreateUserIDController@verifyOTP");
+        $router->post('/update', "CreateUserIDController@updateUser");
+        $router->post('/update/recovery', "CreateUserIDController@updateRecoveryQuestion");
+    });
+    
+    /**
+     * PUBLIC ACCESS - RECOVER USER ACCOUNT
+     */
+    $router->group([
+        'prefix' => 'user-account/recovery',
+        "namespace" => "OneStepId2"
+    ], function ($router) {
+        $router->post('/userinfo', "UserInfoRecoveryController@recoveryInfo");
+        $router->post('/otp/verify', "UserInfoRecoveryController@verifyOTP");
+        $router->post('/questions', "UserInfoRecoveryController@recoveryQuestions");
+        $router->post('/sendid', "UserInfoRecoveryController@sendRecoveredID");
+    });
+
+    /**
      * PRIVATE ACCESS
      */
 
@@ -68,11 +95,12 @@ $router->group([
         });
 
         /**
-         * Add Admins to waiting-lists-ms
+         * Add Admins to microservice
          */
 
-        $router->post('waiting-lists/admins', 'WaitingListsAdminController@store');
-        $router->patch('waiting-lists/admins/{id}', 'WaitingListsAdminController@updateRole');
+        $router->post('/service/admins', 'ServiceAdminController@store');
+        $router->patch('/service/admins', 'ServiceAdminController@update');
+        $router->delete('/service/admins', 'ServiceAdminController@destroy');
     });
 
 });

@@ -72,7 +72,6 @@ class UserController extends Controller
      * )
      *
      */
-
     public function index()
     {
         $user = Auth::user();
@@ -729,6 +728,7 @@ class UserController extends Controller
         $validationMessages = [
             'verification_code.regex' => 'The verification code is invalid',
         ];
+        
         $this->validate($request, $rules, $validationMessages);
 
         try {

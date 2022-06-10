@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\V1\Controllers\OneStepId;
+namespace App\Api\V1\Controllers\OneStepId1;
 
 use App\Api\V1\Controllers\Controller;
 use Exception;
@@ -18,7 +18,7 @@ class AuthController extends Controller
      *     path="/auth/refresh-token",
      *     summary="Refresh Token",
      *     description="Refresh expired Token",
-     *     tags={"Auth by OneStep"},
+     *     tags={"Auth by OneStep 1.0"},
      *
      *     @OA\RequestBody(
      *         required=true,

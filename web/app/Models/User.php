@@ -306,7 +306,6 @@ use Spatie\Permission\Traits\HasRoles;
         return $rules;
     }
 
-
     /**
      * Validation rules for identity verification
      *
@@ -335,5 +334,21 @@ use Spatie\Permission\Traits\HasRoles;
     public function findForPassport($username)
     {
         return $this->where('username', $username)->first();
+    }
+
+    /**
+     * Provide input data validation array.
+     *
+     * @return array
+     */
+    public static function rules():array
+    {
+        return [
+            'username' => 'required|string',
+            'fullname' => 'required|string',
+            'country' => 'required|string',
+            'address' => 'required|string',
+            'birthday' => 'required|string' 
+        ];
     }
 }
