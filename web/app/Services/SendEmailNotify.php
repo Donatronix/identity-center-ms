@@ -6,21 +6,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 
-class SendVerifyToken {
+class SendEmailNotify {
     
     /**
      * Generate request url
      * 
-     * @param string $instance
-     * 
      * @return string
      */
-    public function requestUrl(string $instance):string
+    public function requestUrl():string
     {
         $host = env('MESSENGER_BASE_URL');
         $version = env('MESSENGER_VERSION');
          
-        return "{$host}/{$version}/messages/{$instance}/send-message";
+        return "{$host}/{$version}/mail";
     }
 
     public function getHeaders()
@@ -32,17 +30,18 @@ class SendVerifyToken {
         ];
     }
 
-    public function requestData($to, $message)
+    public function requestData($to, $subject, $message)
     {
         return [
-            'to'=>$to,
-            'message'=>$message
+            'emails'=>$to,
+            'subject'=>$to,
+            'body'=>$message
         ];
     }
 
-    public function dispatchOTP($instance, $to, $message){
-        $params = $this->requestData($to, $message);
-        $url = $this->requestUrl($instance);
+    public function dispatchEmail($to, $subject, $message){
+        $params = $this->requestData($to, $subject, $message);
+        $url = $this->requestUrl();
         $headers = $this->getHeaders();
 
         try {

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Services\SendEmailNotify;
 
 
 class UserProfileController extends Controller
@@ -253,11 +254,12 @@ class UserProfileController extends Controller
      * )
      *
      * @param Request $request
+     * @param SendEmailNotify $sendEmail
      *
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function updatePassword(Request $request): JsonResponse
+    public function updatePassword(Request $request, SendEmailNotify $sendEmail): JsonResponse
     {
         $validData = $this->validate($request, [
             'id'=> 'required|string',
@@ -280,8 +282,11 @@ class UserProfileController extends Controller
                     'password'=>$newPass
                 ]);
 
-                //TODO:send email to user
- 
+                //Send notification email
+                $subject='Change Password'; 
+                $message= 'Your password has been updated successfully.';
+                $sendEmail->dispatchEmail($to['email'], $subject, $message);
+
                  //Show response
                  return response()->json([
                      'type' => 'success',
@@ -377,11 +382,12 @@ class UserProfileController extends Controller
      * )
      *
      * @param Request $request
+     * @param SendEmailNotify $sendEmail
      *
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function updateUsername(Request $request): JsonResponse
+    public function updateUsername(Request $request, SendEmailNotify $sendEmail): JsonResponse
     {
       //validate input date
       $input = $this->validate($request,[
@@ -400,6 +406,11 @@ class UserProfileController extends Controller
                 $user->update([
                     'username'=>$input['username']
                 ]);
+
+                //Send notification email
+                $subject='Change Username'; 
+                $message= 'Your username has been updated successfully.';
+                $sendEmail->dispatchEmail($to['email'], $subject, $message);
             
                 //Show response
                 return response()->json([
@@ -577,7 +588,7 @@ class UserProfileController extends Controller
      *         @OA\JsonContent(
      *             type="object",
      *             
-     *             @OA\Property(
+     *            @OA\Property(
      *                 property="id",
      *                 type="string",
      *                 description="User ID for user profile update",
@@ -675,6 +686,248 @@ class UserProfileController extends Controller
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to update country.",
+                "data" =>  $e->getMessage()
+            ], 400);
+        }
+      
+    }
+
+    /**
+     * Update email for One-Step 2.0
+     *
+     * @OA\Put(
+     *     path="/user-profile/email/update",
+     *     summary="Update email",
+     *     description="Update email for One-Step 2.0",
+     *     tags={"User Profile by OneStep 2.0"},
+     *
+     *     security={{
+     *         "passport": {
+     *             "User",
+     *             "ManagerRead"
+     *         }
+     *     }},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             
+     *            @OA\Property(
+     *                 property="email",
+     *                 type="string",
+     *                 description="User email for user profile update",
+     *                 example="johnkiels@ultainfinity.com"
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *          response=201,
+     *          description="Success",
+     *
+     *          @OA\JsonContent(
+     *             type="object",
+     *
+     *             @OA\Property(
+     *                 property="type",
+     *                 type="string",
+     *                 example="success"
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="Email update was successful"
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *          response=400,
+     *          description="Bad Request",
+     *
+     *          @OA\JsonContent(
+     *             type="object",
+     *
+     *             @OA\Property(
+     *                 property="type",
+     *                 type="string",
+     *                 example="danger"
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="Email update FAILED"
+     *             )
+     *         )
+     *     )
+     * )
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     * @throws ValidationException
+     */
+    public function updateEmail(Request $request): JsonResponse
+    {
+      //validate input date
+      $input = $this->validate($request,[
+        'email'=>'required|string|email'
+      ]);
+
+       try{
+           // Check whether user already exist
+           $userQuery = User::where(['email'=> $input['email']]);
+               
+            if($userQuery->exists()){
+                
+                $user = $userQuery->firstOrFail();
+
+                //Update username
+                $user->update([
+                    'email'=>$input['email']
+                ]);
+            
+                //Show response
+                return response()->json([
+                    'type' => 'success',
+                    'message' => "Email update was successful."
+                ], 400);
+            }else{
+                return response()->json([
+                    'type' => 'danger',
+                    'message' => "User profile does NOT exist.",
+                    "data" => null
+                ], 400);
+            }
+        }catch(ModelNotFoundException $e){
+            return response()->json([
+                'type' => 'danger',
+                'message' => "Unable to update email.",
+                "data" =>  $e->getMessage()
+            ], 400);
+        }
+      
+    }
+
+    /**
+     * Update local for One-Step 2.0
+     *
+     * @OA\Put(
+     *     path="/user-profile/local/update",
+     *     summary="Update local",
+     *     description="Update local for One-Step 2.0",
+     *     tags={"User Profile by OneStep 2.0"},
+     *
+     *     security={{
+     *         "passport": {
+     *             "User",
+     *             "ManagerRead"
+     *         }
+     *     }},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             
+     *            @OA\Property(
+     *                 property="id",
+     *                 type="string",
+     *                 description="User ID for user profile update",
+     *                 required={"true"},
+     *                 example="373458be-3f01-40ca-b6f3-245239c7889f"
+     *             ),
+     *             @OA\Property(
+     *                 property="local",
+     *                 type="string",
+     *                 description="User local for user profile update",
+     *                 example="UK English"
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *          response=201,
+     *          description="Success",
+     *
+     *          @OA\JsonContent(
+     *             type="object",
+     *
+     *             @OA\Property(
+     *                 property="type",
+     *                 type="string",
+     *                 example="success"
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="Local update was successful"
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *          response=400,
+     *          description="Bad Request",
+     *
+     *          @OA\JsonContent(
+     *             type="object",
+     *
+     *             @OA\Property(
+     *                 property="type",
+     *                 type="string",
+     *                 example="danger"
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="Local update FAILED"
+     *             )
+     *         )
+     *     )
+     * )
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     * @throws ValidationException
+     */
+    public function updateLocal(Request $request): JsonResponse
+    {
+      //validate input date
+      $input = $this->validate($request,[
+        'id'=>'required|string',
+        'local'=>'required|string'
+      ]);
+
+       try{
+           // Check whether user already exist
+           $userQuery = User::where(['id'=> $input['id']]);
+               
+            if($userQuery->exists()){
+                
+                $user = $userQuery->firstOrFail();
+
+                //Update username
+                $user->update([
+                    'local'=>$input['local']
+                ]);
+            
+                //Show response
+                return response()->json([
+                    'type' => 'success',
+                    'message' => "Email update was successful."
+                ], 400);
+            }else{
+                return response()->json([
+                    'type' => 'danger',
+                    'message' => "User profile does NOT exist.",
+                    "data" => null
+                ], 400);
+            }
+        }catch(ModelNotFoundException $e){
+            return response()->json([
+                'type' => 'danger',
+                'message' => "Unable to update email.",
                 "data" =>  $e->getMessage()
             ], 400);
         }

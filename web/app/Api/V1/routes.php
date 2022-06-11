@@ -49,6 +49,8 @@ $router->group([
         $router->put('/username/update', "UserProfileController@updateUsername");
         $router->put('/fullname/update', "UserProfileController@updateFullname");
         $router->put('/country/update', "UserProfileController@updateCountry");
+        $router->put('/email/update', "UserProfileController@updateEmail");
+        $router->put('/local/update', "UserProfileController@updateLocal");
     });
     
     /**
