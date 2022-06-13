@@ -9,9 +9,7 @@ RUN set -ex
 RUN apk update
 
 ## Install packages necessary during the build phase
-RUN apk --no-cache add \
-    mc \
-    nano
+RUN apk --no-cache add mc
 
 ## Install GMP extention
 RUN apk add gmp-dev

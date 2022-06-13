@@ -6,7 +6,7 @@ services:
     image: {{DOCKER_IMAGE}}
     restart: always
     networks:
-      - kus-net
+      - ugg.network
     ports:
       - '8200:80'
       - '18200:443'
@@ -26,9 +26,9 @@ services:
     ports:
       - "6379:6379"
     networks:
-      - kus-net
+      - ugg.network
 
 networks:
-  kus-net:
+  ugg.network:
     name: KeyUniversalServicesNet
     driver: bridge
