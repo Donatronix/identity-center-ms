@@ -18,7 +18,7 @@ class CreateRecoveryQuestionsTable extends Migration
             $table->string('user_id')->unique();
             $table->string('question_one')->default('What is my middle name');
             $table->string('answer_one');
-            $table->string('question_two')->default('What is my pet\'s name');
+            $table->string('question_two')->default('What is my pets name');
             $table->string('answer_two');
             $table->string('question_three')->default('Where is the village');
             $table->string('answer_three');

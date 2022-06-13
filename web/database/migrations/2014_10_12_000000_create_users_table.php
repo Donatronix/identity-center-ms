@@ -49,6 +49,7 @@ class CreateUsersTable extends Migration
 
             $table->boolean('subscribed_to_announcement')->default(false);
             $table->string('verify_token')->nullable();
+            $table->string('local')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

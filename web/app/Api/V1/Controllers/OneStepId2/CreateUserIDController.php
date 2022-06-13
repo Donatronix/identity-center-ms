@@ -8,7 +8,6 @@ use App\Models\VerifyStepInfo;
 use App\Models\RecoveryQuestion;
 use App\Models\User;
 use Exception;
-use PubSub;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
