@@ -57,7 +57,6 @@ $app->singleton(
 | the default version. You may register other files below as needed.
 |
 */
-
 $app->configure('app');
 $app->configure('nexmo');
 $app->configure('settings');
@@ -77,7 +76,6 @@ $app->configure('cache');
 */
 
 $app->middleware([
-    \Fruitcake\Cors\HandleCors::class,
     \Sumra\SDK\Middleware\TrimStrings::class,
 ]);
 
@@ -104,12 +102,6 @@ $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Illuminate\Redis\RedisServiceProvider::class);
-
-/**
- * Enable CORS policy
- */
-$app->configure('cors');
-$app->register(Fruitcake\Cors\CorsServiceProvider::class);
 
 /**
  * Spatie

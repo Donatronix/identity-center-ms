@@ -1,6 +1,6 @@
 {
-    "name": "kus/global-identity-centre-ms",
-    "description": "Global Identity Centre API Microservice",
+    "name": "kus/identity-centre-ms",
+    "description": "Identity Centre API Microservice",
     "license": "MIT",
     "type": "project",
     "private": true,
@@ -12,7 +12,6 @@
         "guzzlehttp/guzzle": "^7.4",
         "illuminate/redis": "*",
         "laravel/lumen-framework": "~8",
-        "laravelista/lumen-vendor-publish": "^8.0",
         "predis/predis": "^1.1",
         "spatie/laravel-permission": "^5.5",
         "sumra/sdk": "*"

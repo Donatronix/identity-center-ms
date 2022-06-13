@@ -5,10 +5,16 @@
  */
 $router->group([
     'prefix' => env('APP_API_VERSION', ''),
-    'namespace' => '\App\Api\V1\Controllers',
+    'namespace' => '\App\Api\V1\Controllers'
 ], function ($router) {
     /**
      * PUBLIC ACCESS
+     */
+//    $router->group([], function ($router) {
+//    });
+
+    /**
+     * USER APPLICATION PRIVATE ACCESS
      */
     $router->group([
         'prefix' => 'auth',
@@ -52,7 +58,7 @@ $router->group([
         $router->put('/email/update', "UserProfileController@updateEmail");
         $router->put('/local/update', "UserProfileController@updateLocal");
     });
-    
+
     /**
      * PUBLIC ACCESS - RECOVER USER ACCOUNT
      */
@@ -69,7 +75,6 @@ $router->group([
     /**
      * PRIVATE ACCESS
      */
-
     $router->group(['middleware' => 'auth:api'], function ($router) {
         $router->get('users', 'UserController@index');
     });
@@ -87,15 +92,15 @@ $router->group([
     });
 
     /**
-     * ADMIN PANEL
+     * ADMIN PANEL ACCESS
      */
     $router->group([
         'prefix' => 'admin',
         'namespace' => 'Admin',
         'middleware' => [
             'checkUser',
-            'checkAdmin',
-        ],
+            'checkAdmin'
+        ]
     ], function ($router) {
         $router->group([
             'prefix' => 'users',
@@ -113,10 +118,8 @@ $router->group([
         /**
          * Add Admins to microservice
          */
-
         $router->post('/service/admins', 'ServiceAdminController@store');
         $router->patch('/service/admins', 'ServiceAdminController@update');
         $router->delete('/service/admins', 'ServiceAdminController@destroy');
     });
-
 });

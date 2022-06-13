@@ -1,13 +1,6 @@
 image: alpine:latest
 
 pipelines:
-  default:
-    - step:
-        script:
-          - echo "This script runs on all branches that don't have any specific pipeline assigned in 'branches'."
-          - docker version
-        services:
-          - docker
   branches:
     dev:
       - step:
@@ -17,10 +10,19 @@ pipelines:
             - docker
           script:
             - apk --update --no-cache add openssh-client
-            - echo $(aws ecr get-login --no-include-email --region us-west-2)  > login.sh
-            - sh login.sh
-            - git submodule init && git submodule update --remote
             - ./deploy.sh build
+            - ./deploy.sh login
+            - ./deploy.sh push
+    master:
+      - step:
+          name: Build Image
+          image: atlassian/pipelines-awscli
+          services:
+            - docker
+          script:
+            - apk --update --no-cache add openssh-client
+            - ./deploy.sh build production
+            - ./deploy.sh login
             - ./deploy.sh push
       - step:
           name: EKS Deploy
