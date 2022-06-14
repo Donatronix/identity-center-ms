@@ -25,7 +25,7 @@ $router->group([
 
     /**
      * PUBLIC ACCESS - CREATE USER ACCOUNT
-     */
+    */
     $router->group([
         'prefix' => 'user-account',
         "namespace" => "OneStepId2"
@@ -39,7 +39,7 @@ $router->group([
 
     /**
      * PUBLIC ACCESS - CREATE USER ACCOUNT
-     */
+    */
     $router->group([
         'prefix' => 'user-profile',
         "namespace" => "OneStepId2"
@@ -52,10 +52,22 @@ $router->group([
         $router->put('/email/update', "UserProfileController@updateEmail");
         $router->put('/local/update', "UserProfileController@updateLocal");
     });
+
+    /**
+     * PUBLIC ACCESS - USER SOCIAL MEDIA CONNECTIONS
+    */
+    $router->group([
+        'prefix' => 'user-profile',
+        "namespace" => "OneStepId2"
+    ], function ($router) {
+        $router->post('/redirect', "SocialMediaController@createRedirectUrl");
+        $router->get('/{provider}/callback', "SocialMediaController@mediaCallback");
+        // $router->get('/{provider}/details', "SocialMediaController@connectedUser");
+    });
     
     /**
      * PUBLIC ACCESS - RECOVER USER ACCOUNT
-     */
+    */
     $router->group([
         'prefix' => 'user-account/recovery',
         "namespace" => "OneStepId2"
@@ -68,8 +80,7 @@ $router->group([
 
     /**
      * PRIVATE ACCESS
-     */
-
+    */
     $router->group(['middleware' => 'auth:api'], function ($router) {
         $router->get('users', 'UserController@index');
     });
