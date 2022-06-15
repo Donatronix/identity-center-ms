@@ -38,32 +38,39 @@ $router->group([
     });
 
     /**
-     * PUBLIC ACCESS - CREATE USER ACCOUNT
+     * PRIVATE ACCESS
     */
-    $router->group([
-        'prefix' => 'user-profile',
-        "namespace" => "OneStepId2"
-    ], function ($router) {
-        $router->get('/{id}/details', "UserProfileController@getProfile");
-        $router->put('/password/change', "UserProfileController@updatePassword");
-        $router->put('/username/update', "UserProfileController@updateUsername");
-        $router->put('/fullname/update', "UserProfileController@updateFullname");
-        $router->put('/country/update', "UserProfileController@updateCountry");
-        $router->put('/email/update', "UserProfileController@updateEmail");
-        $router->put('/local/update', "UserProfileController@updateLocal");
+    $router->group(['middleware' => 'checkUser'], function ($router) {
+        /**
+         * CREATE USER ACCOUNT
+        */
+        $router->group([
+            'prefix' => 'user-profile',
+            "namespace" => "OneStepId2"
+        ], function ($router) {
+            $router->get('/{id}/details', "UserProfileController@getProfile");
+            $router->put('/password/change', "UserProfileController@updatePassword");
+            $router->put('/username/update', "UserProfileController@updateUsername");
+            $router->put('/fullname/update', "UserProfileController@updateFullname");
+            $router->put('/country/update', "UserProfileController@updateCountry");
+            $router->put('/email/update', "UserProfileController@updateEmail");
+            $router->put('/local/update', "UserProfileController@updateLocal");
+        });
+
+        /**
+         * USER SOCIAL MEDIA CONNECTIONS
+        */
+        $router->group([
+            'prefix' => 'user-profile',
+            "namespace" => "OneStepId2"
+        ], function ($router) {
+            $router->post('/redirect', "SocialMediaController@createRedirectUrl");
+            $router->get('/{provider}/callback', "SocialMediaController@mediaCallback");
+            $router->get('/social/connections', "SocialMediaController@getMediaData");
+        });
     });
 
-    /**
-     * PUBLIC ACCESS - USER SOCIAL MEDIA CONNECTIONS
-    */
-    $router->group([
-        'prefix' => 'user-profile',
-        "namespace" => "OneStepId2"
-    ], function ($router) {
-        $router->post('/redirect', "SocialMediaController@createRedirectUrl");
-        $router->get('/{provider}/callback', "SocialMediaController@mediaCallback");
-        // $router->get('/{provider}/details', "SocialMediaController@connectedUser");
-    });
+    
     
     /**
      * PUBLIC ACCESS - RECOVER USER ACCOUNT

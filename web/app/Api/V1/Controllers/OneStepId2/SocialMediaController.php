@@ -3,10 +3,12 @@
 namespace App\Api\V1\Controllers\OneStepId2;
 
 use App\Api\V1\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\MediaConnect;
 use Exception;
 
 class SocialMediaController extends Controller
@@ -33,13 +35,6 @@ class SocialMediaController extends Controller
      *             type="object",
      *
      *              @OA\Property(
-     *                 property="id",
-     *                 type="string",
-     *                 description="User ID for social media connection",
-     *                 required={"true"},
-     *                 example="373458be-3f01-40ca-b6f3-245239c7889f"
-     *             ),
-     *             @OA\Property(
      *                 property="provider",
      *                 type="string",
      *                 description="User social media provider.",
@@ -66,14 +61,11 @@ class SocialMediaController extends Controller
     public function createRedirectUrl(Request $request): JsonResponse
     {
       //validate input date
-      $input = $this->validate($request, [
-                    'id'=>'required|string',
-                    'provider'=>'required|string'
-                ]);
+      $input = $this->validate($request, ['provider'=>'required|string']);
 
        try{
            // Check whether user already exist
-           $userExist = User::where(['id'=> $input['id']])->exists();
+           $userExist = User::where(['id'=> Auth::user()->id])->exists();
                
             if($userExist){
                
@@ -148,53 +140,116 @@ class SocialMediaController extends Controller
      *     )
      * )
      *
-     * @param Request $request
+     * @param string $provider
      *
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function mediaCallback(Request $request): JsonResponse
+    public function mediaCallback(string $provider): JsonResponse
     {
-      //validate input date
-      $input = $this->validate($request, ['provider'=>'required|string']);
-
        try{
-           //Get user info
-           $user = Socialite::driver($input['provider'])->stateless()->user();
-        
+            //Get user info
+            $mediaUser = Socialite::driver($provider)->stateless()->user();
            
-               
-            if($userExist){
-                //Save user record
-                $userExist = User::whereEmail($user->email)->doesntExist();
-
-                if(!empty($redirectUrl) && $redirectUrl!=null){
-                     //Show response
-                    return response()->json([
-                        'type' => 'success',
-                        'message' => "Redirect URL created successfully.",
-                        "data" => ['redirect_url'=>$redirectUrl]
-                    ], 200);
-                }else{
-                    return response()->json([
-                        'type' => 'danger',
-                        'message' => "Redirect URL was NOT created.",
-                        "data" => null
-                    ], 400);
+            if(!empty($mediaUser) && $mediaUser!=null){
+                //Check whether media connection already exist
+                $mediaQuery = MediaConnect::where(['email'=>$mediaUser->email, 'provider'=>$input['provider']]);
+                
+                $mediaArray = [
+                    'user_id'=>Auth::user()->id,
+                    'media_id'=>$mediaUser->id,
+                    'provider'=>$provider,
+                    'name'=>$mediaUser->name,
+                    'email'=>$mediaUser->email,
+                    'phone'=>Auth::user()->phone
+                ];
+                
+                if($mediaQuery->doesntExist()){
+                    //Save user record
+                    MediaConnect::create($mediaArray);
                 }
+                
+                //Show response
+                return response()->json([
+                    'type' => 'success',
+                    'message' => "{$provider} connection was successful.",
+                    "data" => $mediaArray
+                ], 200);
 
             }else{
                 //Response with required info
                 return response()->json([
                     'type' => 'danger',
-                    'message' => "User profile does not exist.",
+                    'message' => "Unable to connect to {$provider}.",
                     "data" => null
                 ], 400);
             }
         }catch(Exception $e){
             return response()->json([
                 'type' => 'danger',
-                'message' => "Unable to create redirect URL. Try again.",
+                'message' => "Unable to connect to {$provider}. Try again.",
+                "data" => $e->getMessage()
+            ], 400);
+        }
+      
+    }
+
+    /**
+     * Connect user to social media for One-Step 2.0
+     *
+     * @OA\Get(
+     *     path="/user-profile/social/connections",
+     *     summary="Retrieve social media connections",
+     *     description="Retrieve social media connections for One-Step 2.0",
+     *     tags={"Connect User to Social Media by OneStep 2.0"},
+     *
+     *     security={{
+     *         "passport": {
+     *             "User",
+     *             "ManagerRead"
+     *         }
+     *     }},
+     *
+     *     @OA\Response(
+     *          response=200,
+     *          description="Success"
+     *     ),
+     *     @OA\Response(
+     *          response=400,
+     *          description="Bad Request",
+     *     )
+     * )
+     *
+     *
+     * @return JsonResponse
+     * @throws ValidationException
+     */
+    public function getMediaData(): JsonResponse
+    {
+        try{
+            //Fetch social media connections
+            $userMedia = MediaConnect::where(['user_id'=>Auth::user()->id])->get();
+
+            if(!empty($userMedia) && $userMedia!=null){
+                //Show response
+                return response()->json([
+                    'type' => 'success',
+                    'message' => "Retrieved media connections successfully.",
+                    "data" => $userMedia->toArray()
+                ], 200);
+
+            }else{
+                //Response with required info
+                return response()->json([
+                    'type' => 'danger',
+                    'message' => "No media connection found.",
+                    "data" => null
+                ], 404);
+            }
+        }catch(Exception $e){
+            return response()->json([
+                'type' => 'danger',
+                'message' => "Unable to retrieved media connections. Try again.",
                 "data" => $e->getMessage()
             ], 400);
         }
