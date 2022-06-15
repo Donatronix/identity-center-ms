@@ -1,0 +1,44 @@
+image: alpine:latest
+
+pipelines:
+  branches:
+    dev:
+      - step:
+          name: Build Image
+          image: atlassian/pipelines-awscli
+          services:
+            - docker
+          script:
+            - apk --update --no-cache add openssh-client
+            - ./deploy.sh build
+            - ./deploy.sh login
+            - ./deploy.sh push
+    master:
+      - step:
+          name: Build Image
+          image: atlassian/pipelines-awscli
+          services:
+            - docker
+          script:
+            - apk --update --no-cache add openssh-client
+            - ./deploy.sh build production
+            - ./deploy.sh login
+            - ./deploy.sh push
+      - step:
+          name: EKS Deploy
+          image: atlassian/pipelines-kubectl
+          services:
+            - docker
+          script:
+            - apk --update --no-cache add curl openssl git openssh-client jq
+            - git clone git@bitbucket.org:sumraprague/bitbucket-cicd.git
+            - bitbucket-cicd/deploy.sh kube-init
+
+            - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+            - chmod 700 get_helm.sh
+            - bash ./get_helm.sh
+            - bitbucket-cicd/deploy.sh set-image
+definitions:
+  services:
+    docker:
+      memory: 2048

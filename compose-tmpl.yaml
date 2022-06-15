@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  {{DEPLOY_NAME}}-app:
+    container_name: {{DEPLOY_NAME}}
+    image: {{DOCKER_IMAGE}}
+    restart: always
+    networks:
+      - ugg.network
+    ports:
+      - '8200:80'
+      - '18200:443'
+    environment:
+      - WEB_DOCUMENT_ROOT=/var/www/html/public
+      - PHP_DISMOD=apcu,calendar,exif,gd,imagick,imap,ioncube,mongodb,ldap,pcntl,pdo_pgsql,pgsql,shmop,soap,sysvmsg,sysvsem,sysvshm,vips
+      - PHP_DISPLAY_ERRORS=1
+      - LOG_STDERR=/var/log/vhost-error.log
+      - PUBSUB_QUEUE=Local.IdentityCentreMS
+    volumes:
+      - ./web:/var/www/html:rw
+#     - ./xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini:rw
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - ugg.network
+
+networks:
+  ugg.network:
+    name: UltainfinityGlobalGroup.Network
+    driver: bridge
