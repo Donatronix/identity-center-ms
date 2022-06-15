@@ -5,16 +5,10 @@
  */
 $router->group([
     'prefix' => env('APP_API_VERSION', ''),
-    'namespace' => '\App\Api\V1\Controllers'
+    'namespace' => '\App\Api\V1\Controllers',
 ], function ($router) {
     /**
      * PUBLIC ACCESS
-     */
-//    $router->group([], function ($router) {
-//    });
-
-    /**
-     * USER APPLICATION PRIVATE ACCESS
      */
     $router->group([
         'prefix' => 'auth',
@@ -76,11 +70,7 @@ $router->group([
         });
     });
 
-<<<<<<< HEAD
-    
-    
-=======
->>>>>>> 4cf86396f4c510e3e65bb8bf4d0692e5bb7a7991
+ 
     /**
      * PUBLIC ACCESS - RECOVER USER ACCOUNT
     */
@@ -96,11 +86,7 @@ $router->group([
 
     /**
      * PRIVATE ACCESS
-<<<<<<< HEAD
     */
-=======
-     */
->>>>>>> 4cf86396f4c510e3e65bb8bf4d0692e5bb7a7991
     $router->group(['middleware' => 'auth:api'], function ($router) {
         $router->get('users', 'UserController@index');
     });
@@ -118,15 +104,15 @@ $router->group([
     });
 
     /**
-     * ADMIN PANEL ACCESS
+     * ADMIN PANEL
      */
     $router->group([
         'prefix' => 'admin',
         'namespace' => 'Admin',
         'middleware' => [
             'checkUser',
-            'checkAdmin'
-        ]
+            'checkAdmin',
+        ],
     ], function ($router) {
         $router->group([
             'prefix' => 'users',
@@ -142,10 +128,11 @@ $router->group([
         });
 
         /**
-         * Add Admins to microservice
+         * Add Admins to waiting-lists-ms
          */
-        $router->post('/service/admins', 'ServiceAdminController@store');
-        $router->patch('/service/admins', 'ServiceAdminController@update');
-        $router->delete('/service/admins', 'ServiceAdminController@destroy');
+
+        $router->post('waiting-lists/admins', 'WaitingListsAdminController@store');
+        $router->patch('waiting-lists/admins/{id}', 'WaitingListsAdminController@updateRole');
     });
+
 });
