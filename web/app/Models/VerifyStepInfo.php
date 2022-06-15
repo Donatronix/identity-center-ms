@@ -22,7 +22,7 @@ class VerifyStepInfo extends Model
         'validity' => 'datetime',
     ];
     
-     /**
+    /**
      *  Create an One-Time-password (for phone number verification)
      * 
      * @param int $strlength

@@ -5,9 +5,9 @@
  */
 $router->group([
     'prefix' => env('APP_API_VERSION', ''),
-    'namespace' => '\App\Api\V1\Controllers'
+    'namespace' => '\App\Api\V1\Controllers',
 ], function ($router) {
-    /**
+      /**
      * PUBLIC ACCESS
      */
 //    $router->group([], function ($router) {
@@ -31,7 +31,7 @@ $router->group([
 
     /**
      * PUBLIC ACCESS - CREATE USER ACCOUNT
-     */
+    */
     $router->group([
         'prefix' => 'user-account',
         "namespace" => "OneStepId2"
@@ -44,24 +44,42 @@ $router->group([
     });
 
     /**
-     * PUBLIC ACCESS - CREATE USER ACCOUNT
-     */
-    $router->group([
-        'prefix' => 'user-profile',
-        "namespace" => "OneStepId2"
-    ], function ($router) {
-        $router->get('/{id}/details', "UserProfileController@getProfile");
-        $router->put('/password/change', "UserProfileController@updatePassword");
-        $router->put('/username/update', "UserProfileController@updateUsername");
-        $router->put('/fullname/update', "UserProfileController@updateFullname");
-        $router->put('/country/update', "UserProfileController@updateCountry");
-        $router->put('/email/update', "UserProfileController@updateEmail");
-        $router->put('/local/update', "UserProfileController@updateLocal");
+     * PRIVATE ACCESS
+    */
+    $router->group(['middleware' => 'checkUser'], function ($router) {
+        /**
+         * CREATE USER ACCOUNT
+        */
+        $router->group([
+            'prefix' => 'user-profile',
+            "namespace" => "OneStepId2"
+        ], function ($router) {
+            $router->get('/{id}/details', "UserProfileController@getProfile");
+            $router->put('/password/change', "UserProfileController@updatePassword");
+            $router->put('/username/update', "UserProfileController@updateUsername");
+            $router->put('/fullname/update', "UserProfileController@updateFullname");
+            $router->put('/country/update', "UserProfileController@updateCountry");
+            $router->put('/email/update', "UserProfileController@updateEmail");
+            $router->put('/local/update', "UserProfileController@updateLocal");
+        });
+
+        /**
+         * USER SOCIAL MEDIA CONNECTIONS
+        */
+        $router->group([
+            'prefix' => 'user-profile',
+            "namespace" => "OneStepId2"
+        ], function ($router) {
+            $router->post('/redirect', "SocialMediaController@createRedirectUrl");
+            $router->get('/{provider}/callback', "SocialMediaController@mediaCallback");
+            $router->get('/social/connections', "SocialMediaController@getMediaData");
+        });
     });
 
+ 
     /**
      * PUBLIC ACCESS - RECOVER USER ACCOUNT
-     */
+    */
     $router->group([
         'prefix' => 'user-account/recovery',
         "namespace" => "OneStepId2"
@@ -74,7 +92,7 @@ $router->group([
 
     /**
      * PRIVATE ACCESS
-     */
+    */
     $router->group(['middleware' => 'auth:api'], function ($router) {
         $router->get('users', 'UserController@index');
     });
@@ -92,15 +110,15 @@ $router->group([
     });
 
     /**
-     * ADMIN PANEL ACCESS
+     * ADMIN PANEL
      */
     $router->group([
         'prefix' => 'admin',
         'namespace' => 'Admin',
         'middleware' => [
             'checkUser',
-            'checkAdmin'
-        ]
+            'checkAdmin',
+        ],
     ], function ($router) {
         $router->group([
             'prefix' => 'users',
@@ -122,4 +140,5 @@ $router->group([
         $router->patch('/service/admins', 'ServiceAdminController@update');
         $router->delete('/service/admins', 'ServiceAdminController@destroy');
     });
+
 });
