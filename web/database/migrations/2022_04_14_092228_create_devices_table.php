@@ -14,14 +14,18 @@ class CreateDevicesTable extends Migration
     public function up()
     {
         Schema::create('devices', function (Blueprint $table) {
-            $table->char('id', 36)->primary();
-            $table->char('user_id', 36)->nullable()->index('user_id');
+            $table->uuid('id')->primary();
+
+            $table->foreignUuid('user_id')->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
+
             $table->string('name', 100);
             $table->string('identifier', 100);
             $table->integer('ip')->nullable();
-            $table->dateTime('created_at')->nullable();
 
-            $table->foreign(['user_id'], 'devices_ibfk_1')->references(['id'])->on('users')->onDelete('CASCADE');
+            $table->timestamps();
+            //$table->softDeletes();
         });
     }
 

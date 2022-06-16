@@ -14,16 +14,19 @@ class CreateBotUsersTable extends Migration
     public function up()
     {
         Schema::create('bot_users', function (Blueprint $table) {
-            $table->char('id', 36);
+            $table->uuid('id')->primary();
+
             $table->char('auth_code', 6)->nullable();
             $table->string('identifier_chat', 40)->nullable();
+
             $table->char('bot_id', 36)->index('bot_id');
-            $table->char('user_id', 36)->index('user_id');
 
-            $table->primary(['id', 'bot_id', 'user_id']);
+            $table->foreignUuid('user_id')->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('CASCADE');
-            $table->foreign('bot_id')->references('id')->on('bots')->onDelete('CASCADE');
+            $table->timestamps();
+            //$table->softDeletes();
         });
     }
 

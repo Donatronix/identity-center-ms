@@ -24,8 +24,12 @@ class CreateUsersTable extends Migration
             $table->unsignedBigInteger('phone')->unique();
             $table->string('email', 150)->nullable()->unique();
             $table->date('birthday')->nullable();
+
+            $table->string('avatar')->nullable();
+
             $table->string('password', 60)->nullable();
             $table->tinyInteger('status')->default(User::STATUS_INACTIVE);
+
             $table->timestamp('phone_verified_at')->nullable();
             $table->timestamp('email_verified_at')->nullable();
 

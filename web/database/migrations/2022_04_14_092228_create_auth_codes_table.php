@@ -14,14 +14,19 @@ class CreateAuthCodesTable extends Migration
     public function up()
     {
         Schema::create('auth_codes', function (Blueprint $table) {
-            $table->integer('id', true);
+            $table->uuid('id')->primary();
+
             $table->char('auth_code', 6);
             $table->char('sid', 34)->nullable();
-            $table->char('user_id', 36);
-            $table->dateTime('created')->nullable();
+
+            $table->foreignUuid('user_id')->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
+
             $table->char('bot_id', 36)->nullable()->index('bot_id');
 
-            $table->foreign(['bot_id'], 'auth_codes_ibfk_1')->references(['id'])->on('bots');
+            $table->timestamps();
+            //$table->softDeletes();
         });
     }
 
