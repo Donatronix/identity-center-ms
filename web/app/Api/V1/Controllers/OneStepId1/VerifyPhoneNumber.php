@@ -21,7 +21,7 @@ class VerifyPhoneNumber extends Controller
      *     path="/auth/send-code",
      *     summary="Verify Phone Number",
      *     description="Verify Phone Number",
-     *     tags={"Auth by OneStep 1.0"},
+     *     tags={"OneStep 1.0 | Auth"},
      *
      *     @OA\RequestBody(
      *         required=true,

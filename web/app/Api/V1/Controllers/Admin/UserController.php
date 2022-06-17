@@ -28,7 +28,7 @@ class UserController extends Controller
      * @OA\Get(
      *     path="/admin/users",
      *     description="Get all users",
-     *     tags={"Admin / Users"},
+     *     tags={"Admin | Users"},
      *
      *     security={{
      *          "default":{},
@@ -197,7 +197,7 @@ class UserController extends Controller
      *     path="/admin/users",
      *     summary="Create new user",
      *     description="Create new user",
-     *     tags={"Admin / Users"},
+     *     tags={"Admin | Users"},
      *
      *     security={{
      *         "passport": {
@@ -341,7 +341,7 @@ class UserController extends Controller
      *     path="/admin/users/{id}",
      *     summary="Get user details",
      *     description="Get user details",
-     *     tags={"Admin / Users"},
+     *     tags={"Admin | Users"},
      *
      *     security={{
      *         "passport": {
@@ -402,7 +402,7 @@ class UserController extends Controller
      *     path="/admin/users/{id}",
      *     summary="update user",
      *     description="update user",
-     *     tags={"Admin / Users"},
+     *     tags={"Admin | Users"},
      *
      *     security={{
      *         "passport": {
@@ -488,7 +488,7 @@ class UserController extends Controller
      * @OA\Delete(
      *     path="/admin/users/{id}",
      *     description="Delete user",
-     *     tags={"Admin / Users"},
+     *     tags={"Admin | Users"},
      *
      *     security={{
      *          "default" :{
@@ -634,7 +634,7 @@ class UserController extends Controller
      *     path="/admin/verify",
      *     summary="Create new user",
      *     description="Create new user",
-     *     tags={"Admin / Users"},
+     *     tags={"Admin | Users"},
      *
      *     security={{
      *         "passport": {
@@ -718,7 +718,7 @@ class UserController extends Controller
      *     path="/admin/verify/send",
      *     summary="Create new user",
      *     description="Create new user",
-     *     tags={"Admin / Users"},
+     *     tags={"Admin | Users"},
      *
      *     security={{
      *         "passport": {

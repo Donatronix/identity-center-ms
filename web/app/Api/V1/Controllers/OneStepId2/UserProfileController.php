@@ -22,7 +22,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/{id}/details",
      *     summary="Get user profile for One-Step 2.0",
      *     description="Get user profile for One-Step 2.0",
-     *     tags={"User Profile by OneStep 2.0"},
+     *     tags={"OneStep 2.0 | User Profile"},
      *
      *     security={{
      *         "passport": {
@@ -124,7 +124,7 @@ class UserProfileController extends Controller
         try{
            // Check whether user already exist
            $userQuery = User::where(['id'=>$id]);
-               
+
             if($userQuery->exists()){
                 // Fetch user profile
                 $user = $userQuery->select(
@@ -154,7 +154,7 @@ class UserProfileController extends Controller
                 'message' => "Unable to retrieve user profile.",
                 "data" => $e->getMessage()
             ], 400);
-        }  
+        }
     }
 
     /**
@@ -164,7 +164,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/password/change",
      *     summary="Change user password",
      *     description="Change user profile password for One-Step 2.0",
-     *     tags={"User Profile by OneStep 2.0"},
+     *     tags={"OneStep 2.0 | User Profile"},
      *
      *     security={{
      *         "passport": {
@@ -266,13 +266,13 @@ class UserProfileController extends Controller
             'current_password'=> 'required|string|max:32',
             'new_password'=> 'required|string|max:32'
         ]);
-        
+
         try{
             // Verify current password
             $userQuery = User::where('id',$validData['id']);
-            
+
             $user = $userQuery->firstOrFail();
-                
+
              if(Hash::check($validData['current_password'], $user->password )){
 
                 $newPass = Hash::make($validData['new_password']);
@@ -283,7 +283,7 @@ class UserProfileController extends Controller
                 ]);
 
                 //Send notification email
-                $subject='Change Password'; 
+                $subject='Change Password';
                 $message= 'Your password has been updated successfully.';
                 $sendEmail->dispatchEmail($to['email'], $subject, $message);
 
@@ -293,7 +293,7 @@ class UserProfileController extends Controller
                      'message' => "User password updated successfully.",
                      "data" =>null
                 ], 200);
- 
+
              }else{
                  return response()->json([
                      'type' => 'danger',
@@ -308,7 +308,7 @@ class UserProfileController extends Controller
                  "data" => $e->getMessage()
             ], 400);
         }
-      
+
     }
 
     /**
@@ -318,7 +318,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/username/update",
      *     summary="Update username",
      *     description="Update username for One-Step 2.0",
-     *     tags={"User Profile by OneStep 2.0"},
+     *     tags={"OneStep 2.0 | User Profile"},
      *
      *     security={{
      *         "passport": {
@@ -397,9 +397,9 @@ class UserProfileController extends Controller
        try{
            // Check whether user already exist
            $userQuery = User::where(['username'=> $input['username']]);
-               
+
             if($userQuery->exists()){
-                
+
                 $user = $userQuery->firstOrFail();
 
                 //Update username
@@ -408,10 +408,10 @@ class UserProfileController extends Controller
                 ]);
 
                 //Send notification email
-                $subject='Change Username'; 
+                $subject='Change Username';
                 $message= 'Your username has been updated successfully.';
                 $sendEmail->dispatchEmail($to['email'], $subject, $message);
-            
+
                 //Show response
                 return response()->json([
                     'type' => 'success',
@@ -431,7 +431,7 @@ class UserProfileController extends Controller
                 "data" =>  $e->getMessage()
             ], 400);
         }
-      
+
     }
 
     /**
@@ -441,7 +441,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/fullname/update",
      *     summary="Update fullname",
      *     description="Update fullname for One-Step 2.0",
-     *     tags={"User Profile by OneStep 2.0"},
+     *     tags={"OneStep 2.0 | User Profile"},
      *
      *     security={{
      *         "passport": {
@@ -454,7 +454,7 @@ class UserProfileController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             type="object",
-     *             
+     *
      *             @OA\Property(
      *                 property="id",
      *                 type="string",
@@ -534,9 +534,9 @@ class UserProfileController extends Controller
         try{
            // Check whether user already exist
            $userQuery = User::where(['id'=> $input['id']]);
-               
+
             if($userQuery->exists()){
-                
+
                 $user = $userQuery->firstOrFail();
 
                 //Update full name
@@ -544,7 +544,7 @@ class UserProfileController extends Controller
                     'first_name'=>$input['firstname'],
                     'last_name'=>$input['lastname']
                 ]);
-            
+
                 //Show response
                 return response()->json([
                     'type' => 'success',
@@ -564,7 +564,7 @@ class UserProfileController extends Controller
                 "data" =>  $e->getMessage()
             ], 400);
         }
-      
+
     }
 
     /**
@@ -574,7 +574,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/country/update",
      *     summary="Update country",
      *     description="Update country for One-Step 2.0",
-     *     tags={"User Profile by OneStep 2.0"},
+     *     tags={"OneStep 2.0 | User Profile"},
      *
      *     security={{
      *         "passport": {
@@ -587,7 +587,7 @@ class UserProfileController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             type="object",
-     *             
+     *
      *            @OA\Property(
      *                 property="id",
      *                 type="string",
@@ -660,16 +660,16 @@ class UserProfileController extends Controller
        try{
            // Check whether user already exist
            $userQuery = User::where(['id'=> $input['id']]);
-               
+
             if($userQuery->exists()){
-                
+
                 $user = $userQuery->firstOrFail();
 
                 //Update username
                 $user->update([
                     'country'=>$input['country']
                 ]);
-            
+
                 //Show response
                 return response()->json([
                     'type' => 'success',
@@ -689,7 +689,7 @@ class UserProfileController extends Controller
                 "data" =>  $e->getMessage()
             ], 400);
         }
-      
+
     }
 
     /**
@@ -699,7 +699,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/email/update",
      *     summary="Update email",
      *     description="Update email for One-Step 2.0",
-     *     tags={"User Profile by OneStep 2.0"},
+     *     tags={"OneStep 2.0 | User Profile"},
      *
      *     security={{
      *         "passport": {
@@ -712,7 +712,7 @@ class UserProfileController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             type="object",
-     *             
+     *
      *            @OA\Property(
      *                 property="email",
      *                 type="string",
@@ -777,16 +777,16 @@ class UserProfileController extends Controller
        try{
            // Check whether user already exist
            $userQuery = User::where(['email'=> $input['email']]);
-               
+
             if($userQuery->exists()){
-                
+
                 $user = $userQuery->firstOrFail();
 
                 //Update username
                 $user->update([
                     'email'=>$input['email']
                 ]);
-            
+
                 //Show response
                 return response()->json([
                     'type' => 'success',
@@ -806,7 +806,7 @@ class UserProfileController extends Controller
                 "data" =>  $e->getMessage()
             ], 400);
         }
-      
+
     }
 
     /**
@@ -816,7 +816,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/local/update",
      *     summary="Update local",
      *     description="Update local for One-Step 2.0",
-     *     tags={"User Profile by OneStep 2.0"},
+     *     tags={"OneStep 2.0 | User Profile"},
      *
      *     security={{
      *         "passport": {
@@ -829,7 +829,7 @@ class UserProfileController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             type="object",
-     *             
+     *
      *            @OA\Property(
      *                 property="id",
      *                 type="string",
@@ -902,16 +902,16 @@ class UserProfileController extends Controller
        try{
            // Check whether user already exist
            $userQuery = User::where(['id'=> $input['id']]);
-               
+
             if($userQuery->exists()){
-                
+
                 $user = $userQuery->firstOrFail();
 
                 //Update username
                 $user->update([
                     'local'=>$input['local']
                 ]);
-            
+
                 //Show response
                 return response()->json([
                     'type' => 'success',
@@ -931,6 +931,6 @@ class UserProfileController extends Controller
                 "data" =>  $e->getMessage()
             ], 400);
         }
-      
+
     }
 }

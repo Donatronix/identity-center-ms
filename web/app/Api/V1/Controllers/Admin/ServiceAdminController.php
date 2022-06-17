@@ -22,7 +22,7 @@ class ServiceAdminController extends Controller
      * @OA\Post(
      *     path="/admin/service/admins",
      *     description="Add new admin",
-     *     tags={"Microservice Admins"},
+     *     tags={"Admin | Microservice Admins"},
      *
      *     security={{
      *          "default" :{
@@ -205,7 +205,7 @@ class ServiceAdminController extends Controller
      * @OA\Patch(
      *     path="/admin/service/admins",
      *     description="Update admin",
-     *     tags={"Microservice Admins"},
+     *     tags={"Admin | Microservice Admins"},
      *
      *     security={{
      *          "default" :{
@@ -397,7 +397,7 @@ class ServiceAdminController extends Controller
      * @OA\Delete(
      *     path="/admin/service/admins",
      *     description="Remove admin",
-     *     tags={"Microservice Admins"},
+     *     tags={"Admin | Microservice Admins"},
      *
      *     security={{
      *          "default" :{

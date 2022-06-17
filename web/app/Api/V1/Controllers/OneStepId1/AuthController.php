@@ -18,7 +18,7 @@ class AuthController extends Controller
      *     path="/auth/refresh-token",
      *     summary="Refresh Token",
      *     description="Refresh expired Token",
-     *     tags={"Auth by OneStep 1.0"},
+     *     tags={"OneStep 1.0 | Auth"},
      *
      *     @OA\RequestBody(
      *         required=true,

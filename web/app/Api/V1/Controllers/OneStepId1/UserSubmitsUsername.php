@@ -29,7 +29,7 @@ class UserSubmitsUsername extends Controller
      *     path="/auth/send-username",
      *     summary="User Submits Account Username",
      *     description="Here the new user or the existing user submits username for login, along with the sid",
-     *     tags={"Auth by OneStep 1.0"},
+     *     tags={"OneStep 1.0 | Auth"},
      *
      *
      *     @OA\RequestBody(

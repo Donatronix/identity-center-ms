@@ -16,7 +16,6 @@ use App\Services\SendVerifyToken;
 
 class UserInfoRecoveryController extends Controller
 {
-
     /**
      * User account recovery information for One-Step 2.0
      *
@@ -24,7 +23,7 @@ class UserInfoRecoveryController extends Controller
      *     path="/user-account/recovery/userinfo",
      *     summary="Recover user account for One-Step 2.0",
      *     description="Receive user account recovery info for One-Step 2.0",
-     *     tags={"User Account Recovery by OneStep 2.0"},
+     *     tags={"OneStep 2.0 | User Account Recovery"},
      *
      *     security={{
      *         "passport": {
@@ -143,7 +142,7 @@ class UserInfoRecoveryController extends Controller
         'phone'=>'nullable|string|max:20',
         'handler'=>'nullable|string',
       ]);
-      
+
        try{
            // Check whether user already exist
            $idArr = explode("@",$input['id']);
@@ -151,19 +150,19 @@ class UserInfoRecoveryController extends Controller
 
            $userQuery = User::where('phone',$input['phone'])
                               ->orWhere('username', $username);
-               
+
             if($userQuery->exists()){
                 //Retrieve user info
                 $user = $userQuery->first();
                 $sendto = $user->phone;
-                $channel = 'sms'; 
+                $channel = 'sms';
 
                 // Create verification token (OTP - One Time Password)
                 $token = VerifyStepInfo::generateOTP(7);
-                
+
                 //Generate token expiry time in minutes
                 $validity = VerifyStepInfo::tokenValidity(30);
-                
+
                 // save verification token
                 VerifyStepInfo::create([
                     'username'=>$username,
@@ -175,15 +174,15 @@ class UserInfoRecoveryController extends Controller
 
                 // Send verification token (SMS or Massenger)
                 $sendOTP->dispatchOTP($channel, $sendto, $token);
-                
+
                 //Show response
                 return response()->json([
                     'type' => 'success',
                     'message' => "{$channel} verification code sent to {$sendto}.",
                     "data" => [
-                            'channel'=>$channel, 
+                            'channel'=>$channel,
                             'username'=>$username,
-                            'receiver'=>$sendto 
+                            'receiver'=>$sendto
                         ]
                 ], 200);
 
@@ -201,7 +200,7 @@ class UserInfoRecoveryController extends Controller
                 "data" => null
             ], 400);
         }
-      
+
     }
 
     /**
@@ -211,7 +210,7 @@ class UserInfoRecoveryController extends Controller
      *     path="/user-account/recovery/otp/verify",
      *     summary="Recover user account for One-Step 2.0",
      *     description="Verify phone number or handler to recover user account for One-Step 2.0",
-     *     tags={"User Account Recovery by OneStep 2.0"},
+     *     tags={"OneStep 2.0 | User Account Recovery"},
      *
      *     security={{
      *         "passport": {
@@ -269,20 +268,20 @@ class UserInfoRecoveryController extends Controller
     {
        // Validate user input data
        $input = $this->validate($request, ['token'=>'required|string']);
-       
+
        try{
             //find the token
             $existQuery = VerifyStepInfo::where(['code'=>$input['token']]);
-            
+
             //Check validity and availability
             if($existQuery->exists()){
                 $userData = $existQuery->first();
                 $username = $userData->username;
                 $id = "{$username}@onestep.com";
-                
+
                 //Delete the token
                 $existQuery->delete();
-                
+
                 //Send success response
                 return response()->json([
                     'type' => 'success',
@@ -315,7 +314,7 @@ class UserInfoRecoveryController extends Controller
      *     path="/user-account/recovery/questions",
      *     summary="Get user account recovery questions",
      *     description="Verify user account recovery questions for One-Step 2.0",
-     *     tags={"User Account Recovery by OneStep 2.0"},
+     *     tags={"OneStep 2.0 | User Account Recovery"},
      *
      *     security={{
      *         "passport": {
@@ -328,7 +327,7 @@ class UserInfoRecoveryController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             type="object",
-     *             
+     *
      *             @OA\Property(
      *                 property="username",
      *                 type="string",
@@ -395,22 +394,22 @@ class UserInfoRecoveryController extends Controller
     {
          // Validate user input data
          $input = $this->validate($request, RecoveryQuestion::rules());
-       
+
          try {
              // Update user account
              $userQuery = User::where('username', $input['username']);
-             
+
              //Does the user account exist?
              if($userQuery->exists()){
                  //get the user ID
                  $userId=$userQuery->first()->id;
- 
+
                  //Retrieve recovery question
                  $questions = RecoveryQuestion::where('user_id', $userId)->first();
 
                  if(
-                     $questions->answer_one===$input['question1'] 
-                    && $questions->answer_two===$input['question2'] 
+                     $questions->answer_one===$input['question1']
+                    && $questions->answer_two===$input['question2']
                     && $questions->answer_three===$input['question3']
                  ){
                      // Return response
@@ -432,7 +431,7 @@ class UserInfoRecoveryController extends Controller
                      'message' => 'User account was not found!',
                      'data' => null
                  ], 404);
-             }   
+             }
          } catch (Exception $e) {
              return response()->json([
                  'type' => 'danger',
@@ -449,7 +448,7 @@ class UserInfoRecoveryController extends Controller
      *     path="/user-account/recovery/sendid",
      *     summary="User account recovered ID",
      *     description="Send user account recovered ID for One-Step 2.0",
-     *     tags={"User Account Recovery by OneStep 2.0"},
+     *     tags={"OneStep 2.0 | User Account Recovery"},
      *
      *     security={{
      *         "passport": {
@@ -462,7 +461,7 @@ class UserInfoRecoveryController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             type="object",
-     *             
+     *
      *             @OA\Property(
      *                 property="username",
      *                 type="string",
@@ -474,7 +473,7 @@ class UserInfoRecoveryController extends Controller
      *                 type="array",
      *                 description="Send recovered ID to phone or messenger",
      *                 example={"phone","messenger"},
-     *                 @OA\Items( 
+     *                 @OA\Items(
      *                      @OA\Property(
      *                           property="option",
      *                           type="string",
@@ -538,7 +537,7 @@ class UserInfoRecoveryController extends Controller
      * )
      *
      * @param Request $request
-     * @param 
+     * @param
      *
      * @return JsonResponse
      * @throws ValidationException
@@ -550,12 +549,12 @@ class UserInfoRecoveryController extends Controller
             'username'=>'required|string',
             'sendby'=>'required|array'
         ]);
-       
+
         try {
             // Update user account
             $username= $input['username'];
             $userQuery = User::where('username', $username);
-            
+
             //Does the user account exist?
             if($userQuery->exists()){
                 //get the user ID
@@ -567,26 +566,26 @@ class UserInfoRecoveryController extends Controller
                 // Send retrieved ID to user (SMS or Massenger)
                 if(!empty($sendby)){
                     if(in_array('phone', $sendby)){
-                        $sendOTP->dispatchOTP('sms',$user->phone, $id); 
+                        $sendOTP->dispatchOTP('sms',$user->phone, $id);
                     }elseif(in_array('messenger', $sendby)){
-                        $sendOTP->dispatchOTP('whatsapp',$user->phone, $id); 
+                        $sendOTP->dispatchOTP('whatsapp',$user->phone, $id);
                     }
                 }
-                
+
                 // Return response
                 return response()->json([
                     'type' => 'success',
                     'message' => 'User account ID has been sent.',
                     'data' => ['username'=>$input['username']]
                 ], 200);
-               
+
             }else{
                 return response()->json([
                     'type' => 'danger',
                     'message' => 'User account was not found!',
                     'data' => null
                 ], 404);
-            }   
+            }
         } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',

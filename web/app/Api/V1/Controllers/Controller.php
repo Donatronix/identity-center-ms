@@ -97,4 +97,3 @@ class Controller extends BaseController
         return Str::random(16);
     }
 }
-
