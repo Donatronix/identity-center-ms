@@ -63,6 +63,7 @@ $app->configure('settings');
 $app->configure('auth');
 $app->configure('filesystems');
 $app->configure('cache');
+$app->configure('services');
 
 /*
 |--------------------------------------------------------------------------
