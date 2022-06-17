@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\MediaConnect;
+use App\Services\FetchWhatsAppInfo;
 use Exception;
 
 class SocialMediaController extends Controller
@@ -162,6 +163,90 @@ class SocialMediaController extends Controller
                     'name'=>$mediaUser->name,
                     'email'=>$mediaUser->email,
                     'phone'=>Auth::user()->phone
+                ];
+                
+                if($mediaQuery->doesntExist()){
+                    //Save user record
+                    MediaConnect::create($mediaArray);
+                }
+                
+                //Show response
+                return response()->json([
+                    'type' => 'success',
+                    'message' => "{$provider} connection was successful.",
+                    "data" => $mediaArray
+                ], 200);
+
+            }else{
+                //Response with required info
+                return response()->json([
+                    'type' => 'danger',
+                    'message' => "Unable to connect to {$provider}.",
+                    "data" => null
+                ], 400);
+            }
+        }catch(Exception $e){
+            return response()->json([
+                'type' => 'danger',
+                'message' => "Unable to connect to {$provider}. Try again.",
+                "data" => $e->getMessage()
+            ], 400);
+        }
+      
+    }
+
+    /**
+     * Connect user to whatsapp social media for One-Step 2.0
+     *
+     * @OA\Get(
+     *     path="/user-profile/whatsapp/connect",
+     *     summary="Connect user to WhatsApp",
+     *     description="Connect user to WhatsApp social media for One-Step 2.0",
+     *     tags={"Connect User to Social Media by OneStep 2.0"},
+     *
+     *     security={{
+     *         "passport": {
+     *             "User",
+     *             "ManagerRead"
+     *         }
+     *     }},
+     *
+     *     @OA\Response(
+     *          response=200,
+     *          description="Success"
+     *     ),
+     *     @OA\Response(
+     *          response=400,
+     *          description="Bad Request",
+     *     )
+     * )
+     *
+     * @param FetchWhatsAppInfo $connchat
+     *
+     * @return JsonResponse
+     * @throws ValidationException
+     */
+    public function whatsappConnect(FetchWhatsAppInfo $connchat): JsonResponse
+    {
+        $provider = 'whatsapp';
+
+        try{
+            //Get user info
+            $phoneNumber = Auth::user()->phone;
+            
+            //send test chat
+            $userConn = $connchat->sendTestChat($phoneNumber);
+           
+            if($userConn){
+                //Check whether media connection already exist
+                $mediaQuery = MediaConnect::where(['email'=>Auth::user()->email, 'provider'=>$provider]);
+                
+                $mediaArray = [
+                    'user_id'=>Auth::user()->id,
+                    'provider'=>$provider,
+                    'name'=>Auth::user()->username,
+                    'email'=>Auth::user()->email,
+                    'phone'=>$phoneNumber
                 ];
                 
                 if($mediaQuery->doesntExist()){

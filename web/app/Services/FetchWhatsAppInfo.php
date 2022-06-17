@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Exception\ConnectException;
 
 
-class SendEmailNotify {
+class FetchWhatsAppInfo {
     
     /**
      * Generate request url
@@ -16,10 +16,11 @@ class SendEmailNotify {
      */
     public function requestUrl():string
     {
-        $host = env('MESSENGER_BASE_URL');
-        $version = env('MESSENGER_VERSION');
+        $phoneNumber = env('FROM_PHONE_NUMBER');
+        $baseUrl = 'https://graph.facebook.com';
+        $version = 'v14.0';
          
-        return "{$host}/{$version}/mail";
+        return "{$baseUrl}/{$version}/{$phoneNumber}/messages";
     }
 
     public function getHeaders()
@@ -28,20 +29,27 @@ class SendEmailNotify {
             'user-id' =>'10000000-1000-1000-1000-000000000001',
             'Content-Type' => 'application/json',
             'Access-Control-Allow-Origin' => '*',
+            'Authorization' => env('WHATSAPP_TOKEN')
         ];
     }
 
-    public function requestData($to, $subject, $message)
+    public function requestData($phone_number)
     {
         return [
-            'emails'=>$to,
-            'subject'=>$to,
-            'body'=>$message
+            'messaging_product'=>'whatsapp',
+            'to'=>$phone_number,
+            'type'=> 'template',
+            'template'=>[
+                'name'=>'Test chat',
+                'language'=>[
+                    'code'=>'en_US'
+                ]
+            ],
         ];
     }
 
-    public function dispatchEmail($to, $subject, $message){
-        $params = $this->requestData($to, $subject, $message);
+    public function sendTestChat($phone_number){
+        $params = $this->requestData($phone_number);
         $url = $this->requestUrl();
         $headers = $this->getHeaders();
 
