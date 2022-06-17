@@ -99,7 +99,7 @@ $router->group([
         });
     });
 
- 
+
     /**
      * PUBLIC ACCESS - RECOVER USER ACCOUNT
     */
@@ -133,7 +133,7 @@ $router->group([
     });
 
     /**
-     * ADMIN PANEL
+     * ADMIN PANEL ACCESS
      */
     $router->group([
         'prefix' => 'admin',
@@ -176,5 +176,4 @@ $router->group([
         $router->patch('/service/admins', 'ServiceAdminController@update');
         $router->delete('/service/admins', 'ServiceAdminController@destroy');
     });
-
 });
