@@ -17,7 +17,7 @@ class CreateIdentificationsTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('session_id')->index();
 
-            $table->foreignUuid('contributor_id')->constrained()
+            $table->foreignUuid('user_id')->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
 
