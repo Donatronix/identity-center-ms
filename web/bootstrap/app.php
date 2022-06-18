@@ -135,6 +135,7 @@ $app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
 /**
  * Artisan Commands Lumen Generator
  */
+$app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------
