@@ -322,6 +322,26 @@ class ContributorController extends Controller
     }
 
     /**
+     * Get contributor object
+     *
+     * @param $id
+     * @return mixed
+     */
+    private function getObject($id): mixed
+    {
+        try {
+            return $this->model::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title' => "Get contributor",
+                'message' => "Contributor with id #{$id} not found: {$e->getMessage()}",
+                'data' => ''
+            ], 404);
+        }
+    }
+
+    /**
      * Update contributor data
      *
      * @OA\Put(
@@ -481,26 +501,6 @@ class ContributorController extends Controller
                 'message' => $e->getMessage(),
                 'data' => null
             ], 400);
-        }
-    }
-
-    /**
-     * Get contributor object
-     *
-     * @param $id
-     * @return mixed
-     */
-    private function getObject($id): mixed
-    {
-        try {
-            return $this->model::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
-            return response()->jsonApi([
-                'type' => 'danger',
-                'title' => "Get contributor",
-                'message' => "Contributor with id #{$id} not found: {$e->getMessage()}",
-                'data' => ''
-            ], 404);
         }
     }
 }

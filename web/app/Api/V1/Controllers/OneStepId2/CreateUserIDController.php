@@ -3,16 +3,14 @@
 namespace App\Api\V1\Controllers\OneStepId2;
 
 use App\Api\V1\Controllers\Controller;
-use App\Exceptions\SMSGatewayException;
-use App\Models\VerifyStepInfo;
 use App\Models\RecoveryQuestion;
 use App\Models\User;
+use App\Models\VerifyStepInfo;
+use App\Services\SendVerifyToken;
 use Exception;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use App\Services\SendVerifyToken;
 
 class CreateUserIDController extends Controller
 {
@@ -155,19 +153,19 @@ class CreateUserIDController extends Controller
      */
     public function createAccount(Request $request, SendVerifyToken $sendOTP): JsonResponse
     {
-      //validate input date
-      $input = $this->validate($request, VerifyStepInfo::rules());
+        //validate input date
+        $input = $this->validate($request, VerifyStepInfo::rules());
 
-      $sendto = $this->getTokenReceiver($input);
+        $sendto = $this->getTokenReceiver($input);
 
-       try{
-           // Check whether user already exist
-           $userExist = User::where([
-               'phone'=> $input['phone'],
-               'username'=>$input['username']
-               ])->doesntExist();
+        try {
+            // Check whether user already exist
+            $userExist = User::where([
+                'phone' => $input['phone'],
+                'username' => $input['username']
+            ])->doesntExist();
 
-            if($userExist){
+            if ($userExist) {
                 // Create verification token (OTP - One Time Password)
                 $token = VerifyStepInfo::generateOTP(7);
 
@@ -182,11 +180,11 @@ class CreateUserIDController extends Controller
 
                 // save verification token
                 VerifyStepInfo::create([
-                    'username'=>$input['username'],
-                    'channel'=>$input['channel'],
-                    'receiver'=>$sendto,
-                    'code'=>$token,
-                    'validity'=>$validity
+                    'username' => $input['username'],
+                    'channel' => $input['channel'],
+                    'receiver' => $sendto,
+                    'code' => $token,
+                    'validity' => $validity
                 ]);
 
                 // Send verification token (SMS or Massenger)
@@ -197,20 +195,20 @@ class CreateUserIDController extends Controller
                     'type' => 'success',
                     'message' => "{$channel} verification code sent to {$sendto}.",
                     "data" => [
-                            'channel'=>$input['channel'],
-                            'username'=>$input['username'],
-                            'receiver'=>$sendto
-                        ]
+                        'channel' => $input['channel'],
+                        'username' => $input['username'],
+                        'receiver' => $sendto
+                    ]
                 ], 200);
 
-            }else{
+            } else {
                 return response()->json([
                     'type' => 'danger',
                     'message' => "{$sendto} is already taken/verified by another user. Try again.",
                     "data" => null
                 ], 400);
             }
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again.",
@@ -218,6 +216,23 @@ class CreateUserIDController extends Controller
             ], 400);
         }
 
+    }
+
+    /**
+     * Get the OTP reciever based on channel
+     *
+     * @param array $input
+     *
+     * @return string
+     */
+    public function getTokenReceiver(array $input): string
+    {
+        //Select OTP destination
+        if ($input['channel'] === 'sms') {
+            return $input['phone'];
+        } elseif ($input['channel'] === 'messenger') {
+            return $input['handler'];
+        }
     }
 
     /**
@@ -299,18 +314,18 @@ class CreateUserIDController extends Controller
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function  resendOTP(Request $request, SendVerifyToken $sendOTP): JsonResponse
+    public function resendOTP(Request $request, SendVerifyToken $sendOTP): JsonResponse
     {
-       //validate input date
-       $input = $this->validate($request, [
-           'receiver'=>'required|string',
-           'channel'=>'required|string',
-           'username'=>'required|string'
-       ]);
+        //validate input date
+        $input = $this->validate($request, [
+            'receiver' => 'required|string',
+            'channel' => 'required|string',
+            'username' => 'required|string'
+        ]);
 
         $sendto = $input['receiver'];
 
-        try{
+        try {
             // Create verification token (OTP - One Time Password)
             $token = VerifyStepInfo::generateOTP(7);
 
@@ -319,11 +334,11 @@ class CreateUserIDController extends Controller
 
             // save verification token
             VerifyStepInfo::create([
-                'username'=>$input['username'],
-                'channel'=>$input['channel'],
-                'receiver'=>$sendto,
-                'code'=>$token,
-                'validity'=>$validity
+                'username' => $input['username'],
+                'channel' => $input['channel'],
+                'receiver' => $sendto,
+                'code' => $token,
+                'validity' => $validity
             ]);
 
             // Send verification token (SMS or Massenger)
@@ -333,10 +348,10 @@ class CreateUserIDController extends Controller
             return response()->json([
                 'type' => 'success',
                 'message' => "{$channel} verification code sent to {$sendto}.",
-                "data" => ['channel'=>$input['channel'], 'id'=>$sendto]
+                "data" => ['channel' => $input['channel'], 'id' => $sendto]
             ], 200);
 
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again.",
@@ -411,17 +426,17 @@ class CreateUserIDController extends Controller
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function  verifyOTP(Request $request): JsonResponse
+    public function verifyOTP(Request $request): JsonResponse
     {
-       // Validate user input data
-       $input = $this->validate($request, ['token'=>'required|string']);
+        // Validate user input data
+        $input = $this->validate($request, ['token' => 'required|string']);
 
-       try{
+        try {
             //find the token
-            $existQuery = VerifyStepInfo::where(['code'=>$input['token']]);
+            $existQuery = VerifyStepInfo::where(['code' => $input['token']]);
 
             //Check validity and availability
-            if($existQuery->exists()){
+            if ($existQuery->exists()) {
                 $userData = $existQuery->first();
                 $username = $userData->username;
                 $id = "{$username}@onestep.com";
@@ -433,9 +448,12 @@ class CreateUserIDController extends Controller
                 return response()->json([
                     'type' => 'success',
                     'message' => "New user verification was successful.",
-                    "data" => ['username'=>$username, 'id'=>$id]
+                    "data" => [
+                        'username' => $username,
+                        'id' => $id
+                    ]
                 ], 200);
-            }else{
+            } else {
                 //Send invalid token response
                 return response()->json([
                     'type' => 'danger',
@@ -443,15 +461,14 @@ class CreateUserIDController extends Controller
                     "data" => null
                 ], 400);
             }
-       }catch(Exception $e){
+        } catch (Exception $e) {
             // Error occured
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to verify new use with token {$input['token']}. Try again.",
                 "data" => null
             ], 400);
-       }
-
+        }
     }
 
     /**
@@ -565,10 +582,10 @@ class CreateUserIDController extends Controller
             $user = User::where('username', $input['username'])->first();
             $names = explode(" ", $input['fullname']);
 
-            if(is_array($names) && count($names)>=2){
+            if (is_array($names) && count($names) >= 2) {
                 $firstname = $names[0];
                 $lastname = $names[1];
-            }else{
+            } else {
                 $firstname = $input['fullname'];
                 $lastname = null;
             }
@@ -579,15 +596,15 @@ class CreateUserIDController extends Controller
             $user->address_line1 = $input['address'];
             $user->birthday = $input['birthday'];
 
-            if($user->save()){
+            if ($user->save()) {
                 // Return response
                 return response()->json([
                     'type' => 'success',
                     'title' => "Update user account step 3",
                     'message' => 'User account was successful updated',
-                    'data' => ['username'=>$input['username']]
+                    'data' => ['username' => $input['username']]
                 ], 200);
-            }else{
+            } else {
                 return response()->json([
                     'type' => 'danger',
                     'title' => "Update user account step 1",
@@ -723,32 +740,32 @@ class CreateUserIDController extends Controller
             $userQuery = User::where('username', $input['username']);
 
             //Does the user account exist?
-            if($userQuery->exists()){
+            if ($userQuery->exists()) {
                 //get the user ID
-                $userId=$userQuery->first()->id;
+                $userId = $userQuery->first()->id;
 
                 //Save recovery question
                 $question = new RecoveryQuestion;
-                $question->user_id=$userId;
-                $question->answer_one=$input['question1'];
-                $question->answer_two=$input['question2'];
-                $question->answer_three=$input['question3'];
+                $question->user_id = $userId;
+                $question->answer_one = $input['question1'];
+                $question->answer_two = $input['question2'];
+                $question->answer_three = $input['question3'];
 
-                if($question->save()){
+                if ($question->save()) {
                     // Return response
                     return response()->json([
                         'type' => 'success',
                         'message' => 'User account security questions was successful saved',
-                        'data' => ['username'=>$input['username']]
+                        'data' => ['username' => $input['username']]
                     ], 200);
-                }else{
+                } else {
                     return response()->json([
                         'type' => 'danger',
                         'message' => 'User account security questions was NOT  saved',
                         'data' => null
                     ], 400);
                 }
-            }else{
+            } else {
                 return response()->json([
                     'type' => 'danger',
                     'message' => 'User account was not found!',
@@ -761,23 +778,6 @@ class CreateUserIDController extends Controller
                 'message' => $e->getMessage(),
                 'data' => null
             ], 400);
-        }
-    }
-
-    /**
-     * Get the OTP reciever based on channel
-     *
-     * @param array $input
-     *
-     * @return string
-     */
-    public function getTokenReceiver(array $input): string
-    {
-        //Select OTP destination
-        if($input['channel']==='sms'){
-            return $input['phone'];
-        }elseif($input['channel']==='messenger'){
-            return  $input['handler'];
         }
     }
 }

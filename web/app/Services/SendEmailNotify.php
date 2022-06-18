@@ -2,45 +2,13 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Exception\ConnectException;
+use Illuminate\Support\Facades\Http;
 
-
-class SendEmailNotify {
-    
-    /**
-     * Generate request url
-     * 
-     * @return string
-     */
-    public function requestUrl():string
+class SendEmailNotify
+{
+    public function dispatchEmail($to, $subject, $message)
     {
-        $host = env('MESSENGER_BASE_URL');
-        $version = env('MESSENGER_VERSION');
-         
-        return "{$host}/{$version}/mail";
-    }
-
-    public function getHeaders()
-    {
-        return [
-            'user-id' =>'10000000-1000-1000-1000-000000000001',
-            'Content-Type' => 'application/json',
-            'Access-Control-Allow-Origin' => '*',
-        ];
-    }
-
-    public function requestData($to, $subject, $message)
-    {
-        return [
-            'emails'=>$to,
-            'subject'=>$to,
-            'body'=>$message
-        ];
-    }
-
-    public function dispatchEmail($to, $subject, $message){
         $params = $this->requestData($to, $subject, $message);
         $url = $this->requestUrl();
         $headers = $this->getHeaders();
@@ -49,10 +17,41 @@ class SendEmailNotify {
             $response = Http::withHeaders($headers)->post($url, $params);
         } catch (Excection $e) {
             return false;
-        }catch (ConnectException $e) {
+        } catch (ConnectException $e) {
             return false;
         }
 
         return $response->successful();
+    }
+
+    public function requestData($to, $subject, $message)
+    {
+        return [
+            'emails' => $to,
+            'subject' => $to,
+            'body' => $message
+        ];
+    }
+
+    /**
+     * Generate request url
+     *
+     * @return string
+     */
+    public function requestUrl(): string
+    {
+        $host = env('MESSENGER_BASE_URL');
+        $version = env('MESSENGER_VERSION');
+
+        return "{$host}/{$version}/mail";
+    }
+
+    public function getHeaders()
+    {
+        return [
+            'user-id' => '10000000-1000-1000-1000-000000000001',
+            'Content-Type' => 'application/json',
+            'Access-Control-Allow-Origin' => '*',
+        ];
     }
 }

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Api\V1\Controllers\OneStepId1;
+namespace App\Api\V1\Controllers\User;
 
 use App\Api\V1\Controllers\Controller;
+use App\Traits\TokenHandler;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Traits\TokenHandler;
 
 class AuthController extends Controller
 {
@@ -83,8 +83,7 @@ class AuthController extends Controller
                 "message" => "Token Refresh",
                 "data" => $token
             ], 400);
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 "type" => "danger",
                 "message" => $e->getMessage(),

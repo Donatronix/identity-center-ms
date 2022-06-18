@@ -7,6 +7,7 @@ use App\Models\TwoFactorAuth;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class SendTokenSmsToUser extends Controller
@@ -108,11 +109,11 @@ class SendTokenSmsToUser extends Controller
      *     )
      * )
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function __invoke(Request $request, $botID)
+    public function __invoke(Request $request, $botID = 'twilio'): JsonResponse
     {
         // Validate input data
         $this->validate($request, [
@@ -120,7 +121,7 @@ class SendTokenSmsToUser extends Controller
         ]);
 
         try {
-            $user = User::where("phone", $request->phone)->firstOrFail();
+            $user = User::where("phone", $request->get('phone', null))->firstOrFail();
 
             // user already exists
             if ($user->status == User::STATUS_BANNED) {
@@ -145,7 +146,7 @@ class SendTokenSmsToUser extends Controller
         try {
             $token = TwoFactorAuth::generateToken();
 
-            $sid = $this->sendSms($botID, $request->phone, $token);
+            $sid = $this->sendSms($botID, $request->get('phone', null), $token);
 
             $twoFa = TwoFactorAuth::create([
                 "sid" => $sid,
@@ -167,7 +168,7 @@ class SendTokenSmsToUser extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
-                'message' => "Unable to send sms to phone number. Try again.",
+                'message' => "Unable to send sms to phone number. Try again",
                 "phone_exists" => true
             ], 400);
         }

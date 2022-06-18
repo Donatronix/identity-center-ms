@@ -12,6 +12,7 @@ $router->group([
      */
 //    $router->group([], function ($router) {
 //    });
+
     /**
      * Payments webhooks
      */
@@ -29,12 +30,12 @@ $router->group([
     $router->group([
         'prefix' => 'auth',
         'as' => 'auth',
-        "namespace" => "OneStepId",
+        "namespace" => "OneStepId1",
     ], function ($router) {
-        $router->post('/send-phone/{botID}', "UserRequestsRegistrationByPhoneNumber");
-        $router->post('/send-sms/{botID}', "SendTokenSmsToUser");
-        $router->post('/send-username', "UserSubmitsUsername");
+        $router->post('/send-phone', "AuthByPhoneController");
+        $router->post('/send-sms', "SendTokenSmsToUser");
         $router->post('/send-code', "VerifyPhoneNumber");
+        $router->post('/send-username', "UserSubmitsUsername");
 
         $router->post('/refresh-token', 'AuthController@refresh');
     });

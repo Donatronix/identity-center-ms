@@ -15,7 +15,6 @@ use Throwable;
 
 class ServiceAdminController extends Controller
 {
-
     /**
      *  Add new admin
      *

@@ -13,28 +13,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-class UserRequestsRegistrationByPhoneNumber extends Controller
+class AuthByPhoneController extends Controller
 {
     /**
      * Create new user for One-Step
      *
      * @OA\Post(
-     *     path="/auth/send-phone/{botID}",
+     *     path="/auth/send-phone",
      *     summary="Create new user for One-Step",
      *     description="Create new user for One-Step",
      *     tags={"OneStep 1.0 | Auth"},
-     *
-     *     @OA\Parameter(
-     *          description="Bot ID",
-     *          in="path",
-     *          name="botID",
-     *          required=true,
-     *          example="1",
-     *          @OA\Schema(
-     *              type="integer",
-     *              format="int64"
-     *          ),
-     *     ),
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -123,13 +111,12 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
      *     )
      * )
      *
-     * @param Request                  $request
-     * @param                          $botID
+     * @param Request $request
      *
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function __invoke(Request $request, $botID): JsonResponse
+    public function __invoke(Request $request): JsonResponse
     {
         // Validate input data
         $this->validate($request, [
@@ -137,16 +124,15 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
         ]);
 
         try {
-            $user = User::query()->where("phone", $request->phone)->firstOrFail();
+            $user = User::where("phone", $request->get('phone', null))->firstOrFail();
 
             // user already exists
             if ($user->status == User::STATUS_BANNED) {
-
                 return response()->json([
                     "phone_exists" => true,
                     "user_status" => $user->status,
                     "type" => "danger",
-                    "message" => "This user has been banned from this platform.",
+                    "message" => "This user has been banned from this platform."
                 ], 403);
             } elseif ($user->status == User::STATUS_INACTIVE) {
                 return response()->json([
@@ -156,9 +142,7 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
                     "user_status" => $user->status,
                     "type" => "success",
                 ], 200);
-
             } elseif ($user->status == User::STATUS_ACTIVE) {
-
                 return response()->json([
                     "code" => 200,
                     "message" => "This user already exists.",
@@ -177,10 +161,12 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
         try {
             $token = TwoFactorAuth::generateToken();
 
-            $sid = $this->sendSms($botID, $request->phone, $token);
+            $botID = 'twilio';
+
+            $sid = $this->sendSms($botID, $request->get('phone', null), $token);
 
             $user = User::create([
-                "phone" => $request->phone,
+                "phone" => $request->get('phone', null),
                 "status" => User::STATUS_INACTIVE,
             ]);
 

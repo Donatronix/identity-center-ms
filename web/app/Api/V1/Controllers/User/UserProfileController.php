@@ -1,18 +1,20 @@
 <?php
 
-namespace App\Api\V1\Controllers\OneStepId2;
+namespace App\Api\V1\Controllers\User;
 
 use App\Api\V1\Controllers\Controller;
-use App\Exceptions\SMSGatewayException;
 use App\Models\User;
-use Exception;
+use App\Services\SendEmailNotify;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use App\Services\SendEmailNotify;
 
-
+/**
+ * Class UserProfileController
+ *
+ * @package App\Api\V1\Controllers\User
+ */
 class UserProfileController extends Controller
 {
     /**
@@ -22,7 +24,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/{id}/details",
      *     summary="Get user profile for One-Step 2.0",
      *     description="Get user profile for One-Step 2.0",
-     *     tags={"OneStep 2.0 | User Profile"},
+     *     tags={"User Profile 2.0"},
      *
      *     security={{
      *         "passport": {
@@ -121,34 +123,34 @@ class UserProfileController extends Controller
      */
     public function getProfile(string $id): JsonResponse
     {
-        try{
-           // Check whether user already exist
-           $userQuery = User::where(['id'=>$id]);
+        try {
+            // Check whether user already exist
+            $userQuery = User::where(['id' => $id]);
 
-            if($userQuery->exists()){
+            if ($userQuery->exists()) {
                 // Fetch user profile
                 $user = $userQuery->select(
-                        'users.first_name',
-                        'users.last_name',
-                        'users.email',
-                        'users.address_country',
-                        'users.local'
-                    )->findOrFail();
+                    'users.first_name',
+                    'users.last_name',
+                    'users.email',
+                    'users.address_country',
+                    'users.local'
+                )->findOrFail();
 
                 //Show response
                 return response()->json([
                     'type' => 'success',
                     'message' => "User profile retrieved successfully.",
-                    "data" =>$user->toArray()], 200);
+                    "data" => $user->toArray()], 200);
 
-            }else{
+            } else {
                 return response()->json([
                     'type' => 'danger',
                     'message' => "User profile does NOT exist.",
                     "data" => null
                 ], 400);
             }
-        }catch(ModelNotFoundException $e){
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to retrieve user profile.",
@@ -164,7 +166,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/password/change",
      *     summary="Change user password",
      *     description="Change user profile password for One-Step 2.0",
-     *     tags={"OneStep 2.0 | User Profile"},
+     *     tags={"User Profile 2.0"},
      *
      *     security={{
      *         "passport": {
@@ -262,53 +264,52 @@ class UserProfileController extends Controller
     public function updatePassword(Request $request, SendEmailNotify $sendEmail): JsonResponse
     {
         $validData = $this->validate($request, [
-            'id'=> 'required|string',
-            'current_password'=> 'required|string|max:32',
-            'new_password'=> 'required|string|max:32'
+            'id' => 'required|string',
+            'current_password' => 'required|string|max:32',
+            'new_password' => 'required|string|max:32'
         ]);
 
-        try{
+        try {
             // Verify current password
-            $userQuery = User::where('id',$validData['id']);
+            $userQuery = User::where('id', $validData['id']);
 
             $user = $userQuery->firstOrFail();
 
-             if(Hash::check($validData['current_password'], $user->password )){
+            if (Hash::check($validData['current_password'], $user->password)) {
 
                 $newPass = Hash::make($validData['new_password']);
 
                 // Update user password
                 $userQuery->update([
-                    'password'=>$newPass
+                    'password' => $newPass
                 ]);
 
                 //Send notification email
-                $subject='Change Password';
-                $message= 'Your password has been updated successfully.';
+                $subject = 'Change Password';
+                $message = 'Your password has been updated successfully.';
                 $sendEmail->dispatchEmail($to['email'], $subject, $message);
 
-                 //Show response
-                 return response()->json([
-                     'type' => 'success',
-                     'message' => "User password updated successfully.",
-                     "data" =>null
+                //Show response
+                return response()->json([
+                    'type' => 'success',
+                    'message' => "User password updated successfully.",
+                    "data" => null
                 ], 200);
 
-             }else{
-                 return response()->json([
-                     'type' => 'danger',
-                     'message' => "Invalid user password. Try again",
-                     "data" => null
-                 ], 400);
-             }
-        }catch(ModelNotFoundException $e){
+            } else {
+                return response()->json([
+                    'type' => 'danger',
+                    'message' => "Invalid user password. Try again",
+                    "data" => null
+                ], 400);
+            }
+        } catch (ModelNotFoundException $e) {
             return response()->json([
-                 'type' => 'danger',
-                 'message' => "Unable to update user password.",
-                 "data" => $e->getMessage()
+                'type' => 'danger',
+                'message' => "Unable to update user password.",
+                "data" => $e->getMessage()
             ], 400);
         }
-
     }
 
     /**
@@ -318,7 +319,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/username/update",
      *     summary="Update username",
      *     description="Update username for One-Step 2.0",
-     *     tags={"OneStep 2.0 | User Profile"},
+     *     tags={"User Profile 2.0"},
      *
      *     security={{
      *         "passport": {
@@ -389,27 +390,27 @@ class UserProfileController extends Controller
      */
     public function updateUsername(Request $request, SendEmailNotify $sendEmail): JsonResponse
     {
-      //validate input date
-      $input = $this->validate($request,[
-        'username'=>'required|string'
-      ]);
+        //validate input date
+        $input = $this->validate($request, [
+            'username' => 'required|string'
+        ]);
 
-       try{
-           // Check whether user already exist
-           $userQuery = User::where(['username'=> $input['username']]);
+        try {
+            // Check whether user already exist
+            $userQuery = User::where(['username' => $input['username']]);
 
-            if($userQuery->exists()){
+            if ($userQuery->exists()) {
 
                 $user = $userQuery->firstOrFail();
 
                 //Update username
                 $user->update([
-                    'username'=>$input['username']
+                    'username' => $input['username']
                 ]);
 
                 //Send notification email
-                $subject='Change Username';
-                $message= 'Your username has been updated successfully.';
+                $subject = 'Change Username';
+                $message = 'Your username has been updated successfully.';
                 $sendEmail->dispatchEmail($to['email'], $subject, $message);
 
                 //Show response
@@ -417,21 +418,20 @@ class UserProfileController extends Controller
                     'type' => 'success',
                     'message' => "Username update was successful."
                 ], 400);
-            }else{
+            } else {
                 return response()->json([
                     'type' => 'danger',
                     'message' => "User profile does NOT exist.",
                     "data" => null
                 ], 400);
             }
-        }catch(ModelNotFoundException $e){
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to update Username.",
-                "data" =>  $e->getMessage()
+                "data" => $e->getMessage()
             ], 400);
         }
-
     }
 
     /**
@@ -441,7 +441,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/fullname/update",
      *     summary="Update fullname",
      *     description="Update fullname for One-Step 2.0",
-     *     tags={"OneStep 2.0 | User Profile"},
+     *     tags={"User Profile 2.0"},
      *
      *     security={{
      *         "passport": {
@@ -525,24 +525,24 @@ class UserProfileController extends Controller
     public function updateFullname(Request $request): JsonResponse
     {
         //validate input date
-        $input = $this->validate($request,[
-            'id'=>'required|string',
-            'firstname'=>'required|string',
-            'lastname'=>'required|string'
+        $input = $this->validate($request, [
+            'id' => 'required|string',
+            'firstname' => 'required|string',
+            'lastname' => 'required|string'
         ]);
 
-        try{
-           // Check whether user already exist
-           $userQuery = User::where(['id'=> $input['id']]);
+        try {
+            // Check whether user already exist
+            $userQuery = User::where(['id' => $input['id']]);
 
-            if($userQuery->exists()){
+            if ($userQuery->exists()) {
 
                 $user = $userQuery->firstOrFail();
 
                 //Update full name
                 $user->update([
-                    'first_name'=>$input['firstname'],
-                    'last_name'=>$input['lastname']
+                    'first_name' => $input['firstname'],
+                    'last_name' => $input['lastname']
                 ]);
 
                 //Show response
@@ -550,21 +550,20 @@ class UserProfileController extends Controller
                     'type' => 'success',
                     'message' => "Full name update was successful."
                 ], 400);
-            }else{
+            } else {
                 return response()->json([
                     'type' => 'danger',
                     'message' => "User profile does NOT exist.",
                     "data" => null
                 ], 400);
             }
-        }catch(ModelNotFoundException $e){
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to update Full name.",
-                "data" =>  $e->getMessage()
+                "data" => $e->getMessage()
             ], 400);
         }
-
     }
 
     /**
@@ -574,7 +573,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/country/update",
      *     summary="Update country",
      *     description="Update country for One-Step 2.0",
-     *     tags={"OneStep 2.0 | User Profile"},
+     *     tags={"User Profile 2.0"},
      *
      *     security={{
      *         "passport": {
@@ -651,23 +650,23 @@ class UserProfileController extends Controller
      */
     public function updateCountry(Request $request): JsonResponse
     {
-      //validate input date
-      $input = $this->validate($request,[
-        'id'=>'required|string',
-        'country'=>'required|string'
-      ]);
+        //validate input date
+        $input = $this->validate($request, [
+            'id' => 'required|string',
+            'country' => 'required|string'
+        ]);
 
-       try{
-           // Check whether user already exist
-           $userQuery = User::where(['id'=> $input['id']]);
+        try {
+            // Check whether user already exist
+            $userQuery = User::where(['id' => $input['id']]);
 
-            if($userQuery->exists()){
+            if ($userQuery->exists()) {
 
                 $user = $userQuery->firstOrFail();
 
                 //Update username
                 $user->update([
-                    'country'=>$input['country']
+                    'country' => $input['country']
                 ]);
 
                 //Show response
@@ -675,21 +674,20 @@ class UserProfileController extends Controller
                     'type' => 'success',
                     'message' => "Country update was successful."
                 ], 400);
-            }else{
+            } else {
                 return response()->json([
                     'type' => 'danger',
                     'message' => "User profile does NOT exist.",
                     "data" => null
                 ], 400);
             }
-        }catch(ModelNotFoundException $e){
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to update country.",
-                "data" =>  $e->getMessage()
+                "data" => $e->getMessage()
             ], 400);
         }
-
     }
 
     /**
@@ -699,7 +697,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/email/update",
      *     summary="Update email",
      *     description="Update email for One-Step 2.0",
-     *     tags={"OneStep 2.0 | User Profile"},
+     *     tags={"User Profile 2.0"},
      *
      *     security={{
      *         "passport": {
@@ -769,22 +767,22 @@ class UserProfileController extends Controller
      */
     public function updateEmail(Request $request): JsonResponse
     {
-      //validate input date
-      $input = $this->validate($request,[
-        'email'=>'required|string|email'
-      ]);
+        //validate input date
+        $input = $this->validate($request, [
+            'email' => 'required|string|email'
+        ]);
 
-       try{
-           // Check whether user already exist
-           $userQuery = User::where(['email'=> $input['email']]);
+        try {
+            // Check whether user already exist
+            $userQuery = User::where(['email' => $input['email']]);
 
-            if($userQuery->exists()){
+            if ($userQuery->exists()) {
 
                 $user = $userQuery->firstOrFail();
 
                 //Update username
                 $user->update([
-                    'email'=>$input['email']
+                    'email' => $input['email']
                 ]);
 
                 //Show response
@@ -792,21 +790,20 @@ class UserProfileController extends Controller
                     'type' => 'success',
                     'message' => "Email update was successful."
                 ], 400);
-            }else{
+            } else {
                 return response()->json([
                     'type' => 'danger',
                     'message' => "User profile does NOT exist.",
                     "data" => null
                 ], 400);
             }
-        }catch(ModelNotFoundException $e){
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to update email.",
-                "data" =>  $e->getMessage()
+                "data" => $e->getMessage()
             ], 400);
         }
-
     }
 
     /**
@@ -816,7 +813,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/local/update",
      *     summary="Update local",
      *     description="Update local for One-Step 2.0",
-     *     tags={"OneStep 2.0 | User Profile"},
+     *     tags={"User Profile 2.0"},
      *
      *     security={{
      *         "passport": {
@@ -893,23 +890,23 @@ class UserProfileController extends Controller
      */
     public function updateLocal(Request $request): JsonResponse
     {
-      //validate input date
-      $input = $this->validate($request,[
-        'id'=>'required|string',
-        'local'=>'required|string'
-      ]);
+        //validate input date
+        $input = $this->validate($request, [
+            'id' => 'required|string',
+            'local' => 'required|string'
+        ]);
 
-       try{
-           // Check whether user already exist
-           $userQuery = User::where(['id'=> $input['id']]);
+        try {
+            // Check whether user already exist
+            $userQuery = User::where(['id' => $input['id']]);
 
-            if($userQuery->exists()){
+            if ($userQuery->exists()) {
 
                 $user = $userQuery->firstOrFail();
 
                 //Update username
                 $user->update([
-                    'local'=>$input['local']
+                    'local' => $input['local']
                 ]);
 
                 //Show response
@@ -917,20 +914,19 @@ class UserProfileController extends Controller
                     'type' => 'success',
                     'message' => "Email update was successful."
                 ], 400);
-            }else{
+            } else {
                 return response()->json([
                     'type' => 'danger',
                     'message' => "User profile does NOT exist.",
                     "data" => null
                 ], 400);
             }
-        }catch(ModelNotFoundException $e){
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to update email.",
-                "data" =>  $e->getMessage()
+                "data" => $e->getMessage()
             ], 400);
         }
-
     }
 }

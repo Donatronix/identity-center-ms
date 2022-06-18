@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Identification;
+use App\Models\User;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -11,7 +11,6 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\URL;
 use Psr\Http\Message\RequestInterface;
 
 class IdentityVerification
@@ -64,9 +63,9 @@ class IdentityVerification
 
     /**
      * Make request to veriff API to verify identity
-     * 
-     * @param  User  $user
-     * @param  Request  $request
+     *
+     * @param User $user
+     * @param Request $request
      * @return mixed|object
      */
     public function startSession(User $user, Request $request): mixed
@@ -153,11 +152,11 @@ class IdentityVerification
 
         // Check if exist x-hmac-signature
         if ($headers->has('x-hmac-signature') !== $signature) {
-        //    return (object)[
-        //        'type' => 'danger',
-        //        'message' => 'Signatures is different',
-        //        'code' => 401
-        //    ];
+            //    return (object)[
+            //        'type' => 'danger',
+            //        'message' => 'Signatures is different',
+            //        'code' => 401
+            //    ];
         }
 
         // Set logging generated signature

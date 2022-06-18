@@ -5,15 +5,15 @@ namespace App\Api\V1\Controllers\OneStepId1;
 use App\Api\V1\Controllers\Controller;
 use App\Models\TwoFactorAuth;
 use App\Models\User;
+use App\Traits\TokenHandler;
 use Exception;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Validation\ValidationException;
 use PubSub;
-use App\Traits\TokenHandler;
 
 class UserSubmitsUsername extends Controller
 {
@@ -202,7 +202,7 @@ class UserSubmitsUsername extends Controller
     }
 
     /**
-     * @param User             $user
+     * @param User $user
      * @param                  $sid
      * @param                  $username
      *

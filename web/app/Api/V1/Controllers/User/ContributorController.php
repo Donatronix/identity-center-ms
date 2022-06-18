@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\V1\Controllers;
+namespace App\Api\V1\Controllers\User;
 
 use App\Exceptions\ContributorRegistrationException;
 use App\Http\Controllers\Controller;
@@ -208,6 +208,26 @@ class ContributorController extends Controller
     }
 
     /**
+     * Get contributor object
+     *
+     * @param $id
+     * @return mixed
+     */
+    private function getObject($id): mixed
+    {
+        try {
+            return $this->model::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title' => "Get contributor",
+                'message' => "Contributor with id #{$id} not found: {$e->getMessage()}",
+                'data' => ''
+            ], 404);
+        }
+    }
+
+    /**
      * Contributor registration
      * Step 3.1. Saving contributor Identify data and Init verify session
      *
@@ -291,14 +311,14 @@ class ContributorController extends Controller
         $data = (new IdentityVerification())->startSession($contributor, $request);
 
         // Return response to client
-        if($data->status === 'success'){
+        if ($data->status === 'success') {
             return response()->jsonApi([
                 'type' => 'success',
                 'title' => 'Start KYC verification',
                 'message' => "Session started successfully",
                 'data' => $data->verification
             ], 200);
-        }else{
+        } else {
             return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'Start KYC verification',
@@ -530,26 +550,6 @@ class ContributorController extends Controller
             ], 200);
         } catch (Exception $e) {
             throw new ContributorRegistrationException($e);
-        }
-    }
-
-    /**
-     * Get contributor object
-     *
-     * @param $id
-     * @return mixed
-     */
-    private function getObject($id): mixed
-    {
-        try {
-            return $this->model::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
-            return response()->jsonApi([
-                'type' => 'danger',
-                'title' => "Get contributor",
-                'message' => "Contributor with id #{$id} not found: {$e->getMessage()}",
-                'data' => ''
-            ], 404);
         }
     }
 }

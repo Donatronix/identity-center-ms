@@ -163,7 +163,7 @@ class UserController extends Controller
     public function index(Request $request): mixed
     {
         try {
-            $users = User::query()->paginate($request->get('limit', config('settings.pagination_limit')));
+            $users = User::paginate($request->get('limit', config('settings.pagination_limit')));
 
             return response()->jsonApi(
                 array_merge([
@@ -312,10 +312,9 @@ class UserController extends Controller
                     'status' => User::STATUS_ACTIVE,
                     'verify_token' => Str::random(32),
                 ]);
-                $user = User::query()->create($input);
+                $user = User::create($input);
 
                 PubSub::transaction(function () {
-
                 })->publish('sendVerificationEmail', [
                     'email' => $user->email,
                     'display_name' => $user->display_name,
@@ -329,9 +328,14 @@ class UserController extends Controller
 
             });
         } catch (Throwable $th) {
-            return response()->jsonApi(['message' => $th->getMessage()], 400);
+            return response()->jsonApi([
+                'message' => $th->getMessage()
+            ], 400);
         }
-        return response()->jsonApi(["message" => "User registered successfully!"], 200);
+
+        return response()->jsonApi([
+            "message" => "User registered successfully!"
+        ], 200);
     }
 
     /**
@@ -360,14 +364,14 @@ class UserController extends Controller
      *     )
      * )
      *
-     * @param mixed   $id
+     * @param mixed $id
      * @param Request $request
      *
      * @return mixed
      */
     public function show(Request $request, mixed $id): mixed
     {
-        $builder = User::query()->where('id', $id);
+        $builder = User::where('id', $id);
         //$builder = User::where('id', Auth::user()->id);
 
         $user = new User();
@@ -387,12 +391,6 @@ class UserController extends Controller
         //    return $user;
         //}
         return $user;
-
-//        if ($user) {
-//            UserResource::withoutWrapping();
-//
-//            return new UserResource($user);
-//        }
     }
 
     /**
@@ -422,7 +420,7 @@ class UserController extends Controller
      * )
      *
      * @param Request $request
-     * @param mixed   $id
+     * @param mixed $id
      *
      * @return Response
      * @throws ValidationException
@@ -438,7 +436,7 @@ class UserController extends Controller
                     'password' => 'required_with:current_password|confirmed|min:6|max:190',
                 ]);
 
-                $user = User::query()->findOrFail($id);
+                $user = User::findOrFail($id);
 
                 if (empty($user)) {
                     throw new Exception("User does not exist!");
@@ -599,9 +597,9 @@ class UserController extends Controller
         try {
             $users = null;
             DB::transaction(function () use ($id, &$users) {
-                $user = User::query()->findOrFail($id);
+                $user = User::findOrFail($id);
                 $user->delete();
-                $users = User::query()->paginate(config('settings.pagination_limit'));
+                $users = User::paginate(config('settings.pagination_limit'));
             });
 
         } catch (ModelNotFoundException $e) {
@@ -686,7 +684,7 @@ class UserController extends Controller
                 }
 
 
-                $user = User::query()->where('email', $select->first()->email)->first();
+                $user = User::where('email', $select->first()->email)->first();
                 $user->email_verified_at = Carbon::now()->getTimestamp();
                 $user->save();
 
@@ -763,7 +761,7 @@ class UserController extends Controller
 
                 $validated = $validator->validated();
 
-                $user = User::query()->where('email', $validated['email'])->first();
+                $user = User::where('email', $validated['email'])->first();
 
                 $verify = DB::table('password_resets')->where([
                     'email' => $validated['email'],

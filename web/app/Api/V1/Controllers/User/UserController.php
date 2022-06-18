@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Api\V1\Controllers;
+namespace App\Api\V1\Controllers\User;
 
-use App\Api\V1\Resources\UserResource;
-use App\Models\Category;
+use App\Api\V1\Controllers\Controller;
 use App\Models\User;
 use App\Services\IdentityVerification;
 use App\Traits\TokenHandler;
@@ -398,7 +397,7 @@ class UserController extends Controller
      * )
      *
      * @param Request $request
-     * @param int     $id
+     * @param int $id
      *
      * @return Response
      * @throws ValidationException
@@ -604,7 +603,7 @@ class UserController extends Controller
 
             // Should send SMS to the user's new phone number, contaiing the verification code
             $response = Http::post('[COMMUNICATIONS_MS_URL]/messages/sms/send-message', [
-                'to' => $request->phone,
+                'to' => $request->get('phone', null),
                 'message' => 'Your verification code is: ' . $verificationCode,
             ]);
 
@@ -728,12 +727,12 @@ class UserController extends Controller
         $validationMessages = [
             'verification_code.regex' => 'The verification code is invalid',
         ];
-        
+
         $this->validate($request, $rules, $validationMessages);
 
         try {
             $user = User::first(Auth::user()->id);
-            $user->phone = $request->phone;
+            $user->phone = $request->get('phone', null);
             $user->verification_code = null;
             if (!$user->save()) {
                 throw new Exception();

@@ -3,14 +3,14 @@
 namespace App\Api\V1\Controllers\OneStepId2;
 
 use App\Api\V1\Controllers\Controller;
-use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use App\Models\User;
 use App\Models\MediaConnect;
+use App\Models\User;
 use App\Services\FetchWhatsAppInfo;
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Facades\Socialite;
 
 class SocialMediaController extends Controller
 {
@@ -61,26 +61,26 @@ class SocialMediaController extends Controller
      */
     public function createRedirectUrl(Request $request): JsonResponse
     {
-      //validate input date
-      $input = $this->validate($request, ['provider'=>'required|string']);
+        //validate input date
+        $input = $this->validate($request, ['provider' => 'required|string']);
 
-       try{
-           // Check whether user already exist
-           $userExist = User::where(['id'=> Auth::user()->id])->exists();
-               
-            if($userExist){
-               
+        try {
+            // Check whether user already exist
+            $userExist = User::where(['id' => Auth::user()->id])->exists();
+
+            if ($userExist) {
+
                 //Generate redirect url
                 $redirectUrl = Socialite::driver($input['provider'])->redirect();
 
-                if(!empty($redirectUrl) && $redirectUrl!=null){
-                     //Show response
+                if (!empty($redirectUrl) && $redirectUrl != null) {
+                    //Show response
                     return response()->json([
                         'type' => 'success',
                         'message' => "Redirect URL created successfully.",
-                        "data" => ['redirect_url'=>$redirectUrl]
+                        "data" => ['redirect_url' => $redirectUrl]
                     ], 200);
-                }else{
+                } else {
                     return response()->json([
                         'type' => 'danger',
                         'message' => "Redirect URL was NOT created.",
@@ -88,21 +88,21 @@ class SocialMediaController extends Controller
                     ], 400);
                 }
 
-            }else{
+            } else {
                 return response()->json([
                     'type' => 'danger',
                     'message' => "User profile does not exist.",
                     "data" => null
                 ], 400);
             }
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to create redirect URL. Try again.",
                 "data" => $e->getMessage()
             ], 400);
         }
-      
+
     }
 
     /**
@@ -148,28 +148,28 @@ class SocialMediaController extends Controller
      */
     public function mediaCallback(string $provider): JsonResponse
     {
-       try{
+        try {
             //Get user info
             $mediaUser = Socialite::driver($provider)->stateless()->user();
-           
-            if(!empty($mediaUser) && $mediaUser!=null){
+
+            if (!empty($mediaUser) && $mediaUser != null) {
                 //Check whether media connection already exist
-                $mediaQuery = MediaConnect::where(['email'=>$mediaUser->email, 'provider'=>$input['provider']]);
-                
+                $mediaQuery = MediaConnect::where(['email' => $mediaUser->email, 'provider' => $input['provider']]);
+
                 $mediaArray = [
-                    'user_id'=>Auth::user()->id,
-                    'media_id'=>$mediaUser->id,
-                    'provider'=>$provider,
-                    'name'=>$mediaUser->name,
-                    'email'=>$mediaUser->email,
-                    'phone'=>Auth::user()->phone
+                    'user_id' => Auth::user()->id,
+                    'media_id' => $mediaUser->id,
+                    'provider' => $provider,
+                    'name' => $mediaUser->name,
+                    'email' => $mediaUser->email,
+                    'phone' => Auth::user()->phone
                 ];
-                
-                if($mediaQuery->doesntExist()){
+
+                if ($mediaQuery->doesntExist()) {
                     //Save user record
                     MediaConnect::create($mediaArray);
                 }
-                
+
                 //Show response
                 return response()->json([
                     'type' => 'success',
@@ -177,7 +177,7 @@ class SocialMediaController extends Controller
                     "data" => $mediaArray
                 ], 200);
 
-            }else{
+            } else {
                 //Response with required info
                 return response()->json([
                     'type' => 'danger',
@@ -185,14 +185,14 @@ class SocialMediaController extends Controller
                     "data" => null
                 ], 400);
             }
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to connect to {$provider}. Try again.",
                 "data" => $e->getMessage()
             ], 400);
         }
-      
+
     }
 
     /**
@@ -230,30 +230,30 @@ class SocialMediaController extends Controller
     {
         $provider = 'whatsapp';
 
-        try{
+        try {
             //Get user info
             $phoneNumber = Auth::user()->phone;
-            
+
             //send test chat
             $userConn = $connchat->sendTestChat($phoneNumber);
-           
-            if($userConn){
+
+            if ($userConn) {
                 //Check whether media connection already exist
-                $mediaQuery = MediaConnect::where(['email'=>Auth::user()->email, 'provider'=>$provider]);
-                
+                $mediaQuery = MediaConnect::where(['email' => Auth::user()->email, 'provider' => $provider]);
+
                 $mediaArray = [
-                    'user_id'=>Auth::user()->id,
-                    'provider'=>$provider,
-                    'name'=>Auth::user()->username,
-                    'email'=>Auth::user()->email,
-                    'phone'=>$phoneNumber
+                    'user_id' => Auth::user()->id,
+                    'provider' => $provider,
+                    'name' => Auth::user()->username,
+                    'email' => Auth::user()->email,
+                    'phone' => $phoneNumber
                 ];
-                
-                if($mediaQuery->doesntExist()){
+
+                if ($mediaQuery->doesntExist()) {
                     //Save user record
                     MediaConnect::create($mediaArray);
                 }
-                
+
                 //Show response
                 return response()->json([
                     'type' => 'success',
@@ -261,7 +261,7 @@ class SocialMediaController extends Controller
                     "data" => $mediaArray
                 ], 200);
 
-            }else{
+            } else {
                 //Response with required info
                 return response()->json([
                     'type' => 'danger',
@@ -269,14 +269,14 @@ class SocialMediaController extends Controller
                     "data" => null
                 ], 400);
             }
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to connect to {$provider}. Try again.",
                 "data" => $e->getMessage()
             ], 400);
         }
-      
+
     }
 
     /**
@@ -311,11 +311,11 @@ class SocialMediaController extends Controller
      */
     public function getMediaData(): JsonResponse
     {
-        try{
+        try {
             //Fetch social media connections
-            $userMedia = MediaConnect::where(['user_id'=>Auth::user()->id])->get();
+            $userMedia = MediaConnect::where(['user_id' => Auth::user()->id])->get();
 
-            if(!empty($userMedia) && $userMedia!=null){
+            if (!empty($userMedia) && $userMedia != null) {
                 //Show response
                 return response()->json([
                     'type' => 'success',
@@ -323,7 +323,7 @@ class SocialMediaController extends Controller
                     "data" => $userMedia->toArray()
                 ], 200);
 
-            }else{
+            } else {
                 //Response with required info
                 return response()->json([
                     'type' => 'danger',
@@ -331,13 +331,13 @@ class SocialMediaController extends Controller
                     "data" => null
                 ], 404);
             }
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to retrieved media connections. Try again.",
                 "data" => $e->getMessage()
             ], 400);
         }
-      
+
     }
 }

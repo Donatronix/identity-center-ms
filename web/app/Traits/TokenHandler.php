@@ -2,15 +2,13 @@
 
 namespace App\Traits;
 
-use Auth;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 /**
  *
  */
-trait TokenHandler {
-
+trait TokenHandler
+{
     public function createToken($username, $password)
     {
         $req = Request::create("/oauth/token", "POST", [
@@ -19,7 +17,8 @@ trait TokenHandler {
             'client_secret' => config('settings.token_params.secret'),
             'username' => $username,
             'password' => $password,
-            'scope' => '*']);
+            'scope' => '*'
+        ]);
 
         $res = app()->handle($req);
         return json_decode($res->getContent());
@@ -32,9 +31,11 @@ trait TokenHandler {
             'client_id' => config('settings.token_params.id'),
             'client_secret' => config('settings.token_params.secret', ''),
             'refresh_token' => $token,
-            'scope' => '*']);
+            'scope' => '*'
+        ]);
 
         $res = app()->handle($req);
+
         return json_decode($res->getContent());
     }
 }

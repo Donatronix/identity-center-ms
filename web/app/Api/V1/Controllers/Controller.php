@@ -68,32 +68,20 @@ use Laravel\Lumen\Routing\Controller as BaseController;
  */
 
 /**
-* @OA\SecurityScheme(
-*      in="header",
-*      type="http",
-*      scheme="bearer",
-*      name="bearerAuth",
-*      bearerFormat="JWT",
-*      description="Auth Token",
-*      securityScheme="bearerAuth",
-* ),
-*/
+ * @OA\SecurityScheme(
+ *      in="header",
+ *      type="http",
+ *      scheme="bearer",
+ *      name="bearerAuth",
+ *      bearerFormat="JWT",
+ *      description="Auth Token",
+ *      securityScheme="bearerAuth",
+ * ),
+ */
 
 /**
  * Api Base Class Controller
  *
  * @package App\Api\V1\Controllers
  */
-class Controller extends BaseController
-{
-    protected function sendSms($botID, $phoneNumber, $message)
-    {
-        try {
-            //  api call to communication MS
-        } catch (Exception $th) {
-            throw new SMSGatewayException("Unable to send sms");
-        }
-
-        return Str::random(16);
-    }
-}
+class Controller extends BaseController{}

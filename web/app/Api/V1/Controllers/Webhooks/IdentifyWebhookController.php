@@ -3,7 +3,6 @@
 namespace App\Api\V1\Controllers\Webhooks;
 
 use App\Api\V1\Controllers\Controller;
-use App\Models\User;
 use App\Services\IdentityVerification;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -68,7 +67,7 @@ class IdentifyWebhookController extends Controller
         // Handle Webhook data
         $result = (new IdentityVerification())->handleWebhook($type, $request);
 
-        if($result->type == 'danger'){
+        if ($result->type == 'danger') {
             return response()->jsonApi([
                 'type' => $result->type,
                 'message' => $result->message,
