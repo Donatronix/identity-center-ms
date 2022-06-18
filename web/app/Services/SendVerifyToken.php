@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use GuzzleHttp\Exception\ConnectException;
 
 
 class SendVerifyToken {
@@ -48,6 +49,8 @@ class SendVerifyToken {
         try {
             $response = Http::withHeaders($headers)->post($url, $params);
         } catch (Excection $e) {
+            return false;
+        }catch (ConnectException $e) {
             return false;
         }
 

@@ -96,6 +96,7 @@ $router->group([
             $router->post('/redirect', "SocialMediaController@createRedirectUrl");
             $router->get('/{provider}/callback', "SocialMediaController@mediaCallback");
             $router->get('/social/connections', "SocialMediaController@getMediaData");
+            $router->get('/whatsapp/connect', "SocialMediaController@whatsappConnect");
         });
     });
 
