@@ -14,14 +14,17 @@ class CreateAppUsersTable extends Migration
     public function up()
     {
         Schema::create('app_users', function (Blueprint $table) {
-            $table->integer('id', true);
+            $table->uuid('id')->primary();
+
             $table->string('app_name', 100);
             $table->boolean('register');
-            $table->char('user_id', 36)->index('user_id');
 
-            $table->primary(['id', 'user_id']);
+            $table->foreignUuid('user_id')->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
 
-            $table->foreign(['user_id'], 'app_users_ibfk_1')->references(['id'])->on('users')->onDelete('CASCADE');
+            $table->timestamps();
+            //$table->softDeletes();
         });
     }
 

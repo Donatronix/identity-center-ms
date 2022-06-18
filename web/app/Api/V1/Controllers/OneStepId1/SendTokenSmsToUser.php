@@ -18,7 +18,7 @@ class SendTokenSmsToUser extends Controller
      *     path="/auth/send-sms",
      *     summary="Create new user for One-Step",
      *     description="Create new user for One-Step",
-     *     tags={"Auth by OneStep 1.0"},
+     *     tags={"OneStep 1.0 | Auth"},
      *
      *
      *     @OA\RequestBody(
@@ -121,7 +121,7 @@ class SendTokenSmsToUser extends Controller
 
         try {
             $user = User::where("phone", $request->phone)->firstOrFail();
-            
+
             // user already exists
             if ($user->status == User::STATUS_BANNED) {
                 return response()->json([

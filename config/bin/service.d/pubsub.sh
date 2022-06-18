@@ -16,8 +16,8 @@ set -o nounset
 sleep 10
 
 # Run Pubsub Queue
-echo "Run php artisan queue:listen rabbitmq --queue=${PUBSUB_QUEUE} --timeout=0 --tries=3"
-/usr/local/bin/php /var/www/html/artisan queue:listen rabbitmq --queue=${PUBSUB_QUEUE} --timeout=0 --tries=3 > /dev/null
+echo "Run php artisan queue:listen rabbitmq --queue=${PUBSUB_RECEIVER} --timeout=0 --tries=3"
+/usr/local/bin/php /var/www/html/artisan queue:listen rabbitmq --queue=${PUBSUB_RECEIVER} --timeout=0 --tries=3 > /dev/null
 
 # now we bring the primary process back into the foreground and leave it there
 fg %1

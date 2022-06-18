@@ -24,7 +24,7 @@ class CreateUserIDController extends Controller
      *     path="/user-account/create",
      *     summary="Create new user for One-Step 2.0",
      *     description="Verify phone number and handler to create new user for One-Step 2.0",
-     *     tags={"User Account by OneStep 2.0"},
+     *     tags={"OneStep 2.0 | User Account"},
      *
      *     security={{
      *         "passport": {
@@ -157,23 +157,23 @@ class CreateUserIDController extends Controller
     {
       //validate input date
       $input = $this->validate($request, VerifyStepInfo::rules());
-      
+
       $sendto = $this->getTokenReceiver($input);
 
        try{
            // Check whether user already exist
            $userExist = User::where([
-               'phone'=> $input['phone'], 
+               'phone'=> $input['phone'],
                'username'=>$input['username']
                ])->doesntExist();
-               
+
             if($userExist){
                 // Create verification token (OTP - One Time Password)
                 $token = VerifyStepInfo::generateOTP(7);
-                
+
                 //Generate token expiry time in minutes
                 $validity = VerifyStepInfo::tokenValidity(30);
-                
+
                 //Create user Account
                 $user = new User;
                 $user->username = $input['username'];
@@ -191,15 +191,15 @@ class CreateUserIDController extends Controller
 
                 // Send verification token (SMS or Massenger)
                 $sendOTP->dispatchOTP($input['channel'], $sendto, $token);
-                
+
                 //Show response
                 return response()->json([
                     'type' => 'success',
                     'message' => "{$channel} verification code sent to {$sendto}.",
                     "data" => [
-                            'channel'=>$input['channel'], 
+                            'channel'=>$input['channel'],
                             'username'=>$input['username'],
-                            'receiver'=>$sendto 
+                            'receiver'=>$sendto
                         ]
                 ], 200);
 
@@ -217,7 +217,7 @@ class CreateUserIDController extends Controller
                 "data" => null
             ], 400);
         }
-      
+
     }
 
     /**
@@ -227,7 +227,7 @@ class CreateUserIDController extends Controller
      *     path="/user-account/otp/resend",
      *     summary="Resend OTP for One-Step 2.0",
      *     description="Resend OTP to create new user for One-Step 2.0",
-     *     tags={"User Account by OneStep 2.0"},
+     *     tags={"OneStep 2.0 | User Account"},
      *
      *     security={{
      *         "passport": {
@@ -307,7 +307,7 @@ class CreateUserIDController extends Controller
            'channel'=>'required|string',
            'username'=>'required|string'
        ]);
-      
+
         $sendto = $input['receiver'];
 
         try{
@@ -316,7 +316,7 @@ class CreateUserIDController extends Controller
 
             //Generate token expiry time in minutes
             $validity = VerifyStepInfo::tokenValidity(30);
-            
+
             // save verification token
             VerifyStepInfo::create([
                 'username'=>$input['username'],
@@ -328,7 +328,7 @@ class CreateUserIDController extends Controller
 
             // Send verification token (SMS or Massenger)
             $sendOTP->dispatchOTP($input['channel'], $sendto, $token);
-            
+
             //Show response
             return response()->json([
                 'type' => 'success',
@@ -352,7 +352,7 @@ class CreateUserIDController extends Controller
      *     path="/user-account/otp/verify",
      *     summary="Verify new user OTP for One-Step 2.0",
      *     description="Verify phone number or handler to create new user for One-Step 2.0",
-     *     tags={"User Account by OneStep 2.0"},
+     *     tags={"OneStep 2.0 | User Account"},
      *
      *     security={{
      *         "passport": {
@@ -415,20 +415,20 @@ class CreateUserIDController extends Controller
     {
        // Validate user input data
        $input = $this->validate($request, ['token'=>'required|string']);
-       
+
        try{
             //find the token
             $existQuery = VerifyStepInfo::where(['code'=>$input['token']]);
-            
+
             //Check validity and availability
             if($existQuery->exists()){
                 $userData = $existQuery->first();
                 $username = $userData->username;
                 $id = "{$username}@onestep.com";
-                
+
                 //Delete the token
                 $existQuery->delete();
-                
+
                 //Send success response
                 return response()->json([
                     'type' => 'success',
@@ -461,7 +461,7 @@ class CreateUserIDController extends Controller
      *     path="/user-account/update",
      *     summary="Update new user personal info",
      *     description="Update new user for One-Step 2.0",
-     *     tags={"User Account by OneStep 2.0"},
+     *     tags={"OneStep 2.0 | User Account"},
      *
      *     security={{
      *         "passport": {
@@ -559,12 +559,12 @@ class CreateUserIDController extends Controller
     {
         // Validate user input data
         $input = $this->validate($request, User::rules());
-       
+
         try {
             // Update user account
             $user = User::where('username', $input['username'])->first();
             $names = explode(" ", $input['fullname']);
-            
+
             if(is_array($names) && count($names)>=2){
                 $firstname = $names[0];
                 $lastname = $names[1];
@@ -578,7 +578,7 @@ class CreateUserIDController extends Controller
             $user->address_country = $input['country'];
             $user->address_line1 = $input['address'];
             $user->birthday = $input['birthday'];
-            
+
             if($user->save()){
                 // Return response
                 return response()->json([
@@ -595,7 +595,7 @@ class CreateUserIDController extends Controller
                     'data' => null
                 ], 400);
             }
-            
+
         } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
@@ -612,7 +612,7 @@ class CreateUserIDController extends Controller
      *     path="/user-account/update/recovery",
      *     summary="Update new user recovery questions",
      *     description="Update new user recovery questions for One-Step 2.0",
-     *     tags={"User Account by OneStep 2.0"},
+     *     tags={"OneStep 2.0 | User Account"},
      *
      *     security={{
      *         "passport": {
@@ -625,7 +625,7 @@ class CreateUserIDController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             type="object",
-     *             
+     *
      *             @OA\Property(
      *                 property="username",
      *                 type="string",
@@ -717,11 +717,11 @@ class CreateUserIDController extends Controller
     {
         // Validate user input data
         $input = $this->validate($request, RecoveryQuestion::rules());
-       
+
         try {
             // Update user account
             $userQuery = User::where('username', $input['username']);
-            
+
             //Does the user account exist?
             if($userQuery->exists()){
                 //get the user ID
@@ -733,7 +733,7 @@ class CreateUserIDController extends Controller
                 $question->answer_one=$input['question1'];
                 $question->answer_two=$input['question2'];
                 $question->answer_three=$input['question3'];
-                
+
                 if($question->save()){
                     // Return response
                     return response()->json([
@@ -754,7 +754,7 @@ class CreateUserIDController extends Controller
                     'message' => 'User account was not found!',
                     'data' => null
                 ], 404);
-            }   
+            }
         } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
@@ -763,12 +763,12 @@ class CreateUserIDController extends Controller
             ], 400);
         }
     }
-    
+
     /**
      * Get the OTP reciever based on channel
-     * 
+     *
      * @param array $input
-     * 
+     *
      * @return string
      */
     public function getTokenReceiver(array $input): string

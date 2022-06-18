@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateIdentificationsTable extends Migration
+class CreateAuthCodesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,18 +13,20 @@ class CreateIdentificationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('identifications', function (Blueprint $table) {
+        Schema::create('auth_codes', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('session_id')->index();
 
-            $table->uuid('user_id');
-            $table->foreign('user_id')->references('id')->on('users')
+            $table->char('auth_code', 6);
+            $table->char('sid', 34)->nullable();
+
+            $table->foreignUuid('user_id')->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
 
-            $table->unsignedSmallInteger('status')->default(0);
-            $table->text('payload')->nullable();
+            $table->char('bot_id', 36)->nullable()->index('bot_id');
+
             $table->timestamps();
+            //$table->softDeletes();
         });
     }
 
@@ -35,6 +37,6 @@ class CreateIdentificationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('identifications');
+        Schema::dropIfExists('auth_codes');
     }
 }

@@ -22,7 +22,7 @@ class UserRequestsRegistrationByPhoneNumber extends Controller
      *     path="/auth/send-phone/{botID}",
      *     summary="Create new user for One-Step",
      *     description="Create new user for One-Step",
-     *     tags={"Auth by OneStep 1.0"},
+     *     tags={"OneStep 1.0 | Auth"},
      *
      *     @OA\Parameter(
      *          description="Bot ID",

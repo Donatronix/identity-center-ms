@@ -12,6 +12,16 @@ $router->group([
      */
 //    $router->group([], function ($router) {
 //    });
+    /**
+     * Payments webhooks
+     */
+    $router->group([
+        'prefix' => 'webhooks',
+    ], function ($router) {
+        $router->post('identify/{type}', 'IdentifyWebhookController');
+//        $router->post('identify/events', 'IdentifyWebhookController@webhookEvents');
+//        $router->post('identify/notifications', 'IdentifyWebhookController@webhookNotifications');
+    });
 
     /**
      * USER APPLICATION PRIVATE ACCESS
@@ -27,6 +37,19 @@ $router->group([
         $router->post('/send-code', "VerifyPhoneNumber");
 
         $router->post('/refresh-token', 'AuthController@refresh');
+    });
+
+    /**
+     * Contributors
+     */
+    $router->group([
+        'prefix' => 'contributors',
+    ], function ($router) {
+        $router->get('/', 'ContributorController@show');
+        $router->post('/', 'ContributorController@store');
+        $router->post('/identify', 'ContributorController@identifyStart');
+        $router->put('/identify', 'ContributorController@update');
+        $router->patch('/agreement', 'ContributorController@agreement');
     });
 
     /**
@@ -76,7 +99,7 @@ $router->group([
         });
     });
 
- 
+
     /**
      * PUBLIC ACCESS - RECOVER USER ACCOUNT
     */
@@ -110,7 +133,7 @@ $router->group([
     });
 
     /**
-     * ADMIN PANEL
+     * ADMIN PANEL ACCESS
      */
     $router->group([
         'prefix' => 'admin',
@@ -120,6 +143,19 @@ $router->group([
             'checkAdmin',
         ],
     ], function ($router) {
+        /**
+         * Contributors
+         */
+        $router->group([
+            'prefix' => 'contributors',
+        ], function ($router) {
+            $router->get('/', 'ContributorController@index');
+            $router->post('/', 'ContributorController@store');
+            $router->get('/{id:[a-fA-F0-9\-]{36}}', 'ContributorController@show');
+            $router->put('/{id:[a-fA-F0-9\-]{36}}', 'ContributorController@update');
+            $router->delete('/{id:[a-fA-F0-9\-]{36}}', 'ContributorController@destroy');
+        });
+
         $router->group([
             'prefix' => 'users',
             'as' => 'admin.users',
@@ -140,5 +176,4 @@ $router->group([
         $router->patch('/service/admins', 'ServiceAdminController@update');
         $router->delete('/service/admins', 'ServiceAdminController@destroy');
     });
-
 });
