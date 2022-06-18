@@ -29,7 +29,7 @@ class FetchWhatsAppInfo {
             'user-id' =>'10000000-1000-1000-1000-000000000001',
             'Content-Type' => 'application/json',
             'Access-Control-Allow-Origin' => '*',
-            'Authorization' => env('WHATSAPP_TOKEN')
+            'Authorization' => 'Bearer'.env('WHATSAPP_TOKEN')
         ];
     }
 
