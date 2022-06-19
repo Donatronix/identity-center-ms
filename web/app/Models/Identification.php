@@ -29,7 +29,7 @@ class Identification extends Model
     protected $fillable = [
         'id',
         'session_id',
-        'contributor_id',
+        'user_id',
         'status',
         'payload'
     ];

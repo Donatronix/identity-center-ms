@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Contributor;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
-class ContributorsTableSeeder extends Seeder
+class UsersTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -15,9 +15,9 @@ class ContributorsTableSeeder extends Seeder
      */
     public function run(): void
     {
-        // Generate default contributors
+        // Generate default users
         foreach(config('settings.default_users_ids') as $uuid){
-            Contributor::factory()->create([
+            User::factory()->create([
                 'id' => $uuid
             ]);
         }

@@ -207,26 +207,26 @@ class UserController extends Controller
      *     }},
      *
      *     @OA\Parameter(
-     *          name="email",
-     *          required=true,
-     *          in="query",
-     *          @OA\Schema (
-     *              type="string"
-     *          )
+     *         name="email",
+     *         required=true,
+     *         in="query",
+     *         @OA\Schema (
+     *             type="string"
+     *         )
      *     ),
      *     @OA\Parameter(
-     *          name="password",
-     *          required=true,
-     *          in="query",
-     *          @OA\Schema (
-     *              type="string",
-     *              format="password"
-     *          )
+     *         name="password",
+     *         required=true,
+     *         in="query",
+     *         @OA\Schema (
+     *             type="string",
+     *             format="password"
+     *         )
      *     ),
      *     @OA\Parameter(
-     *          name="password_confirmation",
-     *          required=true,
-     *          in="query",
+     *         name="password_confirmation",
+     *         required=true,
+     *         in="query",
      *          @OA\Schema (
      *              type="string",
      *              format="password"
@@ -236,20 +236,20 @@ class UserController extends Controller
      *          name="first_name",
      *          required=true,
      *          in="query",
-     *          @OA\Schema (
-     *              type="string"
-     *          )
+     *         @OA\Schema (
+     *             type="string"
+     *         )
      *     ),
      *     @OA\Parameter(
-     *          name="last_name",
+     *         name="last_name",
      *          required=true,
-     *          in="query",
-     *          @OA\Schema (
-     *              type="string"
-     *          )
+     *         in="query",
+     *         @OA\Schema (
+     *             type="string"
+     *         )
      *     ),
      *     @OA\Parameter(
-     *          name="birthday",
+     *         name="birthday",
      *          required=true,
      *          in="query",
      *          @OA\Schema (
@@ -258,12 +258,12 @@ class UserController extends Controller
      *          )
      *     ),
      *     @OA\Parameter(
-     *          name="phone",
-     *          required=true,
-     *          in="query",
-     *          @OA\Schema (
-     *              type="string"
-     *          )
+     *         name="phone",
+     *         required=true,
+     *         in="query",
+     *         @OA\Schema(
+     *             type="string"
+     *         )
      *     ),
      *     @OA\Parameter(
      *          name="accept_terms",
@@ -275,12 +275,12 @@ class UserController extends Controller
      *          )
      *     ),
      *     @OA\Response(
-     *          response=200,
-     *          description="Success"
+     *         response=200,
+     *         description="Success"
      *     ),
      *     @OA\Response(
-     *          response=400,
-     *          description="Bad Request"
+     *         response=400,
+     *         description="Bad Request"
      *     )
      * )
      *

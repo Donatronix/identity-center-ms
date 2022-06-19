@@ -6,9 +6,15 @@ use App\Api\V1\Controllers\Controller;
 use App\Models\User;
 use App\Services\SendEmailNotify;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Class UserProfileController
@@ -18,13 +24,13 @@ use Illuminate\Support\Facades\Hash;
 class UserProfileController extends Controller
 {
     /**
-     * Get user profile for One-Step 2.0
+     * Get current user profile data
      *
      * @OA\Get(
-     *     path="/user-profile/{id}/details",
-     *     summary="Get user profile for One-Step 2.0",
-     *     description="Get user profile for One-Step 2.0",
-     *     tags={"User Profile 2.0"},
+     *     path="/user-profile/me",
+     *     summary="Get current user profile data",
+     *     description="Get current user profile data",
+     *     tags={"User Profile"},
      *
      *     security={{
      *         "passport": {
@@ -32,17 +38,6 @@ class UserProfileController extends Controller
      *             "ManagerRead"
      *         }
      *     }},
-     *
-     *     @OA\Parameter(
-     *          name="id",
-     *          in="path",
-     *          description="One-Step user ID",
-     *          required=true,
-     *          example="373458be-3f01-40ca-b6f3-245239c7889f",
-     *          @OA\Schema(
-     *              type="string"
-     *          ),
-     *     ),
      *
      *     @OA\Response(
      *          response=201,
@@ -57,9 +52,14 @@ class UserProfileController extends Controller
      *                 example="success"
      *             ),
      *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="Get current user profile data"
+     *             ),
+     *             @OA\Property(
      *                 property="message",
      *                 type="string",
-     *                 example="User profile info retrieved successfully."
+     *                 example="User profile data retrieved successfully."
      *             ),
      *             @OA\Property(
      *                 property="data",
@@ -102,9 +102,181 @@ class UserProfileController extends Controller
      *                 example="danger"
      *             ),
      *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="Get current user profile data"
+     *             ),
+     *             @OA\Property(
      *                 property="message",
      *                 type="string",
-     *                 example="User profile for One-Step 2.0 not found."
+     *                 example="User data not found."
+     *             ),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 description="User object",
+     *             )
+     *         )
+     *     )
+     * )
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function show(Request $request): JsonResponse
+    {
+        Auth::user()->id = '10000000-1000-1000-1000-000000000001';
+
+//        $user = Auth::user();
+//        if ($user) {}
+
+        try {
+            $builder = User::where('id', Auth::user()->id);
+
+            // Check whether user already exist
+            if ($builder->exists()) {
+                // Add relations to object
+                $user = new User();
+                if ($includes = $request->get('include')) {
+                    foreach (explode(',', $includes) as $include) {
+                        if (method_exists($user, $include) && $user->{$include}() instanceof Relation) {
+                            $builder->with($include);
+                        }
+                    }
+                }
+
+                // Fetch user profile
+                $user = $builder->select(
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'address_country',
+                    'locale'
+                )->firstOrFail();
+
+                // Return response
+                return response()->jsonApi([
+                    'type' => 'success',
+                    'title' => 'Get current user profile data',
+                    'message' => '"User profile retrieved successfully',
+                    'data' => $user->toArray(),
+                ]);
+            } else {
+                return response()->json([
+                    'type' => 'danger',
+                    'message' => "User profile does NOT exist.",
+                    "data" => null
+                ], 400);
+            }
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'type' => 'danger',
+                'title' => 'Get current user profile data',
+                'message' => "Unable to retrieve user profile.",
+                "data" => $e->getMessage()
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'type' => 'danger',
+                'title' => 'Get current user profile data',
+                'message' => $e->getMessage(),
+                'data' => []
+            ], 404);
+        }
+    }
+
+    /**
+     * Create new user for One-Step
+     *
+     * @OA\Post(
+     *     path="/users",
+     *     summary="Create new user for One-Step",
+     *     description="Create new user for One-Step",
+     *     tags={"User Profile"},
+     *
+     *     security={{
+     *         "passport": {
+     *             "User",
+     *             "ManagerRead"
+     *         }
+     *     }},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             required={"phone"},
+     *
+     *             @OA\Property(
+     *                 property="phone",
+     *                 type="number",
+     *                 description="Phone number of user",
+     *                 example="380971829100"
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *          response=201,
+     *          description="Success",
+     *
+     *          @OA\JsonContent(
+     *             type="object",
+     *
+     *             @OA\Property(
+     *                 property="type",
+     *                 type="string",
+     *                 example="success"
+     *             ),
+     *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="Create new user. Step 1"
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="User was successful created"
+     *             ),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 description="User object",
+     *
+     *                 @OA\Property(
+     *                     property="id",
+     *                     type="string",
+     *                     example="50000005-5005-5005-5005-500000000005"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="phone",
+     *                     type="number",
+     *                     example="380971829100"
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *          response=400,
+     *          description="Bad Request",
+     *
+     *          @OA\JsonContent(
+     *             type="object",
+     *
+     *             @OA\Property(
+     *                 property="type",
+     *                 type="string",
+     *                 example="danger"
+     *             ),
+     *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="Create new user. Step 1"
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example=""
      *             ),
      *             @OA\Property(
      *                 property="data",
@@ -116,47 +288,197 @@ class UserProfileController extends Controller
      *     )
      * )
      *
-     * @param string $id
+     * @param Request $request
      *
      * @return JsonResponse
-     * @throws ValidationException
      */
-    public function getProfile(string $id): JsonResponse
+    public function store(Request $request): JsonResponse
     {
+        // Validate input data
+        $this->validate($request, [
+            'phone' => 'required|integer',
+        ]);
+
+        // Try to create new user
         try {
-            // Check whether user already exist
-            $userQuery = User::where(['id' => $id]);
+            $user = null;
+            PubSub::transaction(function () use ($request, &$user) {
+                $user = User::create(array_merge($request->all(), ['phone' => $request->get('phone')]));
+            })->publish('NewUserRegistered', [
+                'user' => $user?->toArray(),
+            ], 'new_user');
 
-            if ($userQuery->exists()) {
-                // Fetch user profile
-                $user = $userQuery->select(
-                    'users.first_name',
-                    'users.last_name',
-                    'users.email',
-                    'users.address_country',
-                    'users.local'
-                )->findOrFail();
-
-                //Show response
-                return response()->json([
-                    'type' => 'success',
-                    'message' => "User profile retrieved successfully.",
-                    "data" => $user->toArray()], 200);
-
-            } else {
-                return response()->json([
-                    'type' => 'danger',
-                    'message' => "User profile does NOT exist.",
-                    "data" => null
-                ], 400);
-            }
-        } catch (ModelNotFoundException $e) {
+            // Return response
+            return response()->json([
+                'type' => 'success',
+                'title' => "Create new user. Step 1",
+                'message' => 'User was successful created',
+                'data' => $user,
+            ], 201);
+        } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
-                'message' => "Unable to retrieve user profile.",
-                "data" => $e->getMessage()
+                'title' => "Create new user. Step 1",
+                'message' => $e->getMessage(),
             ], 400);
         }
+    }
+
+    /**
+     * Update the specified resource in storage
+     *
+     * @OA\Patch(
+     *     path="/user-profile/{id}",
+     *     summary="update user",
+     *     description="update user",
+     *     tags={"User Profile"},
+     *
+     *     @OA\Parameter(
+     *          description="ID of User",
+     *          in="path",
+     *          name="id",
+     *          required=true,
+     *          example="1",
+     *          @OA\Schema(
+     *              type="integer",
+     *              format="int64"
+     *          ),
+     *     ),
+     *
+     *     security={{
+     *         "passport": {
+     *             "User",
+     *             "ManagerRead"
+     *         }
+     *     }},
+     *
+     *     @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(
+     *              type="object",
+     *              @OA\Property(
+     *                  property="first_name",
+     *                  type="string",
+     *                  description="First name",
+     *              ),
+     *              @OA\Property(
+     *                  property="last_name",
+     *                  type="string",
+     *                  description="Last name",
+     *              ),
+     *              @OA\Property(
+     *                  property="email",
+     *                  type="string",
+     *                  description="Email address",
+     *              ),
+     *              @OA\Property(
+     *                  property="phone",
+     *                  type="string",
+     *                  description="Phone number",
+     *              ),
+     *              @OA\Property(
+     *                  property="birthday",
+     *                  type="string",
+     *                  description="Date of birth in format DD-MM-YYYY",
+     *              ),
+     *              @OA\Property(
+     *                  property="subscribed_to_announcement",
+     *                  type="string",
+     *                  description="Indicate whether or not the user should be subscribed for announcements",
+     *              ),
+     *              @OA\Property(
+     *                  property="address_country",
+     *                  type="string",
+     *                  description="Country code",
+     *              ),
+     *              @OA\Property(
+     *                  property="address_line1",
+     *                  type="string",
+     *                  description="First line of address. may contain house number, street name, etc.",
+     *              ),
+     *              @OA\Property(
+     *                  property="address_line2",
+     *                  type="string",
+     *                  description="Second line of address.",
+     *              ),
+     *              @OA\Property(
+     *                  property="address_city",
+     *                  type="string",
+     *                  description="Name of city",
+     *              ),
+     *              @OA\Property(
+     *                  property="address_zip",
+     *                  type="string",
+     *                  description="Zip code",
+     *              ),
+     *
+     *          ),
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Not found"
+     *     )
+     * )
+     *
+     * @param Request $request
+     * @param int $id
+     *
+     * @return Response
+     * @throws ValidationException
+     */
+    public function update(Request $request, int $id): Response
+    {
+//        $this->validate($request, [
+//            'phone' => "integer",
+//            'email' => "email|unique:users,email",
+//            'current_password' => 'required_with:password|min:6',
+//            'password' => 'required_with:current_password|confirmed|min:6|max:190',
+//        ]);
+
+        $validatedData = $this->validate($request, User::personalValidationRules((int)$id));
+
+        $user = User::findOrFail($id);
+
+        if (!empty($request->email)) {
+            $user->status = User::STATUS_ACTIVE;
+            $user->verify_token = Str::random(32);
+
+            PubSub::transaction(function () use ($user) {
+                $user->save();
+            })->publish('sendVerificationEmail', [
+                'email' => $user->email,
+                'display_name' => $user->display_name,
+                'verify_token' => $user->verify_token,
+            ], 'mail');
+        }
+
+//        $update = $request->except(['password']);
+//
+//        if ($request->has('current_password')) {
+//            if (Hash::check($request->current_password, $user->password)) {
+//                $update['password'] = Hash::make($request->password);
+//            } else {
+//                throw new BadRequestHttpException('Invalid current_password');
+//            }
+//        }
+//
+//        if (!empty($update)) {
+//            $user->fill($update);
+//            $user->save();
+
+        if (!empty($validatedData)) {
+            $user->fill($validatedData);
+            $user->save();
+
+            return response()->jsonApi(["message" => "updated"], 200);
+        }
+
+        throw new BadRequestHttpException();
     }
 
     /**
@@ -166,7 +488,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/password/change",
      *     summary="Change user password",
      *     description="Change user profile password for One-Step 2.0",
-     *     tags={"User Profile 2.0"},
+     *     tags={"User Profile"},
      *
      *     security={{
      *         "passport": {
@@ -259,7 +581,6 @@ class UserProfileController extends Controller
      * @param SendEmailNotify $sendEmail
      *
      * @return JsonResponse
-     * @throws ValidationException
      */
     public function updatePassword(Request $request, SendEmailNotify $sendEmail): JsonResponse
     {
@@ -319,7 +640,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/username/update",
      *     summary="Update username",
      *     description="Update username for One-Step 2.0",
-     *     tags={"User Profile 2.0"},
+     *     tags={"User Profile"},
      *
      *     security={{
      *         "passport": {
@@ -441,7 +762,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/fullname/update",
      *     summary="Update fullname",
      *     description="Update fullname for One-Step 2.0",
-     *     tags={"User Profile 2.0"},
+     *     tags={"User Profile"},
      *
      *     security={{
      *         "passport": {
@@ -573,7 +894,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/country/update",
      *     summary="Update country",
      *     description="Update country for One-Step 2.0",
-     *     tags={"User Profile 2.0"},
+     *     tags={"User Profile"},
      *
      *     security={{
      *         "passport": {
@@ -697,7 +1018,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/email/update",
      *     summary="Update email",
      *     description="Update email for One-Step 2.0",
-     *     tags={"User Profile 2.0"},
+     *     tags={"User Profile"},
      *
      *     security={{
      *         "passport": {
@@ -807,13 +1128,13 @@ class UserProfileController extends Controller
     }
 
     /**
-     * Update local for One-Step 2.0
+     * Update user profile locale
      *
      * @OA\Put(
-     *     path="/user-profile/local/update",
-     *     summary="Update local",
-     *     description="Update local for One-Step 2.0",
-     *     tags={"User Profile 2.0"},
+     *     path="/user-profile/locale/update",
+     *     summary="Update user profile locale",
+     *     description="Update user profile locale",
+     *     tags={"User Profile"},
      *
      *     security={{
      *         "passport": {
@@ -835,9 +1156,9 @@ class UserProfileController extends Controller
      *                 example="373458be-3f01-40ca-b6f3-245239c7889f"
      *             ),
      *             @OA\Property(
-     *                 property="local",
+     *                 property="locale",
      *                 type="string",
-     *                 description="User local for user profile update",
+     *                 description="Update user profile locale",
      *                 example="UK English"
      *             )
      *         )
@@ -893,7 +1214,7 @@ class UserProfileController extends Controller
         //validate input date
         $input = $this->validate($request, [
             'id' => 'required|string',
-            'local' => 'required|string'
+            'locale' => 'required|string'
         ]);
 
         try {
@@ -906,7 +1227,7 @@ class UserProfileController extends Controller
 
                 //Update username
                 $user->update([
-                    'local' => $input['local']
+                    'locale' => $input['locale']
                 ]);
 
                 //Show response

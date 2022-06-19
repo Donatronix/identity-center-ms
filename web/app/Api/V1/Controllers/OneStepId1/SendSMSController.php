@@ -10,15 +10,15 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class SendTokenSmsToUser extends Controller
+class SendSMSController extends Controller
 {
     /**
-     * Create new user for One-Step
+     * Verify phone and send sms
      *
      * @OA\Post(
      *     path="/auth/send-sms",
-     *     summary="Create new user for One-Step",
-     *     description="Create new user for One-Step",
+     *     summary="Verify phone and send sms",
+     *     description="Verify phone and send sms",
      *     tags={"OneStep 1.0 | Auth"},
      *
      *

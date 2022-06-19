@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Redis;
 use Illuminate\Validation\ValidationException;
 use PubSub;
 
-class UserSubmitsUsername extends Controller
+class UsernameSubmitController extends Controller
 {
     use TokenHandler;
 
@@ -23,11 +23,11 @@ class UserSubmitsUsername extends Controller
     const LOGIN_ATTEMPTS_DURATION = 120; //secs
 
     /**
-     * User Submits Account Username
+     * Submit username account
      *
      * @OA\Post(
      *     path="/auth/send-username",
-     *     summary="User Submits Account Username",
+     *     summary="Submit username account",
      *     description="Here the new user or the existing user submits username for login, along with the sid",
      *     tags={"OneStep 1.0 | Auth"},
      *

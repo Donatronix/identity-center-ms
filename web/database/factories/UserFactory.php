@@ -25,16 +25,42 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
+            /**
+             * User common data
+             */
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
             'username' => $this->faker->userName(),
             'phone' => Str::after($this->faker->e164PhoneNumber(), '+'),
             'email' => $this->faker->unique()->safeEmail(),
+            'gender' => '',
 //            'email_verified_at' => now(),
 //            'birthday' => '',
+            'birthday' => $this->faker->date(),
             'password' => Hash::make($this->faker->password(8)),
 //            'remember_token' => Str::random(10),
-            'status' => Arr::random(User::$statuses)
+            'status' => Arr::random(User::$statuses),
+
+            /**
+             * User address
+             */
+            'address_country' => $this->faker->countryCode(),
+            'address_line1' => $this->faker->streetAddress(),
+            'address_line2' => $this->faker->secondaryAddress(),
+            'address_city' => $this->faker->city(),
+            'address_zip' => $this->faker->postcode(),
+
+            /**
+             * User document
+             */
+            'id_number' => '',
+            'document_number' => '',
+            'document_country' => $this->faker->countryCode(),
+            'document_type' => Arr::random(User::$document_types),
+            'document_file' => '',
+
+            'status' => User::STATUS_STEP_1,
+            'is_agreement' => $this->faker->boolean(),
         ];
     }
 

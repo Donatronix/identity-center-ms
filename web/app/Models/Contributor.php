@@ -10,12 +10,12 @@ use Sumra\SDK\Traits\OwnerTrait;
 use Sumra\SDK\Traits\UuidTrait;
 
 /**
- * Contributor Person Scheme
+ * User Person Scheme
  *
  * @package App\Models
  *
  * @OA\Schema(
- *     schema="ContributorPerson",
+ *     schema="UserPerson",
  *
  *     @OA\Property(
  *         property="first_name",
@@ -26,23 +26,23 @@ use Sumra\SDK\Traits\UuidTrait;
  *     @OA\Property(
  *         property="last_name",
  *         type="string",
- *         description="Last name of contributors",
+ *         description="Last name of users",
  *         example="Smith"
  *     ),
  *     @OA\Property(
  *         property="email",
  *         type="string",
- *         description="Contributor's email",
+ *         description="User's email",
  *     ),
  *     @OA\Property(
  *         property="address",
  *         type="object",
- *         description="Address of contributor",
+ *         description="Address of user",
  *
  *         @OA\Property(
  *             property="country",
  *             type="string",
- *             description="Country of contributor (ISO 3166-1 alpha-2 format)",
+ *             description="Country of user (ISO 3166-1 alpha-2 format)",
  *             example="GB"
  *         ),
  *         @OA\Property(
@@ -60,7 +60,7 @@ use Sumra\SDK\Traits\UuidTrait;
  *         @OA\Property(
  *             property="city",
  *             type="string",
- *             description="City of contributor",
+ *             description="City of user",
  *             example=""
  *         ),
  *         @OA\Property(
@@ -74,12 +74,12 @@ use Sumra\SDK\Traits\UuidTrait;
  */
 
 /**
- * Contributor Identify Scheme
+ * User Identify Scheme
  *
  * @package App\Models
  *
  * @OA\Schema(
- *     schema="ContributorIdentify",
+ *     schema="UserIdentify",
  *
  *     @OA\Property(
  *         property="id_number",
@@ -89,20 +89,20 @@ use Sumra\SDK\Traits\UuidTrait;
  *     @OA\Property(
  *         property="gender",
  *         type="string",
- *         description="Gender of contributor",
+ *         description="Gender of user",
  *         enum={"", "m", "f"},
  *         example="m"
  *     ),
  *     @OA\Property(
- *         property="date_birthday",
+ *         property="birthday",
  *         type="date",
- *         description="Birthday date of contributor",
+ *         description="Birthday date of user",
  *         example="1974-10-25"
  *     ),
  *     @OA\Property(
  *         property="document",
  *         type="object",
- *         description="Document of contributors",
+ *         description="Document of users",
  *
  *         @OA\Property(
  *             property="number",
@@ -131,7 +131,7 @@ use Sumra\SDK\Traits\UuidTrait;
  *     )
  * )
  */
-class Contributor extends Model
+class User extends Model
 {
     use HasFactory;
     use SoftDeletes;
@@ -147,7 +147,7 @@ class Contributor extends Model
     const DOCUMENT_TYPES_RESIDENCE_PERMIT = 4;
 
     /**
-     * Contributor statuses constant
+     * User statuses constant
      */
     const STATUS_STEP_1 = 1;
     const STATUS_STEP_2 = 2;
@@ -157,7 +157,7 @@ class Contributor extends Model
     const STATUS_INACTIVE = 6;
 
     /**
-     * Contributor document types array
+     * User document types array
      *
      * @var int[]
      */
@@ -169,7 +169,7 @@ class Contributor extends Model
     ];
 
     /**
-     * Contributor statuses array
+     * User statuses array
      *
      * @var array|int[]
      */
@@ -192,7 +192,7 @@ class Contributor extends Model
         'first_name',
         'last_name',
         'gender',
-        'date_birthday',
+        'birthday',
         'email',
         'id_number',
 
@@ -247,7 +247,7 @@ class Contributor extends Model
     {
         return [
             'gender' => 'required|string',
-            'date_birthday' => 'required|string',
+            'birthday' => 'required|string',
             'id_number' => 'required|string|max:100',
             'document' => 'required|array:number,country,type,file',
             'document.number' => 'required|string',
@@ -258,7 +258,7 @@ class Contributor extends Model
     }
 
     /**
-     * One Contributor has many Orders relation
+     * One User has many Orders relation
      *
      * @return HasMany
      */
@@ -268,7 +268,7 @@ class Contributor extends Model
     }
 
     /**
-     * One Contributor has many Identification relation
+     * One User has many Identification relation
      *
      * @return HasMany
      */

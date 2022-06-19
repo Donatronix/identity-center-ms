@@ -32,25 +32,25 @@ $router->group([
         'as' => 'auth',
         "namespace" => "OneStepId1",
     ], function ($router) {
-        $router->post('/send-phone', "AuthByPhoneController");
-        $router->post('/send-sms', "SendTokenSmsToUser");
-        $router->post('/send-code', "VerifyPhoneNumber");
-        $router->post('/send-username', "UserSubmitsUsername");
+        $router->post('/send-phone', "PhoneVerifyController");
+        $router->post('/send-sms', "SendSMSController");
+        $router->post('/send-code', "OTPVerifyController");
+        $router->post('/send-username', "UsernameSubmitController");
 
         $router->post('/refresh-token', 'AuthController@refresh');
     });
 
     /**
-     * Contributors
+     * Users
      */
     $router->group([
-        'prefix' => 'contributors',
+        'prefix' => 'users',
     ], function ($router) {
-        $router->get('/', 'ContributorController@show');
-        $router->post('/', 'ContributorController@store');
-        $router->post('/identify', 'ContributorController@identifyStart');
-        $router->put('/identify', 'ContributorController@update');
-        $router->patch('/agreement', 'ContributorController@agreement');
+        $router->get('/', 'UserController@show');
+        $router->post('/', 'UserController@store');
+        $router->post('/identify', 'UserController@identifyStart');
+        $router->put('/identify', 'UserController@update');
+        $router->patch('/agreement', 'UserController@agreement');
     });
 
     /**
@@ -70,21 +70,23 @@ $router->group([
     /**
      * PRIVATE ACCESS
     */
-    $router->group(['middleware' => 'checkUser'], function ($router) {
+    $router->group([
+        'middleware' => 'checkUser'
+    ], function ($router) {
         /**
          * CREATE USER ACCOUNT
         */
         $router->group([
             'prefix' => 'user-profile',
-            "namespace" => "OneStepId2"
+            "namespace" => "User"
         ], function ($router) {
-            $router->get('/{id}/details', "UserProfileController@getProfile");
+            $router->get('/me', "UserProfileController@show");
             $router->put('/password/change', "UserProfileController@updatePassword");
             $router->put('/username/update', "UserProfileController@updateUsername");
             $router->put('/fullname/update', "UserProfileController@updateFullname");
             $router->put('/country/update', "UserProfileController@updateCountry");
             $router->put('/email/update', "UserProfileController@updateEmail");
-            $router->put('/local/update', "UserProfileController@updateLocal");
+            $router->put('/locale/update', "UserProfileController@updateLocal");
         });
 
         /**
@@ -122,8 +124,13 @@ $router->group([
         $router->get('users', 'UserController@index');
     });
 
-    $router->group(['middleware' => 'checkUser'], function ($router) {
-        $router->group(['prefix' => 'users', 'as' => 'users'], function ($router) {
+    $router->group([
+        'middleware' => 'checkUser'
+    ], function ($router) {
+        $router->group([
+            'prefix' => 'users',
+            'as' => 'users'
+        ], function ($router) {
             $router->post('/', 'UserController@store');
             $router->get('/{id}', 'UserController@show');
             $router->patch('/{id}', 'UserController@update');
@@ -146,16 +153,16 @@ $router->group([
         ],
     ], function ($router) {
         /**
-         * Contributors
+         * Users
          */
         $router->group([
-            'prefix' => 'contributors',
+            'prefix' => 'users',
         ], function ($router) {
-            $router->get('/', 'ContributorController@index');
-            $router->post('/', 'ContributorController@store');
-            $router->get('/{id:[a-fA-F0-9\-]{36}}', 'ContributorController@show');
-            $router->put('/{id:[a-fA-F0-9\-]{36}}', 'ContributorController@update');
-            $router->delete('/{id:[a-fA-F0-9\-]{36}}', 'ContributorController@destroy');
+            $router->get('/', 'UserController@index');
+            $router->post('/', 'UserController@store');
+            $router->get('/{id:[a-fA-F0-9\-]{36}}', 'UserController@show');
+            $router->put('/{id:[a-fA-F0-9\-]{36}}', 'UserController@update');
+            $router->delete('/{id:[a-fA-F0-9\-]{36}}', 'UserController@destroy');
         });
 
         $router->group([

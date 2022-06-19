@@ -3,30 +3,30 @@
 namespace App\Api\V1\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Contributor;
+use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Sumra\SDK\JsonApiResponse;
 
 /**
- * Class ContributorController
+ * Class UserController
  *
  * @package App\Api\V1\Controllers
  */
-class ContributorController extends Controller
+class UserController extends Controller
 {
     /**
-     * @param Contributor $model
+     * @param User $model
      */
-    private Contributor $model;
+    private User $model;
 
     /**
-     * ContributorController constructor.
+     * UserController constructor.
      *
-     * @param Contributor $model
+     * @param User $model
      */
-    public function __construct(Contributor $model)
+    public function __construct(User $model)
     {
         $this->model = $model;
     }
@@ -35,10 +35,10 @@ class ContributorController extends Controller
      * Display a listing of the resource.
      *
      * @OA\Get(
-     *     path="/admin/contributors",
-     *     summary="Load contributors list",
-     *     description="Load contributors list",
-     *     tags={"Admin | Contributors"},
+     *     path="/admin/users",
+     *     summary="Load users list",
+     *     description="Load users list",
+     *     tags={"Admin | Users"},
      *
      *     security={{
      *         "default": {
@@ -59,7 +59,7 @@ class ContributorController extends Controller
      *     @OA\Parameter(
      *         name="limit",
      *         in="query",
-     *         description="Limit contributors of page",
+     *         description="Limit users of page",
      *         @OA\Schema(
      *             type="number"
      *         )
@@ -67,7 +67,7 @@ class ContributorController extends Controller
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
-     *         description="Count contributors of page",
+     *         description="Count users of page",
      *         @OA\Schema(
      *             type="number"
      *         )
@@ -118,20 +118,20 @@ class ContributorController extends Controller
     public function index(Request $request)
     {
         try {
-            // Get contributors list
-            $contributors = $this->model::byOwner()->get();
+            // Get users list
+            $users = $this->model::byOwner()->get();
 
             // Return response
             return response()->jsonApi([
                 'type' => 'success',
-                'title' => "Contributors list",
-                'message' => 'List of contributors contributors successfully received',
-                'data' => $contributors->toArray()
+                'title' => "Users list",
+                'message' => 'List of users users successfully received',
+                'data' => $users->toArray()
             ], 200);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
-                'title' => "Contributors list",
+                'title' => "Users list",
                 'message' => $e->getMessage(),
                 'data' => null
             ], 400);
@@ -139,13 +139,13 @@ class ContributorController extends Controller
     }
 
     /**
-     * Save a new contributor data
+     * Save a new user data
      *
      * @OA\Post(
-     *     path="/admin/contributors",
-     *     summary="Save a new contributor data",
-     *     description="Save a new contributor data",
-     *     tags={"Admin | Contributors"},
+     *     path="/admin/users",
+     *     summary="Save a new user data",
+     *     description="Save a new user data",
+     *     tags={"Admin | Users"},
      *
      *     security={{
      *         "default": {
@@ -165,7 +165,7 @@ class ContributorController extends Controller
      *
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/ContributorPerson")
+     *         @OA\JsonContent(ref="#/components/schemas/UserPerson")
      *     ),
      *     @OA\Response(
      *         response="200",
@@ -173,7 +173,7 @@ class ContributorController extends Controller
      *     ),
      *     @OA\Response(
      *         response="201",
-     *         description="Contributor created"
+     *         description="User created"
      *     ),
      *     @OA\Response(
      *         response="400",
@@ -202,40 +202,40 @@ class ContributorController extends Controller
         // Validate input
         $this->validate($request, $this->model::validationRules());
 
-        $contributor_id = $request->get('contact_id', null);
+        $user_id = $request->get('contact_id', null);
         try {
-            $contact = $this->model::findOrFail($contributor_id);
+            $contact = $this->model::findOrFail($user_id);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'type' => 'danger',
                 'title' => "Get contact object",
-                'message' => "Contributor with id #{$contributor_id} not found: " . $e->getMessage(),
+                'message' => "User with id #{$user_id} not found: " . $e->getMessage(),
                 'data' => null
             ], 404);
         }
 
-        // Try to add new contributor
+        // Try to add new user
         try {
             // Create new
-            $contributor = $this->model;
-            $contributor->fill($request->all());
-            $contributor->contact()->associate($contact);
-            $contributor->save();
+            $user = $this->model;
+            $user->fill($request->all());
+            $user->contact()->associate($contact);
+            $user->save();
 
             // Remove contact object from response
-            unset($contributor->contact);
+            unset($user->contact);
 
             // Return response to client
             return response()->jsonApi([
                 'type' => 'success',
-                'title' => 'New contributor registration',
-                'message' => "Contributor successfully added",
-                'data' => $contributor->toArray()
+                'title' => 'New user registration',
+                'message' => "User successfully added",
+                'data' => $user->toArray()
             ], 200);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
-                'title' => 'New contributor registration',
+                'title' => 'New user registration',
                 'message' => $e->getMessage(),
                 'data' => null
             ], 400);
@@ -246,10 +246,10 @@ class ContributorController extends Controller
      * Get detail info about contact
      *
      * @OA\Get(
-     *     path="/admin/contributors/{id}",
+     *     path="/admin/users/{id}",
      *     summary="Get detail info about contact",
      *     description="Get detail info about contact",
-     *     tags={"Admin | Contributors"},
+     *     tags={"Admin | Users"},
      *
      *     security={{
      *         "default": {
@@ -271,7 +271,7 @@ class ContributorController extends Controller
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="Contributors ID",
+     *         description="Users ID",
      *         @OA\Schema(
      *             type="string"
      *         )
@@ -282,7 +282,7 @@ class ContributorController extends Controller
      *     ),
      *     @OA\Response(
      *          response="404",
-     *          description="Contributor not found",
+     *          description="User not found",
      *
      *          @OA\JsonContent(
      *              type="object",
@@ -315,14 +315,14 @@ class ContributorController extends Controller
 
         return response()->jsonApi([
             'type' => 'success',
-            'title' => 'Contributor details',
+            'title' => 'User details',
             'message' => "contact details received",
             'data' => $contact->toArray()
         ], 200);
     }
 
     /**
-     * Get contributor object
+     * Get user object
      *
      * @param $id
      * @return mixed
@@ -334,21 +334,21 @@ class ContributorController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'type' => 'danger',
-                'title' => "Get contributor",
-                'message' => "Contributor with id #{$id} not found: {$e->getMessage()}",
+                'title' => "Get user",
+                'message' => "User with id #{$id} not found: {$e->getMessage()}",
                 'data' => ''
             ], 404);
         }
     }
 
     /**
-     * Update contributor data
+     * Update user data
      *
      * @OA\Put(
-     *     path="/admin/contributors/{id}",
-     *     summary="Update contributor data",
-     *     description="Update contributor data",
-     *     tags={"Admin | Contributors"},
+     *     path="/admin/users/{id}",
+     *     summary="Update user data",
+     *     description="Update user data",
+     *     tags={"Admin | Users"},
      *
      *     security={{
      *         "default": {
@@ -369,7 +369,7 @@ class ContributorController extends Controller
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
-     *         description="Contributor Id",
+     *         description="User Id",
      *         example="0aa06e6b-35de-3235-b925-b0c43f8f7c75",
      *         required=true,
      *         @OA\Schema(
@@ -378,7 +378,7 @@ class ContributorController extends Controller
      *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/ContributorPerson")
+     *         @OA\JsonContent(ref="#/components/schemas/UserPerson")
      *     ),
      *     @OA\Response(
      *         response="200",
@@ -395,32 +395,32 @@ class ContributorController extends Controller
         // Validate input
         $this->validate($request, $this->model::validationRules());
 
-        // Read contributor model
-        $contributor = $this->getObject($id);
-        if ($contributor instanceof JsonApiResponse) {
-            return $contributor;
+        // Read user model
+        $user = $this->getObject($id);
+        if ($user instanceof JsonApiResponse) {
+            return $user;
         }
 
-        // Try update contributor data
+        // Try update user data
         try {
             // Update data
-            $contributor->fill($request->all());
-            $contributor->save();
+            $user->fill($request->all());
+            $user->save();
 
             // Remove contact object from response
-            unset($contributor->contact);
+            unset($user->contact);
 
             // Return response to client
             return response()->jsonApi([
                 'type' => 'success',
-                'title' => 'Changing contributor',
-                'message' => "Contributor successfully updated",
-                'data' => $contributor->toArray()
+                'title' => 'Changing user',
+                'message' => "User successfully updated",
+                'data' => $user->toArray()
             ], 200);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
-                'title' => 'Change a contributor',
+                'title' => 'Change a user',
                 'message' => $e->getMessage(),
                 'data' => null
             ], 400);
@@ -428,13 +428,13 @@ class ContributorController extends Controller
     }
 
     /**
-     * Delete contributor from storage
+     * Delete user from storage
      *
      * @OA\Delete(
-     *     path="/admin/contributors/{id}",
-     *     summary="Delete contributor from storage",
-     *     description="Delete contributor from storage",
-     *     tags={"Admin | Contributors"},
+     *     path="/admin/users/{id}",
+     *     summary="Delete user from storage",
+     *     description="Delete user from storage",
+     *     tags={"Admin | Users"},
      *
      *     security={{
      *         "default": {
@@ -455,7 +455,7 @@ class ContributorController extends Controller
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
-     *         description="Contributor Id",
+     *         description="User Id",
      *         example="0aa06e6b-35de-3235-b925-b0c43f8f7c75",
      *         required=true,
      *         @OA\Schema(
@@ -472,32 +472,32 @@ class ContributorController extends Controller
      *     ),
      *     @OA\Response(
      *         response="404",
-     *         description="Contributor not found"
+     *         description="User not found"
      *     )
      * )
      */
     public function destroy(int $id)
     {
-        // Read contributor model
-        $contributor = $this->getObject($id);
-        if ($contributor instanceof JsonApiResponse) {
-            return $contributor;
+        // Read user model
+        $user = $this->getObject($id);
+        if ($user instanceof JsonApiResponse) {
+            return $user;
         }
 
-        // Try to delete contributor
+        // Try to delete user
         try {
-            $contributor->delete();
+            $user->delete();
 
             return response()->jsonApi([
                 'type' => 'success',
-                'title' => "Delete contributor",
-                'message' => 'Contributor is successfully deleted',
+                'title' => "Delete user",
+                'message' => 'User is successfully deleted',
                 'data' => null
             ], 200);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
-                'title' => "Delete of contributor",
+                'title' => "Delete of user",
                 'message' => $e->getMessage(),
                 'data' => null
             ], 400);

@@ -76,15 +76,15 @@ class IdentifyWebhookController extends Controller
         }
 
         try {
-            $contributor = Contributor::find($result->contributor_id);
-            $contributor->is_verified = true;
-            $contributor->save();
+            $user = User::find($result->user_id);
+            $user->is_verified = true;
+            $user->save();
 
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'type' => 'danger',
-                'title' => "Get contributor",
-                'message' => "Contributor with id #{$result->contributor_id} not found: {$e->getMessage()}",
+                'title' => "Get user",
+                'message' => "User with id #{$result->user_id} not found: {$e->getMessage()}",
                 'data' => ''
             ], 404);
         }

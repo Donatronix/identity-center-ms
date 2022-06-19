@@ -2,9 +2,9 @@
 
 namespace App\Api\V1\Controllers\User;
 
-use App\Exceptions\ContributorRegistrationException;
+use App\Exceptions\UserRegistrationException;
 use App\Http\Controllers\Controller;
-use App\Models\Contributor;
+use App\Models\User;
 use App\Services\IdentityVerification;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -14,38 +14,21 @@ use Illuminate\Validation\ValidationException;
 use Sumra\SDK\JsonApiResponse;
 
 /**
- * Class ContributorController
+ * Class UserController
  *
  * @package App\Api\V1\Controllers
  */
-class ContributorController extends Controller
+class UserController extends Controller
 {
     /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $model = Contributor::class;
-
-    /**
-     * ContributorController constructor.
-     *
-     * @param Contributor $model
-     */
-    public function __construct(Contributor $model)
-    {
-        $this->model = $model;
-    }
-
-    /**
-     * Contributor registration
-     * Step 2. Saving contributor person detail
+     * User registration
+     * Step 2. Saving user person detail
      *
      * @OA\Post(
-     *     path="/contributors",
-     *     summary="Saving contributor person detail",
-     *     description="Saving contributor person detail",
-     *     tags={"Contributors"},
+     *     path="/users",
+     *     summary="Saving user person detail",
+     *     description="Saving user person detail",
+     *     tags={"Users"},
      *
      *     security={{
      *         "default": {
@@ -65,7 +48,7 @@ class ContributorController extends Controller
      *
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/ContributorPerson")
+     *         @OA\JsonContent(ref="#/components/schemas/UserPerson")
      *     ),
      *     @OA\Response(
      *         response="200",
@@ -73,7 +56,7 @@ class ContributorController extends Controller
      *     ),
      *     @OA\Response(
      *         response="201",
-     *         description="Contributor created"
+     *         description="User created"
      *     ),
      *     @OA\Response(
      *         response="400",
@@ -98,18 +81,19 @@ class ContributorController extends Controller
      * )
      *
      * @param Request $request
+     *
      * @return mixed
-     * @throws ContributorRegistrationException
+     * @throws UserRegistrationException
      */
     public function store(Request $request): mixed
     {
         // Validate input
         try {
-            $this->validate($request, $this->model::personValidationRules());
+            $this->validate($request, User::personValidationRules());
         } catch (ValidationException $e) {
             return response()->jsonApi([
                 'type' => 'warning',
-                'title' => 'Contributor person details data',
+                'title' => 'User person details data',
                 'message' => "Validation error",
                 'data' => $e->getMessage()
             ], 400);
@@ -117,18 +101,18 @@ class ContributorController extends Controller
 
         // Try to save received data
         try {
-            // Get user_id as contributor_Id
-            $contributor_id = Auth::user()->getAuthIdentifier();
+            // Get user_id as user_Id
+            $user_id = Auth::user()->getAuthIdentifier();
 
-            // Find exist contributor
-            $contributor = $this->model::find($contributor_id);
+            // Find exist user
+            $user = User::find($user_id);
 
             // If not exist, then to create it
-            if (!$contributor) {
+            if (!$user) {
                 // Create new
-                $contributor = $this->model::create([
-                    'id' => $contributor_id,
-                    'status' => Contributor::STATUS_STEP_1
+                $user = User::create([
+                    'id' => $user_id,
+                    'status' => User::STATUS_STEP_1
                 ]);
             }
 
@@ -139,30 +123,30 @@ class ContributorController extends Controller
             }
             unset($personData['address']);
 
-            $contributor->fill($personData);
-            $contributor->status = Contributor::STATUS_STEP_2;
-            $contributor->save();
+            $user->fill($personData);
+            $user->status = User::STATUS_STEP_2;
+            $user->save();
 
             // Return response to client
             return response()->jsonApi([
                 'type' => 'success',
-                'title' => 'New contributor registration',
-                'message' => "Contributor person detail data successfully saved",
-                'data' => $contributor->toArray()
+                'title' => 'New user registration',
+                'message' => "User person detail data successfully saved",
+                'data' => $user->toArray()
             ], 200);
         } catch (Exception $e) {
-            throw new ContributorRegistrationException($e);
+            throw new UserRegistrationException($e);
         }
     }
 
     /**
-     * Getting data about contributor
+     * Getting data about user
      *
      * @OA\Get(
-     *     path="/contributors",
-     *     summary="Getting data about contributor",
-     *     description="Getting data about contributor",
-     *     tags={"Contributors"},
+     *     path="/users",
+     *     summary="Getting data about user",
+     *     description="Getting data about user",
+     *     tags={"Users"},
      *
      *     security={{
      *         "default": {
@@ -182,33 +166,33 @@ class ContributorController extends Controller
      *
      *     @OA\Response(
      *          response="200",
-     *          description="Detail data of contributor"
+     *          description="Detail data of user"
      *     ),
      *     @OA\Response(
      *          response="404",
-     *          description="Contributor not found"
+     *          description="User not found"
      *     )
      * )
      */
     public function show(): JsonApiResponse
     {
         // Get object
-        $contributor = $this->getObject(Auth::user()->getAuthIdentifier());
+        $user = $this->getObject(Auth::user()->getAuthIdentifier());
 
-        if ($contributor instanceof JsonApiResponse) {
-            return $contributor;
+        if ($user instanceof JsonApiResponse) {
+            return $user;
         }
 
         return response()->jsonApi([
             'type' => 'success',
-            'title' => 'Contributor details data',
-            'message' => "Contributor detail data has been received",
-            'data' => $contributor->toArray()
+            'title' => 'User details data',
+            'message' => "User detail data has been received",
+            'data' => $user->toArray()
         ], 200);
     }
 
     /**
-     * Get contributor object
+     * Get user object
      *
      * @param $id
      * @return mixed
@@ -216,129 +200,26 @@ class ContributorController extends Controller
     private function getObject($id): mixed
     {
         try {
-            return $this->model::findOrFail($id);
+            return User::findOrFail($id);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'type' => 'danger',
-                'title' => "Get contributor",
-                'message' => "Contributor with id #{$id} not found: {$e->getMessage()}",
+                'title' => "Get user",
+                'message' => "User with id #{$id} not found: {$e->getMessage()}",
                 'data' => ''
             ], 404);
         }
     }
 
     /**
-     * Contributor registration
-     * Step 3.1. Saving contributor Identify data and Init verify session
-     *
-     * @OA\Post(
-     *     path="/contributors/identify",
-     *     summary="Saving contributor person detail",
-     *     description="Saving contributor person detail",
-     *     description="Document type (1 = PASSPORT, 2 = ID_CARD, 3 = DRIVERS_LICENSE, 4 = RESIDENCE_PERMIT)",
-     *     tags={"Contributors"},
-     *
-     *     security={{
-     *         "default": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
-     *     x={
-     *         "auth-type": "Application & Application User",
-     *         "throttling-tier": "Unlimited",
-     *         "wso2-application-security": {
-     *             "security-types": {"oauth2"},
-     *             "optional": "false"
-     *         }
-     *     },
-     *
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="document_type",
-     *                 type="string",
-     *                 description="Document type (1 = PASSPORT, 2 = ID_CARD, 3 = DRIVERS_LICENSE, 4 = RESIDENCE_PERMIT)",
-     *                 enum={"1", "2", "3", "4"},
-     *                 example="1"
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="Successfully save"
-     *     ),
-     *     @OA\Response(
-     *         response="201",
-     *         description="Contributor created"
-     *     ),
-     *     @OA\Response(
-     *         response="400",
-     *         description="Invalid request"
-     *     ),
-     *     @OA\Response(
-     *         response="401",
-     *         description="Unauthorized"
-     *     ),
-     *     @OA\Response(
-     *         response="404",
-     *         description="not found"
-     *     ),
-     *     @OA\Response(
-     *         response="422",
-     *         description="Validation failed"
-     *     ),
-     *     @OA\Response(
-     *         response="500",
-     *         description="Unknown error"
-     *     )
-     * )
-     * @param Request $request
-     * @return mixed
-     */
-    public function identifyStart(Request $request): mixed
-    {
-        // Get object
-        $contributor = $this->getObject(Auth::user()->getAuthIdentifier());
-
-        if ($contributor instanceof JsonApiResponse) {
-            return $contributor;
-        }
-
-        // Init verify session
-        $data = (new IdentityVerification())->startSession($contributor, $request);
-
-        // Return response to client
-        if ($data->status === 'success') {
-            return response()->jsonApi([
-                'type' => 'success',
-                'title' => 'Start KYC verification',
-                'message' => "Session started successfully",
-                'data' => $data->verification
-            ], 200);
-        } else {
-            return response()->jsonApi([
-                'type' => 'danger',
-                'title' => 'Start KYC verification',
-                'message' => $data->message,
-                'data' => [
-                    'code' => $data->code ?? ''
-                ]
-            ], 400);
-        }
-    }
-
-    /**
-     * Contributor registration
-     * Step 3. Saving contributor Identify data
+     * User registration
+     * Step 3. Saving user Identify data
      *
      * @OA\Put(
-     *     path="/contributors/identify",
-     *     summary="Saving contributor identify data",
-     *     description="Saving contributor identify data",
-     *     tags={"Contributors"},
+     *     path="/users/identify",
+     *     summary="Saving user identify data",
+     *     description="Saving user identify data",
+     *     tags={"Users"},
      *
      *     security={{
      *         "default": {
@@ -358,7 +239,7 @@ class ContributorController extends Controller
      *
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/ContributorIdentify")
+     *         @OA\JsonContent(ref="#/components/schemas/UserIdentify")
      *     ),
      *     @OA\Response(
      *         response="200",
@@ -366,7 +247,7 @@ class ContributorController extends Controller
      *     ),
      *     @OA\Response(
      *         response="201",
-     *         description="Contributor created"
+     *         description="User created"
      *     ),
      *     @OA\Response(
      *         response="400",
@@ -391,18 +272,19 @@ class ContributorController extends Controller
      * )
      *
      * @param Request $request
+     *
      * @return mixed
-     * @throws ContributorRegistrationException
+     * @throws UserRegistrationException
      */
     public function update(Request $request): mixed
     {
         // Validate input
         try {
-            $this->validate($request, $this->model::identifyValidationRules());
+            $this->validate($request, User::identifyValidationRules());
         } catch (ValidationException $e) {
             return response()->jsonApi([
                 'type' => 'warning',
-                'title' => 'Contributor identify data',
+                'title' => 'User identify data',
                 'message' => "Validation error",
                 'data' => $e->getMessage()
             ], 400);
@@ -410,10 +292,10 @@ class ContributorController extends Controller
 
         // Try to save received document data
         try {
-            // Find exist contributor
-            $contributor = $this->getObject(Auth::user()->getAuthIdentifier());
-            if ($contributor instanceof JsonApiResponse) {
-                return $contributor;
+            // Find exist user
+            $user = $this->getObject(Auth::user()->getAuthIdentifier());
+            if ($user instanceof JsonApiResponse) {
+                return $user;
             }
 
             // Transform data and save
@@ -423,31 +305,31 @@ class ContributorController extends Controller
             }
             unset($identifyData['document']);
 
-            $contributor->fill($identifyData);
-            $contributor->status = Contributor::STATUS_STEP_3;
-            $contributor->save();
+            $user->fill($identifyData);
+            $user->status = User::STATUS_STEP_3;
+            $user->save();
 
             // Return response to client
             return response()->jsonApi([
                 'type' => 'success',
-                'title' => 'New contributor registration',
-                'message' => "Contributor Identify data successfully saved",
+                'title' => 'New user registration',
+                'message' => "User Identify data successfully saved",
                 'data' => []
             ], 200);
         } catch (Exception $e) {
-            throw new ContributorRegistrationException($e);
+            throw new UserRegistrationException($e);
         }
     }
 
     /**
-     * Contributor registration
+     * User registration
      * Step 4. Saving acceptance agreement
      *
      * @OA\Patch(
-     *     path="/contributors/agreement",
+     *     path="/users/agreement",
      *     summary="Saving acceptance agreement",
      *     description="Saving acceptance agreement",
-     *     tags={"Contributors"},
+     *     tags={"Users"},
      *
      *     security={{
      *         "default": {
@@ -485,7 +367,7 @@ class ContributorController extends Controller
      *     ),
      *     @OA\Response(
      *         response="201",
-     *         description="Contributor created"
+     *         description="User created"
      *     ),
      *     @OA\Response(
      *         response="400",
@@ -511,7 +393,7 @@ class ContributorController extends Controller
      *
      * @param Request $request
      * @return mixed
-     * @throws ContributorRegistrationException
+     * @throws UserRegistrationException
      */
     public function agreement(Request $request): mixed
     {
@@ -523,7 +405,7 @@ class ContributorController extends Controller
         } catch (ValidationException $e) {
             return response()->jsonApi([
                 'type' => 'warning',
-                'title' => 'Contributor agreement data',
+                'title' => 'User agreement data',
                 'message' => "Validation error",
                 'data' => $e->getMessage()
             ], 400);
@@ -531,25 +413,25 @@ class ContributorController extends Controller
 
         // Try to save received data
         try {
-            // Find Exist contributor
-            $contributor = $this->getObject(Auth::user()->getAuthIdentifier());
-            if ($contributor instanceof JsonApiResponse) {
-                return $contributor;
+            // Find Exist user
+            $user = $this->getObject(Auth::user()->getAuthIdentifier());
+            if ($user instanceof JsonApiResponse) {
+                return $user;
             }
 
-            $contributor->fill($request->all());
-            $contributor->status = Contributor::STATUS_STEP_4;
-            $contributor->save();
+            $user->fill($request->all());
+            $user->status = User::STATUS_STEP_4;
+            $user->save();
 
             // Return response to client
             return response()->jsonApi([
                 'type' => 'success',
-                'title' => 'New contributor registration',
-                'message' => "Contributor agreement set successfully",
+                'title' => 'New user registration',
+                'message' => "User agreement set successfully",
                 'data' => []
             ], 200);
         } catch (Exception $e) {
-            throw new ContributorRegistrationException($e);
+            throw new UserRegistrationException($e);
         }
     }
 }

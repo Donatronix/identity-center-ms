@@ -13,15 +13,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-class AuthByPhoneController extends Controller
+class PhoneVerifyController extends Controller
 {
     /**
-     * Create new user for One-Step
+     * Verify phone and send sms
      *
      * @OA\Post(
      *     path="/auth/send-phone",
-     *     summary="Create new user for One-Step",
-     *     description="Create new user for One-Step",
+     *     summary="Verify phone and send sms",
+     *     description="Verify phone and send sms",
      *     tags={"OneStep 1.0 | Auth"},
      *
      *     @OA\RequestBody(
@@ -118,22 +118,28 @@ class AuthByPhoneController extends Controller
      */
     public function __invoke(Request $request): JsonResponse
     {
-        // Validate input data
-        $this->validate($request, [
-            'phone' => 'required|integer',
-        ]);
-
         try {
-            $user = User::where("phone", $request->get('phone', null))->firstOrFail();
+            // Validate input data
+            $this->validate($request, [
+                'phone_number' => 'required|numeric|min:10',
+            ]);
+
+            // Get User by phone number
+            $user = User::where("phone", $request->get('phone_number', null))
+                ->firstOrFail();
+
+            $message = 'This phone number exists';
+            $phone_exist = True;
 
             // user already exists
             if ($user->status == User::STATUS_BANNED) {
                 return response()->json([
+                    "type" => "danger",
                     "phone_exists" => true,
                     "user_status" => $user->status,
-                    "type" => "danger",
                     "message" => "This user has been banned from this platform."
                 ], 403);
+
             } elseif ($user->status == User::STATUS_INACTIVE) {
                 return response()->json([
                     "code" => 200,
@@ -151,6 +157,16 @@ class AuthByPhoneController extends Controller
                     "type" => "success",
                 ], 200);
             }
+
+        } catch (ValidationException $e) {
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title' => 'Send phone',
+                'message' => "Validation error: " . $e->getMessage(),
+                'data' => [
+
+                ]
+            ], 400);
         } catch (ModelNotFoundException $e) {
             //pass
             //New user

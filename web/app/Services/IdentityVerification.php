@@ -177,7 +177,7 @@ class IdentityVerification
 
         return (object)[
             'type' => 'success',
-            'contributor_id' => $vendorData->user_id,
+            'user_id' => $vendorData->user_id,
         ];
     }
 }

@@ -12,15 +12,15 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
-class VerifyPhoneNumber extends Controller
+class OTPVerifyController extends Controller
 {
     /**
-     * Verify Phone Number
+     * OTP Code Verify
      *
      * @OA\Post(
      *     path="/auth/send-code",
-     *     summary="Verify Phone Number",
-     *     description="Verify Phone Number",
+     *     summary="OTP Code Verify",
+     *     description="OTP Code Verify",
      *     tags={"OneStep 1.0 | Auth"},
      *
      *     @OA\RequestBody(
@@ -32,8 +32,8 @@ class VerifyPhoneNumber extends Controller
      *             @OA\Property(
      *                 property="auth_code_from_user",
      *                 type="string",
-     *                 description="verification code enter by user",
-     *                 example="ksdaofdf"
+     *                 description="Verification OTP code enter by user",
+     *                 example="RJK78S"
      *             )
      *         )
      *     ),
