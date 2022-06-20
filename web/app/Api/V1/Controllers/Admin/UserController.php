@@ -23,7 +23,7 @@ use Throwable;
 class UserController extends Controller
 {
     /**
-     *  Display a listing of the users
+     * Display a listing of the users
      *
      * @OA\Get(
      *     path="/admin/users",
@@ -31,16 +31,21 @@ class UserController extends Controller
      *     tags={"Admin | Users"},
      *
      *     security={{
-     *          "default":{},
+     *         "default": {
+     *             "AdminRead",
+     *             "AdminWrite",
+     *             "ManagerRead",
+     *             "ManagerWrite"
+     *         }
      *     }},
      *
      *     x={
-     *          "auth-type": "Applecation & Application Use",
-     *          "throttling-tier": "Unlimited",
-     *          "wso2-appliocation-security": {
-     *              "security-types": {"oauth2"},
-     *              "optional": "false"
-     *           },
+     *         "auth-type": "Applecation & Application Use",
+     *         "throttling-tier": "Unlimited",
+     *         "wso2-application-security": {
+     *             "security-types": {"oauth2"},
+     *             "optional": "false"
+     *          },
      *     },
      *
      *     @OA\Response(
@@ -499,7 +504,7 @@ class UserController extends Controller
      *     x={
      *          "auth-type": "Applecation & Application Use",
      *          "throttling-tier": "Unlimited",
-     *          "wso2-appliocation-security": {
+     *          "wso2-application-security": {
      *              "security-types": {"oauth2"},
      *              "optional": "false"
      *           },

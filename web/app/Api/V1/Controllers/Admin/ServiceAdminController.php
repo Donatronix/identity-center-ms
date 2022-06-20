@@ -32,9 +32,9 @@ class ServiceAdminController extends Controller
      *     }},
      *
      *     x={
-     *          "auth-type": "Application & Application Use",
+     *          "auth-type": "Application & Application User",
      *          "throttling-tier": "Unlimited",
-     *          "wso2-appliocation-security": {
+     *          "wso2-application-security": {
      *              "security-types": {"oauth2"},
      *              "optional": "false"
      *           },
@@ -215,9 +215,9 @@ class ServiceAdminController extends Controller
      *     }},
      *
      *     x={
-     *          "auth-type": "Application & Application Use",
+     *          "auth-type": "Application & Application User",
      *          "throttling-tier": "Unlimited",
-     *          "wso2-appliocation-security": {
+     *          "wso2-application-security": {
      *              "security-types": {"oauth2"},
      *              "optional": "false"
      *           },
@@ -407,9 +407,9 @@ class ServiceAdminController extends Controller
      *     }},
      *
      *     x={
-     *          "auth-type": "Application & Application Use",
+     *          "auth-type": "Application & Application User",
      *          "throttling-tier": "Unlimited",
-     *          "wso2-appliocation-security": {
+     *          "wso2-application-security": {
      *              "security-types": {"oauth2"},
      *              "optional": "false"
      *           },

@@ -17,36 +17,23 @@ use Sumra\SDK\JsonApiResponse;
 class UserController extends Controller
 {
     /**
-     * @param User $model
-     */
-    private User $model;
-
-    /**
-     * UserController constructor.
-     *
-     * @param User $model
-     */
-    public function __construct(User $model)
-    {
-        $this->model = $model;
-    }
-
-    /**
-     * Display a listing of the resource.
+     * Display a listing of the users
      *
      * @OA\Get(
-     *     path="/admin/users",
+     *     path="/admin2/users",
      *     summary="Load users list",
      *     description="Load users list",
      *     tags={"Admin | Users"},
      *
      *     security={{
      *         "default": {
+     *             "AdminRead",
+     *             "AdminWrite",
      *             "ManagerRead",
-     *             "User",
      *             "ManagerWrite"
      *         }
      *     }},
+     *
      *     x={
      *         "auth-type": "Application & Application User",
      *         "throttling-tier": "Unlimited",
@@ -119,7 +106,7 @@ class UserController extends Controller
     {
         try {
             // Get users list
-            $users = $this->model::byOwner()->get();
+            $users = User::byOwner()->get();
 
             // Return response
             return response()->jsonApi([
@@ -142,7 +129,7 @@ class UserController extends Controller
      * Save a new user data
      *
      * @OA\Post(
-     *     path="/admin/users",
+     *     path="/admin2/users",
      *     summary="Save a new user data",
      *     description="Save a new user data",
      *     tags={"Admin | Users"},
@@ -165,7 +152,7 @@ class UserController extends Controller
      *
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/UserPerson")
+     *         @OA\JsonContent(ref="#/components/schemas/UserProfile")
      *     ),
      *     @OA\Response(
      *         response="200",
@@ -200,11 +187,11 @@ class UserController extends Controller
     public function store(Request $request)
     {
         // Validate input
-        $this->validate($request, $this->model::validationRules());
+        $this->validate($request, User::validationRules());
 
         $user_id = $request->get('contact_id', null);
         try {
-            $contact = $this->model::findOrFail($user_id);
+            $contact = User::findOrFail($user_id);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'type' => 'danger',
@@ -246,7 +233,7 @@ class UserController extends Controller
      * Get detail info about contact
      *
      * @OA\Get(
-     *     path="/admin/users/{id}",
+     *     path="/admin2/users/{id}",
      *     summary="Get detail info about contact",
      *     description="Get detail info about contact",
      *     tags={"Admin | Users"},
@@ -330,7 +317,7 @@ class UserController extends Controller
     private function getObject($id): mixed
     {
         try {
-            return $this->model::findOrFail($id);
+            return User::findOrFail($id);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'type' => 'danger',
@@ -345,7 +332,7 @@ class UserController extends Controller
      * Update user data
      *
      * @OA\Put(
-     *     path="/admin/users/{id}",
+     *     path="/admin2/users/{id}",
      *     summary="Update user data",
      *     description="Update user data",
      *     tags={"Admin | Users"},
@@ -378,7 +365,7 @@ class UserController extends Controller
      *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/UserPerson")
+     *         @OA\JsonContent(ref="#/components/schemas/UserProfile")
      *     ),
      *     @OA\Response(
      *         response="200",
@@ -393,7 +380,7 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         // Validate input
-        $this->validate($request, $this->model::validationRules());
+        $this->validate($request, User::validationRules());
 
         // Read user model
         $user = $this->getObject($id);
@@ -431,7 +418,7 @@ class UserController extends Controller
      * Delete user from storage
      *
      * @OA\Delete(
-     *     path="/admin/users/{id}",
+     *     path="/admin2/users/{id}",
      *     summary="Delete user from storage",
      *     description="Delete user from storage",
      *     tags={"Admin | Users"},

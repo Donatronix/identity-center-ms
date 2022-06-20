@@ -5,7 +5,6 @@ namespace App\Api\V1\Controllers\User;
 use App\Exceptions\UserRegistrationException;
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Services\IdentityVerification;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -25,30 +24,22 @@ class UserController extends Controller
      * Step 2. Saving user person detail
      *
      * @OA\Post(
-     *     path="/users",
+     *     path="/users2",
      *     summary="Saving user person detail",
      *     description="Saving user person detail",
      *     tags={"Users"},
      *
      *     security={{
-     *         "default": {
-     *             "ManagerRead",
+     *         "passport": {
      *             "User",
+     *             "ManagerRead",
      *             "ManagerWrite"
      *         }
      *     }},
-     *     x={
-     *         "auth-type": "Application & Application User",
-     *         "throttling-tier": "Unlimited",
-     *         "wso2-application-security": {
-     *             "security-types": {"oauth2"},
-     *             "optional": "false"
-     *         }
-     *     },
      *
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/UserPerson")
+     *         @OA\JsonContent(ref="#/components/schemas/UserProfile")
      *     ),
      *     @OA\Response(
      *         response="200",
@@ -56,7 +47,7 @@ class UserController extends Controller
      *     ),
      *     @OA\Response(
      *         response="201",
-     *         description="User created"
+     *         description="Identity verification session successfully initialized"
      *     ),
      *     @OA\Response(
      *         response="400",
@@ -83,7 +74,6 @@ class UserController extends Controller
      * @param Request $request
      *
      * @return mixed
-     * @throws UserRegistrationException
      */
     public function store(Request $request): mixed
     {
@@ -208,116 +198,6 @@ class UserController extends Controller
                 'message' => "User with id #{$id} not found: {$e->getMessage()}",
                 'data' => ''
             ], 404);
-        }
-    }
-
-    /**
-     * User registration
-     * Step 3. Saving user Identify data
-     *
-     * @OA\Put(
-     *     path="/users/identify",
-     *     summary="Saving user identify data",
-     *     description="Saving user identify data",
-     *     tags={"Users"},
-     *
-     *     security={{
-     *         "default": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
-     *     x={
-     *         "auth-type": "Application & Application User",
-     *         "throttling-tier": "Unlimited",
-     *         "wso2-application-security": {
-     *             "security-types": {"oauth2"},
-     *             "optional": "false"
-     *         }
-     *     },
-     *
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/UserIdentify")
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="Successfully save"
-     *     ),
-     *     @OA\Response(
-     *         response="201",
-     *         description="User created"
-     *     ),
-     *     @OA\Response(
-     *         response="400",
-     *         description="Invalid request"
-     *     ),
-     *     @OA\Response(
-     *         response="401",
-     *         description="Unauthorized"
-     *     ),
-     *     @OA\Response(
-     *         response="404",
-     *         description="not found"
-     *     ),
-     *     @OA\Response(
-     *         response="422",
-     *         description="Validation failed"
-     *     ),
-     *     @OA\Response(
-     *         response="500",
-     *         description="Unknown error"
-     *     )
-     * )
-     *
-     * @param Request $request
-     *
-     * @return mixed
-     * @throws UserRegistrationException
-     */
-    public function update(Request $request): mixed
-    {
-        // Validate input
-        try {
-            $this->validate($request, User::identifyValidationRules());
-        } catch (ValidationException $e) {
-            return response()->jsonApi([
-                'type' => 'warning',
-                'title' => 'User identify data',
-                'message' => "Validation error",
-                'data' => $e->getMessage()
-            ], 400);
-        }
-
-        // Try to save received document data
-        try {
-            // Find exist user
-            $user = $this->getObject(Auth::user()->getAuthIdentifier());
-            if ($user instanceof JsonApiResponse) {
-                return $user;
-            }
-
-            // Transform data and save
-            $identifyData = $request->all();
-            foreach ($identifyData['document'] as $key => $value) {
-                $identifyData['document_' . $key] = $value;
-            }
-            unset($identifyData['document']);
-
-            $user->fill($identifyData);
-            $user->status = User::STATUS_STEP_3;
-            $user->save();
-
-            // Return response to client
-            return response()->jsonApi([
-                'type' => 'success',
-                'title' => 'New user registration',
-                'message' => "User Identify data successfully saved",
-                'data' => []
-            ], 200);
-        } catch (Exception $e) {
-            throw new UserRegistrationException($e);
         }
     }
 

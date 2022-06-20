@@ -2,27 +2,31 @@
 
 namespace App\Api\V1\Controllers\User;
 
+use App\Exceptions\UserRegistrationException;
 use App\Http\Controllers\Controller;
-use App\Models\Identification;
 use App\Models\User;
 use App\Services\IdentityVerification;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Sumra\SDK\JsonApiResponse;
 
+/**
+ * Class IdentificationController
+ *
+ * @package App\Api\V1\Controllers\User
+ */
 class IdentificationController extends Controller
 {
     /**
      * Initialize identity verification session
      *
      * @OA\Post(
-     *     path="/user-profile/identify",
+     *     path="/user-identity/start",
      *     summary="Initialize identity verification session",
      *     description="Initialize identity verification session",
      *     description="Document type (1 = PASSPORT, 2 = ID_CARD, 3 = DRIVERS_LICENSE, 4 = RESIDENCE_PERMIT)",
-     *     tags={"User Profile"},
+     *     tags={"User Identity"},
      *
      *     security={{
      *         "passport": {
@@ -123,13 +127,13 @@ class IdentificationController extends Controller
     }
 
     /**
-     * Webhook to handle Veriff response
+     * Saving user identity data
      *
      * @OA\Post(
-     *     path="/user-profile/identify-webhook",
-     *     summary="Webhook to handle Veriff response",
-     *     description="Webhook to handle Veriff response",
-     *     tags={"User Profile"},
+     *     path="/user-identity",
+     *     summary="Saving user identity data",
+     *     description="Saving user identity data",
+     *     tags={"User Identity"},
      *
      *     security={{
      *         "default": {
@@ -177,7 +181,7 @@ class IdentificationController extends Controller
      *
      * @return mixed
      */
-    public function identifyWebHook(Request $request): mixed
+    public function post(Request $request): mixed
     {
         // Validate input
         try {
@@ -187,7 +191,7 @@ class IdentificationController extends Controller
                 'type' => 'warning',
                 'title' => 'User data identification',
                 'message' => "Validation error",
-                'data' => $e->getMessage(),
+                'data' => $e->getMessage()
             ], 400);
         }
 
@@ -204,6 +208,12 @@ class IdentificationController extends Controller
                 ], 404);
             }
 
+//            // Find exist user
+//            $user = $this->getObject(Auth::user()->getAuthIdentifier());
+//            if ($user instanceof JsonApiResponse) {
+//                return $user;
+//            }
+
             // Transform data and save
             $identifyData = $request->all();
             foreach ($identifyData['document'] as $key => $value) {
@@ -213,6 +223,7 @@ class IdentificationController extends Controller
 
             $user->fill($identifyData);
             $user->status = User::STATUS_ACTIVE;
+           // $user->status = User::STATUS_STEP_3;
             $user->save();
 
             // Return response to client
@@ -220,9 +231,10 @@ class IdentificationController extends Controller
                 'type' => 'success',
                 'title' => 'New user registration',
                 'message' => "User identity verified successfully",
-                'data' => [],
+                'data' => []
             ], 200);
         } catch (Exception $e) {
+            // throw new UserRegistrationException($e);
             return response()->jsonApi([
                 'type' => 'warning',
                 'title' => 'User data identification',

@@ -8,20 +8,21 @@ use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Laravel\Lumen\Auth\Authorizable;
 use Laravel\Passport\HasApiTokens;
-use Sumra\SDK\Traits\UuidTrait;
 use Spatie\Permission\Traits\HasRoles;
+use Sumra\SDK\Traits\UuidTrait;
 
 /**
- * User Schema
+ * User Profile Scheme
  *
  * @package App\Models
  *
  * @OA\Schema(
- *     schema="User",
+ *     schema="UserProfile",
  *
  *     @OA\Property(
  *         property="first_name",
@@ -69,32 +70,43 @@ use Spatie\Permission\Traits\HasRoles;
  *         enum={0, 1},
  *     ),
  *     @OA\Property(
+ *         property="address",
+ *         type="object",
+ *         description="Address of user",
+ *     ),
+ *     @OA\Property(
  *        property="address_country",
  *        type="string",
- *        description="Country code",
+ *        description="Country code  (ISO 3166-1 alpha-2 format)",
+ *        example="GB"
  *     ),
  *     @OA\Property(
  *        property="address_line1",
  *        type="string",
  *        description="First line of address. may contain house number, street name, etc.",
+ *        example="My Big Avenue, 256"
  *     ),
  *     @OA\Property(
  *        property="address_line2",
  *        type="string",
- *        description="Second line of address.",
+ *        description="Second line of address (optional)",
+ *        example=""
  *     ),
  *     @OA\Property(
  *        property="address_city",
  *        type="string",
  *        description="Name of city",
+ *        example=""
  *     ),
  *     @OA\Property(
  *        property="address_zip",
  *        type="string",
- *        description="Zip code",
- *     ),
+ *        description="Post / Zip code",
+ *        example="05123"
+ *     )
  * )
  */
+
 /**
  * User Identity Schema
  *
@@ -153,15 +165,23 @@ use Spatie\Permission\Traits\HasRoles;
  *     )
  * )
  */
- class User extends Model implements AuthenticatableContract, AuthorizableContract
+class User extends Model implements AuthenticatableContract, AuthorizableContract
 {
     use HasApiTokens;
     use Authenticatable;
     use Authorizable;
-    use SoftDeletes;
     use HasFactory;
-    use UuidTrait;
     use HasRoles;
+    use SoftDeletes;
+    use UuidTrait;
+
+    /**
+     * Document Types constants
+     */
+    const DOCUMENT_TYPES_PASSPORT = 1;
+    const DOCUMENT_TYPES_ID_CARD = 2;
+    const DOCUMENT_TYPES_DRIVERS_LICENSE = 3;
+    const DOCUMENT_TYPES_RESIDENCE_PERMIT = 4;
 
     /**
      * Statuses of users
@@ -170,16 +190,47 @@ use Spatie\Permission\Traits\HasRoles;
     const STATUS_ACTIVE = 1;
     const STATUS_BANNED = 2;
 
+//    /**
+//     * User statuses constant
+//     */
+//    const STATUS_STEP_1 = 1;
+//    const STATUS_STEP_2 = 2;
+//    const STATUS_STEP_3 = 3;
+//    const STATUS_STEP_4 = 4;
+//    const STATUS_ACTIVE = 5;
+//    const STATUS_INACTIVE = 6;
+
+    /**
+     * User document types array
+     *
+     * @var int[]
+     */
+    public static array $document_types = [
+        1 => self::DOCUMENT_TYPES_PASSPORT,
+        2 => self::DOCUMENT_TYPES_ID_CARD,
+        3 => self::DOCUMENT_TYPES_DRIVERS_LICENSE,
+        4 => self::DOCUMENT_TYPES_RESIDENCE_PERMIT
+    ];
+
     /**
      * Array statuses of users
      *
-     * @var int[]
+     * @var array|int[]
      */
     public static array $statuses = [
         self::STATUS_INACTIVE,
         self::STATUS_ACTIVE,
         self::STATUS_BANNED
     ];
+
+//    public static array $statuses = [
+//        self::STATUS_STEP_1,
+//        self::STATUS_STEP_2,
+//        self::STATUS_STEP_3,
+//        self::STATUS_STEP_4,
+//        self::STATUS_ACTIVE,
+//        self::STATUS_INACTIVE,
+//    ];
 
     /**
      * @var string[]
@@ -202,19 +253,22 @@ use Spatie\Permission\Traits\HasRoles;
         'email',
         'birthday',
         'password',
-        'status',
 
-        'subscribed_to_announcement',
         'address_country',
         'address_line1',
         'address_line2',
         'address_city',
         'address_zip',
 
+        'id_number',
         'document_number',
         'document_country',
         'document_type',
         'document_file',
+
+        'subscribed_to_announcement',
+        'is_agreement',
+        'status'
     ];
 
     /**
@@ -224,7 +278,10 @@ use Spatie\Permission\Traits\HasRoles;
      */
     protected $hidden = [
         'password',
-        'remember_token'
+        'remember_token',
+        'created_at',
+        'updated_at',
+        'deleted_at'
     ];
 
     /**
@@ -259,30 +316,9 @@ use Spatie\Permission\Traits\HasRoles;
     }
 
     /**
-     * Make display_name attribute
-     *
-     * @return string
-     */
-    public function getDisplayNameAttribute(): string
-    {
-        $displayName = sprintf(
-            "%s %s",
-            $this->first_name,
-            $this->last_name
-        );
-        $displayName = trim(Str::replace('  ', ' ', $displayName));
-
-        if (empty($displayName)) {
-            $displayName = $this->username ?? '';
-        }
-
-        return $this->attributes['display_name'] = $displayName;
-    }
-
-    /**
      * Rules to validate personal data
      *
-     * @param  int|null  $id
+     * @param int|null $id
      * @return array
      */
     public static function personalValidationRules(?int $id = null): array
@@ -307,6 +343,24 @@ use Spatie\Permission\Traits\HasRoles;
     }
 
     /**
+     * @return string[]
+     */
+    public static function personValidationRules2(): array
+    {
+        return [
+            'first_name' => 'required|string|max:60',
+            'last_name' => 'required|string|max:60',
+            'email' => 'required|string|max:100',
+            'address' => 'required|array:country,line1,line2,city,zip',
+            'address.country' => 'required|string|max:3',
+            'address.line1' => 'required|string|max:150',
+            'address.line2' => 'string|max:100',
+            'address.city' => 'required|string|max:50',
+            'address.zip' => 'required|string|max:15'
+        ];
+    }
+
+    /**
      * Validation rules for identity verification
      *
      * @return string[]
@@ -326,10 +380,47 @@ use Spatie\Permission\Traits\HasRoles;
     }
 
     /**
+     * Provide input data validation array.
+     *
+     * @return array
+     */
+    public static function rules(): array
+    {
+        return [
+            'username' => 'required|string',
+            'fullname' => 'required|string',
+            'country' => 'required|string',
+            'address' => 'required|string',
+            'birthday' => 'required|string'
+        ];
+    }
+
+    /**
+     * Make display_name attribute
+     *
+     * @return string
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        $displayName = sprintf(
+            "%s %s",
+            $this->first_name,
+            $this->last_name
+        );
+        $displayName = trim(Str::replace('  ', ' ', $displayName));
+
+        if (empty($displayName)) {
+            $displayName = $this->username ?? '';
+        }
+
+        return $this->attributes['display_name'] = $displayName;
+    }
+
+    /**
      * Find the user instance for the given username.
      *
-     * @param  string  $username
-     * @return \App\Models\User
+     * @param string $username
+     * @return User
      */
     public function findForPassport($username)
     {
@@ -337,18 +428,12 @@ use Spatie\Permission\Traits\HasRoles;
     }
 
     /**
-     * Provide input data validation array.
+     * One User has many Identification relation
      *
-     * @return array
+     * @return HasMany
      */
-    public static function rules():array
+    public function identifications(): HasMany
     {
-        return [
-            'username' => 'required|string',
-            'fullname' => 'required|string',
-            'country' => 'required|string',
-            'address' => 'required|string',
-            'birthday' => 'required|string' 
-        ];
+        return $this->hasMany(Identification::class);
     }
 }
