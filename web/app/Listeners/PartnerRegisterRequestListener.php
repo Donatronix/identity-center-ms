@@ -31,7 +31,7 @@ class PartnerRegisterRequestListener
             $user = new User();
             $user->first_name = $data['first_name'];
             $user->last_name = $data['last_name'];
-            $user->email = $data['last_name'] ?? null;
+            $user->email = $data['email'] ?? null;
             $user->phone = $data['mobile'] ?? null;
 
             $user->save();
