@@ -59,8 +59,7 @@ class UserFactory extends Factory
             'document_type' => Arr::random(User::$document_types),
             'document_file' => '',
 
-            'status' => User::STATUS_STEP_1,
-            'is_agreement' => $this->faker->boolean(),
+            'status' => User::STATUS_INACTIVE,
         ];
     }
 

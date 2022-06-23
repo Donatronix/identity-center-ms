@@ -39,7 +39,7 @@ class CreateUsersTable extends Migration
             $table->string('address_city', 50)->nullable();
             $table->string('address_line2', 100)->nullable();
             $table->string('address_line1', 150)->nullable();
-            $table->string('address_country', 3)->nullable();
+            $table->string('address_country', 150)->nullable();
 
             $table->string('verification_code')->nullable();
 

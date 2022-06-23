@@ -132,6 +132,7 @@ $app->register(\SwaggerLume\ServiceProvider::class);
 $app->register(Laravel\Passport\PassportServiceProvider::class);
 $app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
 
+
 /**
  * Artisan Commands Lumen Generator
  */

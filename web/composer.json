@@ -9,7 +9,6 @@
         "ext-gmp": "*",
         "ext-json": "*",
         "dusterio/lumen-passport": "^0.3.0",
-        "flipbox/lumen-generator": "^9.1",
         "guzzlehttp/guzzle": "^7.4",
         "illuminate/redis": "*",
         "laravel/lumen-framework": "~8",

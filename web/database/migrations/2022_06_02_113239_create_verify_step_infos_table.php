@@ -14,12 +14,12 @@ class CreateVerifyStepInfosTable extends Migration
     public function up()
     {
         Schema::create('verify_step_infos', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->bigIncrements('id');
             $table->string('username');
             $table->string('channel');
             $table->string('receiver');
             $table->string('code')->unique();
-            $table->datetime("validity")->nullable();
+            $table->string("validity")->nullable();
             $table->timestamps();
         });
     }

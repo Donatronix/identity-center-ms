@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class RecoveryQuestion extends Model
 {
-    protected $table = 'verify_step_infos';
+    protected $table = 'recovery_questions';
     
     protected $fillable = [
         "user_id",

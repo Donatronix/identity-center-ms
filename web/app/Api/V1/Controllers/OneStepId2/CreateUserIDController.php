@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\VerifyStepInfo;
 use App\Services\SendVerifyToken;
 use Exception;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -154,9 +155,21 @@ class CreateUserIDController extends Controller
     public function createAccount(Request $request, SendVerifyToken $sendOTP): JsonResponse
     {
         //validate input date
-        $input = $this->validate($request, VerifyStepInfo::rules());
+        $input = $request->all();
 
+        $validator = Validator::make($input, VerifyStepInfo::rules());
+        
+        if($validator->fails()){
+            return response()->json([
+                'type' => 'danger',
+                'message' => "Input validator errors. Try again.",
+                "data" => null
+            ], 400);
+        }
+
+        //Receiver token
         $sendto = $this->getTokenReceiver($input);
+        $channel = $input['channel'];
 
         try {
             // Check whether user already exist
@@ -167,7 +180,7 @@ class CreateUserIDController extends Controller
 
             if ($userExist) {
                 // Create verification token (OTP - One Time Password)
-                $token = VerifyStepInfo::generateOTP(7);
+                $otpToken = VerifyStepInfo::generateOTP(7);
 
                 //Generate token expiry time in minutes
                 $validity = VerifyStepInfo::tokenValidity(30);
@@ -178,27 +191,31 @@ class CreateUserIDController extends Controller
                 $user->phone = $input['phone'];
                 $user->save();
 
+                // Generate authentication access token
+                $data['token'] = $user->createToken('OneStep')->accessToken;
+
+                //Other response data array
+                $data['channel'] = $input['channel'];
+                $data['username'] = $input['username'];
+                $data['receiver'] = $sendto;
+
                 // save verification token
                 VerifyStepInfo::create([
                     'username' => $input['username'],
                     'channel' => $input['channel'],
                     'receiver' => $sendto,
-                    'code' => $token,
+                    'code' => $otpToken,
                     'validity' => $validity
                 ]);
 
                 // Send verification token (SMS or Massenger)
-                $sendOTP->dispatchOTP($input['channel'], $sendto, $token);
+                $sendOTP->dispatchOTP($input['channel'], $sendto, $otpToken);
 
                 //Show response
                 return response()->json([
                     'type' => 'success',
                     'message' => "{$channel} verification code sent to {$sendto}.",
-                    "data" => [
-                        'channel' => $input['channel'],
-                        'username' => $input['username'],
-                        'receiver' => $sendto
-                    ]
+                    "data" => $data
                 ], 200);
 
             } else {
@@ -212,7 +229,7 @@ class CreateUserIDController extends Controller
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again.",
-                "data" => null
+                "data" => $e->getMessage()
             ], 400);
         }
 
@@ -324,6 +341,7 @@ class CreateUserIDController extends Controller
         ]);
 
         $sendto = $input['receiver'];
+        $channel = $input['channel'];
 
         try {
             // Create verification token (OTP - One Time Password)
@@ -355,7 +373,7 @@ class CreateUserIDController extends Controller
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again.",
-                "data" => null
+                "data" => $e->getMessage()
             ], 400);
         }
     }
@@ -466,7 +484,7 @@ class CreateUserIDController extends Controller
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to verify new use with token {$input['token']}. Try again.",
-                "data" => null
+                "data" => $e->getMessage()
             ], 400);
         }
     }
@@ -523,7 +541,7 @@ class CreateUserIDController extends Controller
      *                 type="string",
      *                 description="New user birthday update",
      *                 required={"birthday"},
-     *                 example="20/02/2001"
+     *                 example="2001/02/20"
      *             )
      *         )
      *     ),
@@ -575,7 +593,17 @@ class CreateUserIDController extends Controller
     public function updateUser(Request $request): JsonResponse
     {
         // Validate user input data
-        $input = $this->validate($request, User::rules());
+        $input = $request->all();
+
+        $validator = Validator::make($input, User::rules());
+        
+        if($validator->fails()){
+            return response()->json([
+                'type' => 'danger',
+                'message' => "Input validator errors. Try again.",
+                "data" => null
+            ], 400);
+        }
 
         try {
             // Update user account
@@ -651,21 +679,21 @@ class CreateUserIDController extends Controller
      *                 example="richard.brown"
      *             ),
      *              @OA\Property(
-     *                 property="question1",
+     *                 property="answer1",
      *                 type="string",
      *                 description="New user  recovery question 1",
      *                 required={"question1"},
      *                 example="Kathrine"
      *             ),
      *             @OA\Property(
-     *                 property="question2",
+     *                 property="answer2",
      *                 type="string",
      *                 description="New user  recovery question 2",
      *                 required={"question2"},
      *                 example="Mikky"
      *             ),
      *              @OA\Property(
-     *                 property="question3",
+     *                 property="answer3",
      *                 type="string",
      *                 description="New user  recovery question 3",
      *                 required={"question3"},
@@ -733,7 +761,17 @@ class CreateUserIDController extends Controller
     public function updateRecoveryQuestion(Request $request): JsonResponse
     {
         // Validate user input data
-        $input = $this->validate($request, RecoveryQuestion::rules());
+        $input = $request->all();
+
+        $validator = Validator::make($input, RecoveryQuestion::rules());
+        
+        if($validator->fails()){
+            return response()->json([
+                'type' => 'danger',
+                'message' => "Input validator errors. Try again.",
+                "data" => null
+            ], 400);
+        }
 
         try {
             // Update user account
@@ -747,9 +785,9 @@ class CreateUserIDController extends Controller
                 //Save recovery question
                 $question = new RecoveryQuestion;
                 $question->user_id = $userId;
-                $question->answer_one = $input['question1'];
-                $question->answer_two = $input['question2'];
-                $question->answer_three = $input['question3'];
+                $question->answer_one = $input['answer1'];
+                $question->answer_two = $input['answer2'];
+                $question->answer_three = $input['answer3'];
 
                 if ($question->save()) {
                     // Return response
@@ -776,7 +814,7 @@ class CreateUserIDController extends Controller
             return response()->json([
                 'type' => 'danger',
                 'message' => $e->getMessage(),
-                'data' => null
+                'data' => $input
             ], 400);
         }
     }
