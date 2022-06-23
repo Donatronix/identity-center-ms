@@ -17,10 +17,6 @@ class VerifyStepInfo extends Model
         "code",
         "validity"
     ];
-
-    protected $casts = [
-        'validity' => 'datetime',
-    ];
     
     /**
      *  Create an One-Time-password (for phone number verification)
@@ -42,7 +38,7 @@ class VerifyStepInfo extends Model
      */
     public static function tokenValidity($minutes):int
     {
-       return time()+($minute*60*60);
+       return time()+($minutes*60*60);
     }
 
     /**

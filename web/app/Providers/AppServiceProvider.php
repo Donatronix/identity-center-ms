@@ -7,9 +7,20 @@ use Laravel\Passport\Client;
 use Laravel\Passport\Passport;
 use Illuminate\Support\ServiceProvider;
 use Dusterio\LumenPassport\LumenPassport;
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
+   /**
+     * Register any application services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        Schema::defaultStringLength(191);
+    }
+   
     /**
      * Register any application services.
      *
@@ -27,4 +38,6 @@ class AppServiceProvider extends ServiceProvider
         LumenPassport::tokensExpireIn(Carbon::now()->addDays(1)); // Actor
         LumenPassport::allowMultipleTokens();
     }
+
+    
 }

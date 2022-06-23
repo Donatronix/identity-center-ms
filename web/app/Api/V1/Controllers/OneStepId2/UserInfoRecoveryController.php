@@ -11,6 +11,8 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
+
 
 class UserInfoRecoveryController extends Controller
 {
@@ -135,11 +137,21 @@ class UserInfoRecoveryController extends Controller
     public function recoveryInfo(Request $request, SendVerifyToken $sendOTP): JsonResponse
     {
         //validate input date
-        $input = $this->validate($request, [
+        $input = $request->all();
+
+        $validator = Validator::make($input, [
             'id' => 'required|string',
             'phone' => 'nullable|string|max:20',
             'handler' => 'nullable|string',
         ]);
+        
+        if($validator->fails()){
+            return response()->json([
+                'type' => 'danger',
+                'message' => "Input validator errors. Try again.",
+                "data" => null
+            ], 400);
+        }
 
         try {
             // Check whether user already exist
@@ -195,7 +207,7 @@ class UserInfoRecoveryController extends Controller
             return response()->json([
                 'type' => 'danger',
                 'message' => "Unable to send token for verification. Try again.",
-                "data" => null
+                "data" => $e->getMessage
             ], 400);
         }
 
@@ -391,7 +403,17 @@ class UserInfoRecoveryController extends Controller
     public function recoveryQuestions(Request $request): JsonResponse
     {
         // Validate user input data
-        $input = $this->validate($request, RecoveryQuestion::rules());
+        $input = $request->all();
+
+        $validator = Validator::make($input, RecoveryQuestion::rules());
+        
+        if($validator->fails()){
+            return response()->json([
+                'type' => 'danger',
+                'message' => "Input validator errors. Try again.",
+                "data" => null
+            ], 400);
+        }
 
         try {
             // Update user account
@@ -406,9 +428,9 @@ class UserInfoRecoveryController extends Controller
                 $questions = RecoveryQuestion::where('user_id', $userId)->first();
 
                 if (
-                    $questions->answer_one === $input['question1']
-                    && $questions->answer_two === $input['question2']
-                    && $questions->answer_three === $input['question3']
+                    $questions->answer_one === $input['answer1']
+                    && $questions->answer_two === $input['answer2']
+                    && $questions->answer_three === $input['answer3']
                 ) {
                     // Return response
                     return response()->json([
@@ -543,10 +565,20 @@ class UserInfoRecoveryController extends Controller
     public function sendRecoveredID(Request $request, SendVerifyToken $sendOTP): JsonResponse
     {
         // Validate user input data
-        $input = $this->validate($request, [
+        $input = $request->all();
+
+        $validator = Validator::make($input, [
             'username' => 'required|string',
             'sendby' => 'required|array'
         ]);
+        
+        if($validator->fails()){
+            return response()->json([
+                'type' => 'danger',
+                'message' => "Input validator errors. Try again.",
+                "data" => null
+            ], 400);
+        }
 
         try {
             // Update user account
