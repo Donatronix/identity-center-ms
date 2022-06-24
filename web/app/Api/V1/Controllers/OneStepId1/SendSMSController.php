@@ -38,7 +38,7 @@ class SendSMSController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *          response=201,
+     *          response="201",
      *          description="Success",
      *
      *          @OA\JsonContent(
@@ -78,7 +78,7 @@ class SendSMSController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(

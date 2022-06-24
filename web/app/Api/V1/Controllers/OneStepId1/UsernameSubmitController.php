@@ -54,7 +54,7 @@ class UsernameSubmitController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *          response=200,
+     *          response="200",
      *          description="Success",
      *
      *          @OA\JsonContent(
@@ -89,7 +89,7 @@ class UsernameSubmitController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(

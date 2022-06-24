@@ -35,7 +35,7 @@ class AuthController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *          response=200,
+     *          response="200",
      *          description="Success",
      *
      *          @OA\JsonContent(
@@ -61,7 +61,7 @@ class AuthController extends Controller
      *         )
      *     ),
      *
-     *     @OA\Response(response=400, description="Bad Request")
+     *     @OA\Response(response="400", description="Bad Request")
      * )
      *
      * @param Request $request

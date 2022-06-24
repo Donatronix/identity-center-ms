@@ -5,6 +5,7 @@ namespace App\Api\V1\Controllers\User;
 use App\Api\V1\Controllers\Controller;
 use App\Models\User;
 use App\Services\SendEmailNotify;
+use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
@@ -40,7 +41,7 @@ class UserProfileController extends Controller
      *     }},
      *
      *     @OA\Response(
-     *          response=201,
+     *          response="201",
      *          description="Success",
      *
      *          @OA\JsonContent(
@@ -90,7 +91,7 @@ class UserProfileController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(
@@ -175,7 +176,7 @@ class UserProfileController extends Controller
                 'message' => "Unable to retrieve user profile.",
                 "data" => $e->getMessage()
             ], 400);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
                 'title' => 'Get current user profile data',
@@ -217,7 +218,7 @@ class UserProfileController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *          response=201,
+     *          response="201",
      *          description="Success",
      *
      *          @OA\JsonContent(
@@ -257,7 +258,7 @@ class UserProfileController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(
@@ -416,11 +417,11 @@ class UserProfileController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *         response=200,
+     *         response="200",
      *         description="Success"
      *     ),
      *     @OA\Response(
-     *         response=404,
+     *         response="404",
      *         description="Not found"
      *     )
      * )
@@ -527,7 +528,7 @@ class UserProfileController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *          response=201,
+     *          response="201",
      *          description="Success",
      *
      *          @OA\JsonContent(
@@ -551,7 +552,7 @@ class UserProfileController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(
@@ -664,7 +665,7 @@ class UserProfileController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *          response=201,
+     *          response="201",
      *          description="Success",
      *
      *          @OA\JsonContent(
@@ -683,7 +684,7 @@ class UserProfileController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(
@@ -799,7 +800,7 @@ class UserProfileController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *          response=201,
+     *          response="201",
      *          description="Success",
      *
      *          @OA\JsonContent(
@@ -818,7 +819,7 @@ class UserProfileController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(
@@ -925,7 +926,7 @@ class UserProfileController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *          response=201,
+     *          response="201",
      *          description="Success",
      *
      *          @OA\JsonContent(
@@ -944,7 +945,7 @@ class UserProfileController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(
@@ -1042,7 +1043,7 @@ class UserProfileController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *          response=201,
+     *          response="201",
      *          description="Success",
      *
      *          @OA\JsonContent(
@@ -1061,7 +1062,7 @@ class UserProfileController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(
@@ -1165,7 +1166,7 @@ class UserProfileController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *          response=201,
+     *          response="201",
      *          description="Success",
      *
      *          @OA\JsonContent(
@@ -1184,7 +1185,7 @@ class UserProfileController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(

@@ -40,7 +40,7 @@ class PhoneVerifyController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *          response=201,
+     *          response="201",
      *          description="Success",
      *
      *          @OA\JsonContent(
@@ -80,7 +80,7 @@ class PhoneVerifyController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(

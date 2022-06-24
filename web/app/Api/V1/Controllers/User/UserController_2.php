@@ -17,7 +17,7 @@ use Sumra\SDK\JsonApiResponse;
  *
  * @package App\Api\V1\Controllers
  */
-class UserController extends Controller
+class UserController_2 extends Controller
 {
     /**
      * User registration

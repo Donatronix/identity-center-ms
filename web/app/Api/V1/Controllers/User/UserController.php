@@ -4,10 +4,8 @@ namespace App\Api\V1\Controllers\User;
 
 use App\Api\V1\Controllers\Controller;
 use App\Models\User;
-use App\Services\IdentityVerification;
 use App\Traits\TokenHandler;
 use Exception;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -15,10 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use PubSub;
-use Sumra\SDK\JsonApiResponse;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class UserController extends Controller
 {
@@ -50,15 +45,15 @@ class UserController extends Controller
      *          )
      *     ),
      *     @OA\Response(
-     *         response=200,
+     *         response="200",
      *         description="Success"
      *     ),
      *     @OA\Response(
-     *         response=404,
+     *         response="404",
      *         description="Not found"
      *     ),
      *     @OA\Response(
-     *         response=400,
+     *         response="400",
      *         description="Bad Request"
      *     )
      * )
@@ -134,7 +129,7 @@ class UserController extends Controller
      *      ),
      *
      *     @OA\Response(
-     *        response=200,
+     *        response="200",
      *        description="Validation success",
      *        @OA\JsonContent(
      *           @OA\Property(property="message", type="string", example="A 6-digit code has been sent to your phone number"),
@@ -142,7 +137,7 @@ class UserController extends Controller
      *     ),
      *
      *    @OA\Response(
-     *        response=500,
+     *        response="500",
      *        description="Validation success",
      *        @OA\JsonContent(
      *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again."),
@@ -225,7 +220,7 @@ class UserController extends Controller
      *     ),
      *
      *    @OA\Response(
-     *        response=200,
+     *        response="200",
      *        description="Validation success",
      *        @OA\JsonContent(
      *           @OA\Property(property="message", type="string", example="Phone number updated"),
@@ -233,7 +228,7 @@ class UserController extends Controller
      *     ),
      *
      *    @OA\Response(
-     *        response=500,
+     *        response="500",
      *        description="Validation success",
      *        @OA\JsonContent(
      *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again."),
@@ -346,7 +341,7 @@ class UserController extends Controller
      *     ),
      *
      *    @OA\Response(
-     *        response=200,
+     *        response="200",
      *        description="Validation success",
      *        @OA\JsonContent(
      *           @OA\Property(property="message", type="string", example="A 6-digit code has been sent to your email"),
@@ -354,7 +349,7 @@ class UserController extends Controller
      *     ),
      *
      *    @OA\Response(
-     *        response=500,
+     *        response="500",
      *        description="Validation success",
      *        @OA\JsonContent(
      *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again."),
@@ -458,7 +453,7 @@ class UserController extends Controller
      *     ),
      *
      *    @OA\Response(
-     *        response=200,
+     *        response="200",
      *        description="Validation success",
      *        @OA\JsonContent(
      *           @OA\Property(property="message", type="string", example="Email updated"),
@@ -466,7 +461,7 @@ class UserController extends Controller
      *     ),
      *
      *    @OA\Response(
-     *        response=500,
+     *        response="500",
      *        description="Validation success",
      *        @OA\JsonContent(
      *           @OA\Property(property="message", type="string", example="An error occurred! Please, try again."),

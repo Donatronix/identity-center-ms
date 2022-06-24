@@ -47,7 +47,7 @@ class IdentifyWebhookController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *         response=200,
+     *         response="200",
      *         description="Success",
      *     )
      * )

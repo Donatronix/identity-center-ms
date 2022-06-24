@@ -45,11 +45,11 @@ class SocialMediaController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=200,
+     *          response="200",
      *          description="Success"
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *     )
      * )
@@ -132,11 +132,11 @@ class SocialMediaController extends Controller
      *          ),
      *     ),
      *     @OA\Response(
-     *          response=200,
+     *          response="200",
      *          description="Success"
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *     )
      * )
@@ -212,11 +212,11 @@ class SocialMediaController extends Controller
      *     }},
      *
      *     @OA\Response(
-     *          response=200,
+     *          response="200",
      *          description="Success"
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *     )
      * )
@@ -296,11 +296,11 @@ class SocialMediaController extends Controller
      *     }},
      *
      *     @OA\Response(
-     *          response=200,
+     *          response="200",
      *          description="Success"
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *     )
      * )

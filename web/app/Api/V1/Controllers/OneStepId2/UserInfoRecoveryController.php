@@ -62,7 +62,7 @@ class UserInfoRecoveryController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *          response=201,
+     *          response="201",
      *          description="Success",
      *
      *          @OA\JsonContent(
@@ -102,7 +102,7 @@ class UserInfoRecoveryController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(
@@ -144,7 +144,7 @@ class UserInfoRecoveryController extends Controller
             'phone' => 'nullable|string|max:20',
             'handler' => 'nullable|string',
         ]);
-        
+
         if($validator->fails()){
             return response()->json([
                 'type' => 'danger',
@@ -243,7 +243,7 @@ class UserInfoRecoveryController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(
@@ -369,7 +369,7 @@ class UserInfoRecoveryController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(
@@ -406,7 +406,7 @@ class UserInfoRecoveryController extends Controller
         $input = $request->all();
 
         $validator = Validator::make($input, RecoveryQuestion::rules());
-        
+
         if($validator->fails()){
             return response()->json([
                 'type' => 'danger',
@@ -505,7 +505,7 @@ class UserInfoRecoveryController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=200,
+     *          response="200",
      *          description="Success",
      *
      *          @OA\JsonContent(
@@ -530,7 +530,7 @@ class UserInfoRecoveryController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(
@@ -571,7 +571,7 @@ class UserInfoRecoveryController extends Controller
             'username' => 'required|string',
             'sendby' => 'required|array'
         ]);
-        
+
         if($validator->fails()){
             return response()->json([
                 'type' => 'danger',

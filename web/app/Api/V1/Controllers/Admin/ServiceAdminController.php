@@ -103,7 +103,7 @@ class ServiceAdminController extends Controller
      *          description="Unauthorized"
      *     ),
      *     @OA\Response(
-     *         response=400,
+     *         response="400",
      *         description="Invalid request"
      *     ),
      *
@@ -296,7 +296,7 @@ class ServiceAdminController extends Controller
      *          description="Unauthorized"
      *     ),
      *     @OA\Response(
-     *         response=400,
+     *         response="400",
      *         description="Invalid request"
      *     ),
      *
@@ -479,7 +479,7 @@ class ServiceAdminController extends Controller
      *          description="Unauthorized"
      *     ),
      *     @OA\Response(
-     *         response=400,
+     *         response="400",
      *         description="Invalid request"
      *     ),
      *

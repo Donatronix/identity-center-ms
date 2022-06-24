@@ -223,7 +223,7 @@ class IdentificationController extends Controller
 
             $user->fill($identifyData);
             $user->status = User::STATUS_ACTIVE;
-           // $user->status = User::STATUS_STEP_3;
+            // $user->status = User::STATUS_STEP_3;
             $user->save();
 
             // Return response to client

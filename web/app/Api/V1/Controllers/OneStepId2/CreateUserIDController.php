@@ -75,7 +75,7 @@ class CreateUserIDController extends Controller
      *     ),
      *
      *     @OA\Response(
-     *          response=201,
+     *          response="201",
      *          description="Success",
      *
      *          @OA\JsonContent(
@@ -115,7 +115,7 @@ class CreateUserIDController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(
@@ -158,7 +158,7 @@ class CreateUserIDController extends Controller
         $input = $request->all();
 
         $validator = Validator::make($input, VerifyStepInfo::rules());
-        
+
         if($validator->fails()){
             return response()->json([
                 'type' => 'danger',
@@ -295,7 +295,7 @@ class CreateUserIDController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(
@@ -408,7 +408,7 @@ class CreateUserIDController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(
@@ -546,7 +546,7 @@ class CreateUserIDController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=201,
+     *          response="201",
      *          description="Success",
      *
      *          @OA\JsonContent(
@@ -565,7 +565,7 @@ class CreateUserIDController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(
@@ -596,7 +596,7 @@ class CreateUserIDController extends Controller
         $input = $request->all();
 
         $validator = Validator::make($input, User::rules());
-        
+
         if($validator->fails()){
             return response()->json([
                 'type' => 'danger',
@@ -702,7 +702,7 @@ class CreateUserIDController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *          response=400,
+     *          response="400",
      *          description="Bad Request",
      *
      *          @OA\JsonContent(
@@ -727,7 +727,7 @@ class CreateUserIDController extends Controller
      *         )
      *     ),
      *      @OA\Response(
-     *          response=404,
+     *          response="404",
      *          description="User Account Not Found",
      *
      *          @OA\JsonContent(
@@ -764,7 +764,7 @@ class CreateUserIDController extends Controller
         $input = $request->all();
 
         $validator = Validator::make($input, RecoveryQuestion::rules());
-        
+
         if($validator->fails()){
             return response()->json([
                 'type' => 'danger',
