@@ -14,6 +14,9 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         'partnerRegisterRequest' => [
             'App\Listeners\PartnerRegisterRequestListener'
+        ],
+        'getUserByPhone' => [
+            'App\Listeners\GetUserByPhoneListener'
         ]
     ];
 
