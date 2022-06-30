@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\V1\Controllers\OneStepId1;
+namespace App\Api\V1\Controllers\Public\OneStepId1;
 
 use App\Api\V1\Controllers\Controller;
 use App\Models\TwoFactorAuth;
@@ -30,7 +30,6 @@ class UsernameSubmitController extends Controller
      *     summary="Submit username account",
      *     description="Here the new user or the existing user submits username for login, along with the sid",
      *     tags={"OneStep 1.0 | Auth"},
-     *
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -263,6 +262,149 @@ class UsernameSubmitController extends Controller
                 "type" => "danger",
                 "message" => "Invalid SID",
             ], 403);
+        }
+    }
+
+    /**
+     * Create new user for One-Step
+     *
+     * @OA\Post(
+     *     path="/88888888888",
+     *     summary="Create new user for One-Step",
+     *     description="Create new user for One-Step",
+     *     tags={"User Profile"},
+     *
+     *     security={{
+     *         "passport": {
+     *             "User",
+     *             "ManagerRead"
+     *         }
+     *     }},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             required={"phone"},
+     *
+     *             @OA\Property(
+     *                 property="phone",
+     *                 type="number",
+     *                 description="Phone number of user",
+     *                 example="380971829100"
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *          response="201",
+     *          description="Success",
+     *
+     *          @OA\JsonContent(
+     *             type="object",
+     *
+     *             @OA\Property(
+     *                 property="type",
+     *                 type="string",
+     *                 example="success"
+     *             ),
+     *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="Create new user. Step 1"
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="User was successful created"
+     *             ),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 description="User object",
+     *
+     *                 @OA\Property(
+     *                     property="id",
+     *                     type="string",
+     *                     example="50000005-5005-5005-5005-500000000005"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="phone",
+     *                     type="number",
+     *                     example="380971829100"
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *          response="400",
+     *          description="Bad Request",
+     *
+     *          @OA\JsonContent(
+     *             type="object",
+     *
+     *             @OA\Property(
+     *                 property="type",
+     *                 type="string",
+     *                 example="danger"
+     *             ),
+     *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="Create new user. Step 1"
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example=""
+     *             ),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 description="User object",
+     *                 example=""
+     *             )
+     *         )
+     *     )
+     * )
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function store(Request $request): JsonResponse
+    {
+        // Validate input data
+        $this->validate($request, [
+            'phone' => 'required|integer',
+        ]);
+
+        // Try to create new user
+        try {
+
+            $user = null;
+
+            PubSub::transaction(function () use ($request, &$user) {
+                $user = User::create(array_merge($request->all(), [
+                    'phone' => $request->get('phone')
+                ]));
+            })->publish('NewUserRegistered', [
+                'user' => $user?->toArray(),
+            ], 'new_user');
+
+            // Return response
+            return response()->json([
+                'type' => 'success',
+                'title' => "Create new user. Step 1",
+                'message' => 'User was successful created',
+                'data' => $user,
+            ], 201);
+        } catch (Exception $e) {
+            return response()->json([
+                'type' => 'danger',
+                'title' => "Create new user. Step 1",
+                'message' => $e->getMessage(),
+            ], 400);
         }
     }
 }

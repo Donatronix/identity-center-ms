@@ -3,15 +3,14 @@
 namespace App\Providers;
 
 use Carbon\Carbon;
-use Laravel\Passport\Client;
-use Laravel\Passport\Passport;
-use Illuminate\Support\ServiceProvider;
 use Dusterio\LumenPassport\LumenPassport;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\ServiceProvider;
+use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {
-   /**
+    /**
      * Register any application services.
      *
      * @return void
@@ -20,7 +19,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
     }
-   
+
     /**
      * Register any application services.
      *
@@ -38,6 +37,4 @@ class AppServiceProvider extends ServiceProvider
         LumenPassport::tokensExpireIn(Carbon::now()->addDays(1)); // Actor
         LumenPassport::allowMultipleTokens();
     }
-
-    
 }

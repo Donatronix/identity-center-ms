@@ -15,9 +15,9 @@ class IdentifyWebhookController extends Controller
      * Identify webhook
      *
      * @OA\Post(
-     *     path="/webhooks/identify/{type}",
-     *     description="Webhooks Identify Notifications. Available type is: {events | decisions | sanctions}",
-     *     summary="Webhooks Identify Notifications. Available type is: {events | decisions | sanctions}",
+     *     path="/webhooks/identify/{object}",
+     *     description="Webhooks Identify Notifications. Available object is: {events | decisions | sanctions}",
+     *     summary="Webhooks Identify Notifications. Available object is: {events | decisions | sanctions}",
      *     tags={"Webhooks"},
      *
      *     security={{
@@ -29,8 +29,8 @@ class IdentifyWebhookController extends Controller
      *     }},
      *
      *     @OA\Parameter(
-     *         name="type",
-     *         description="Webhook type: {events | decisions | sanctions}",
+     *         name="object",
+     *         description="Webhook object: {events | decisions | sanctions}",
      *         in="path",
      *         required=true,
      *         @OA\Schema(
@@ -46,19 +46,19 @@ class IdentifyWebhookController extends Controller
      * )
      *
      * @param Request $request
-     * @param string $type
+     * @param string $object
      *
      * @return mixed
      */
-    public function __invoke(string $type, Request $request): mixed
+    public function __invoke(string $object, Request $request): mixed
     {
         // Set logging
         if (env("APP_DEBUG", 0)) {
-            Log::info("Type: {$type}");
+            Log::info("Object: {$object}");
         }
 
         // Handle Webhook data
-        $result = (new IdentityVerification())->handleWebhook($type, $request);
+        $result = (new IdentityVerification())->handleWebhook($object, $request);
 
         if ($result->type == 'danger') {
             return response()->jsonApi([

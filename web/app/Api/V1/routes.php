@@ -19,23 +19,20 @@ $router->group([
          * OneStep 1.0
          */
         $router->group([
-            'prefix' => 'auth',
-            'as' => 'auth',
+            'prefix' => 'user-account/v1',
             "namespace" => "OneStepId1",
         ], function ($router) {
             $router->post('/send-phone', "PhoneVerifyController");
             $router->post('/send-sms', "SendSMSController");
             $router->post('/send-code', "OTPVerifyController");
             $router->post('/send-username', "UsernameSubmitController");
-
-            $router->post('/refresh-token', 'AuthController@refresh');
         });
 
         /**
          * OneStep 2.0
          */
         $router->group([
-            'prefix' => 'user-account',
+            'prefix' => 'user-account/v2',
             "namespace" => "OneStepId2"
         ], function ($router) {
             $router->post('/create', "CreateUserIDController@createAccount");
@@ -71,27 +68,34 @@ $router->group([
         ]
     ], function ($router) {
         /**
-         * CREATE USER ACCOUNT
+         * User Profile
         */
         $router->group([
             'prefix' => 'user-profile',
-            "namespace" => "User"
         ], function ($router) {
+            $router->post('/', 'UserProfileController@store');
             $router->get('/me', "UserProfileController@show");
-            $router->put('/password/change', "UserProfileController@updatePassword");
-            $router->put('/username/update', "UserProfileController@updateUsername");
-            $router->put('/fullname/update', "UserProfileController@updateFullname");
-            $router->put('/country/update', "UserProfileController@updateCountry");
-            $router->put('/email/update', "UserProfileController@updateEmail");
-            $router->put('/locale/update', "UserProfileController@updateLocal");
+            $router->patch('/{id:[a-fA-F0-9\-]{36}}', 'UserProfileController@update');
+
+            $router->put('/update/phone', 'UserProfileController@updatePhone');
+            $router->put('/update/password', "UserProfileController@updatePassword");
+            $router->put('/update/username', "UserProfileController@updateUsername");
+            $router->put('/update/fullname', "UserProfileController@updateFullname");
+            $router->put('/update/country', "UserProfileController@updateCountry");
+            $router->put('/update/email', "UserProfileController@updateEmail");
+            $router->put('/update/locale', "UserProfileController@updateLocale");
+
+            $router->post('/update-email', 'UserProfileController@updateMyEmail');
+            $router->post('/verify-email-send', 'UserProfileController@verify_email');
+            $router->post('/validate-edit-phone', 'UserProfileController@validateEditPhoneNumber');
+            $router->post('/validate-edit-email', 'UserProfileController@validateEditEmail');
         });
 
         /**
-         * USER SOCIAL MEDIA CONNECTIONS
+         * Social media connector
         */
         $router->group([
             'prefix' => 'user-profile',
-            "namespace" => "OneStepId2"
         ], function ($router) {
             $router->post('/redirect', "SocialMediaController@createRedirectUrl");
             $router->get('/{provider}/callback', "SocialMediaController@mediaCallback");
@@ -99,33 +103,20 @@ $router->group([
             $router->get('/whatsapp/connect', "SocialMediaController@whatsappConnect");
         });
 
-        $router->get('users', 'UserController@index');
-
-
+        /**
+         * User KYC identify
+         */
         $router->group([
-            'prefix' => 'users',
-            'as' => 'users'
+            'prefix' => 'user-identify',
         ], function ($router) {
-            $router->post('/', 'UserController@store');
-            $router->get('/{id}', 'UserController@show');
-            $router->patch('/{id}', 'UserController@update');
-            $router->post('/validate-edit-phone', 'UserController@validateEditPhoneNumber');
-            $router->post('/update-phone', 'UserController@updateMyPhoneNumber');
-            $router->post('/identify', 'UserController@identifyStart');
+            $router->post('/', 'IdentificationController@store');
+            $router->post('/start', 'IdentificationController@identifyStart');
         });
 
         /**
-         * Contributor
+         * Auth - refresh token
          */
-        $router->group([
-            'prefix' => 'users',
-        ], function ($router) {
-            $router->get('/', 'UserController@show');
-            $router->post('/', 'UserController@store');
-            $router->post('/identify', 'UserController@identifyStart');
-            $router->put('/identify', 'UserController@update');
-            $router->patch('/agreement', 'UserController@agreement');
-        });
+        $router->post('/refresh-token', 'AuthController@refresh');
     });
 
     /**
@@ -185,10 +176,6 @@ $router->group([
         'prefix' => 'webhooks',
         'namespace' => 'Webhooks'
     ], function ($router) {
-        $router->post('/identify-webhook', 'UserController@identifyWebHook');
-
-        $router->post('identify/{type}', 'IdentifyWebhookController');
-//        $router->post('identify/events', 'IdentifyWebhookController@webhookEvents');
-//        $router->post('identify/notifications', 'IdentifyWebhookController@webhookNotifications');
+        $router->post('identify/{object}', 'IdentifyWebhookController');
     });
 });

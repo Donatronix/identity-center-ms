@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\V1\Controllers\OneStepId1;
+namespace App\Api\V1\Controllers\Public\OneStepId1;
 
 use App\Api\V1\Controllers\Controller;
 use App\Exceptions\SMSGatewayException;

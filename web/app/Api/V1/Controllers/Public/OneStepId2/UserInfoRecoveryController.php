@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\V1\Controllers\OneStepId2;
+namespace App\Api\V1\Controllers\Public\OneStepId2;
 
 use App\Api\V1\Controllers\Controller;
 use App\Models\RecoveryQuestion;
@@ -10,9 +10,8 @@ use App\Services\SendVerifyToken;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Validation\ValidationException;
 
 class UserInfoRecoveryController extends Controller
 {
@@ -145,7 +144,7 @@ class UserInfoRecoveryController extends Controller
             'handler' => 'nullable|string',
         ]);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Input validator errors. Try again.",
@@ -407,7 +406,7 @@ class UserInfoRecoveryController extends Controller
 
         $validator = Validator::make($input, RecoveryQuestion::rules());
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Input validator errors. Try again.",
@@ -572,7 +571,7 @@ class UserInfoRecoveryController extends Controller
             'sendby' => 'required|array'
         ]);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Input validator errors. Try again.",
@@ -624,5 +623,4 @@ class UserInfoRecoveryController extends Controller
             ], 400);
         }
     }
-
 }

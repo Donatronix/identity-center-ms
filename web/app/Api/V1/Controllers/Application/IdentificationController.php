@@ -2,14 +2,13 @@
 
 namespace App\Api\V1\Controllers\Application;
 
-use App\Exceptions\UserRegistrationException;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\IdentityVerification;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
-use Sumra\SDK\JsonApiResponse;
 
 /**
  * Class IdentificationController
@@ -234,7 +233,6 @@ class IdentificationController extends Controller
                 'data' => []
             ], 200);
         } catch (Exception $e) {
-            // throw new UserRegistrationException($e);
             return response()->jsonApi([
                 'type' => 'warning',
                 'title' => 'User data identification',

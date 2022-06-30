@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\V1\Controllers\OneStepId2;
+namespace App\Api\V1\Controllers\Public\OneStepId2;
 
 use App\Api\V1\Controllers\Controller;
 use App\Models\RecoveryQuestion;
@@ -8,14 +8,13 @@ use App\Models\User;
 use App\Models\VerifyStepInfo;
 use App\Services\SendVerifyToken;
 use Exception;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class CreateUserIDController extends Controller
 {
-
     /**
      * Create new user for One-Step 2.0
      *
@@ -159,7 +158,7 @@ class CreateUserIDController extends Controller
 
         $validator = Validator::make($input, VerifyStepInfo::rules());
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Input validator errors. Try again.",
@@ -231,24 +230,6 @@ class CreateUserIDController extends Controller
                 'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again.",
                 "data" => $e->getMessage()
             ], 400);
-        }
-
-    }
-
-    /**
-     * Get the OTP reciever based on channel
-     *
-     * @param array $input
-     *
-     * @return string
-     */
-    public function getTokenReceiver(array $input): string
-    {
-        //Select OTP destination
-        if ($input['channel'] === 'sms') {
-            return $input['phone'];
-        } elseif ($input['channel'] === 'messenger') {
-            return $input['handler'];
         }
     }
 
@@ -597,7 +578,7 @@ class CreateUserIDController extends Controller
 
         $validator = Validator::make($input, User::rules());
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Input validator errors. Try again.",
@@ -765,7 +746,7 @@ class CreateUserIDController extends Controller
 
         $validator = Validator::make($input, RecoveryQuestion::rules());
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json([
                 'type' => 'danger',
                 'message' => "Input validator errors. Try again.",
@@ -816,6 +797,23 @@ class CreateUserIDController extends Controller
                 'message' => $e->getMessage(),
                 'data' => $input
             ], 400);
+        }
+    }
+
+    /**
+     * Get the OTP reciever based on channel
+     *
+     * @param array $input
+     *
+     * @return string
+     */
+    private function getTokenReceiver(array $input): string
+    {
+        //Select OTP destination
+        if ($input['channel'] === 'sms') {
+            return $input['phone'];
+        } elseif ($input['channel'] === 'messenger') {
+            return $input['handler'];
         }
     }
 }
