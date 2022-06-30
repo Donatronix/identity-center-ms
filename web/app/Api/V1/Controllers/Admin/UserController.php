@@ -46,14 +46,6 @@ class UserController extends Controller
      *         }
      *     }},
      *
-     *     x={
-     *         "auth-type": "Application & Application User",
-     *         "wso2-application-security": {
-     *             "security-types": {"oauth2"},
-     *             "optional": "false"
-     *         }
-     *     },
-     *
      *     @OA\Parameter(
      *         name="limit",
      *         in="query",
@@ -213,14 +205,6 @@ class UserController extends Controller
      *             "ManagerWrite"
      *         }
      *     }},
-     *
-     *     x={
-     *         "auth-type": "Application & Application User",
-     *         "wso2-application-security": {
-     *             "security-types": {"oauth2"},
-     *             "optional": "false"
-     *         }
-     *     },
      *
      *     @OA\Parameter(
      *         name="email",
@@ -540,7 +524,6 @@ class UserController extends Controller
 
         // Try update user data
         try {
-
                 $validated = $this->validate($request, [
                     'phone' => "sometimes|integer",
                     'email' => "required|email|unique:users,email",
@@ -643,7 +626,6 @@ class UserController extends Controller
      *         response="204",
      *         description="Delete shelter"
      *     ),
-     *
      *     @OA\Response(
      *          response="401",
      *          description="Unauthorized"
@@ -652,12 +634,10 @@ class UserController extends Controller
      *         response="400",
      *         description="Invalid request"
      *     ),
-     *
      *     @OA\Response(
      *         response="404",
      *         description="User not found"
-     *     )
-     *
+     *     ),
      *     @OA\Response(
      *         response="500",
      *         description="Unknown error"
