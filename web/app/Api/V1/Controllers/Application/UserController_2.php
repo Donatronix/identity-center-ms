@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\V1\Controllers\User;
+namespace App\Api\V1\Controllers\Application;
 
 use App\Exceptions\UserRegistrationException;
 use App\Http\Controllers\Controller;
@@ -145,14 +145,6 @@ class UserController_2 extends Controller
      *             "ManagerWrite"
      *         }
      *     }},
-     *     x={
-     *         "auth-type": "Application & Application User",
-     *         "throttling-tier": "Unlimited",
-     *         "wso2-application-security": {
-     *             "security-types": {"oauth2"},
-     *             "optional": "false"
-     *         }
-     *     },
      *
      *     @OA\Response(
      *          response="200",
@@ -218,14 +210,6 @@ class UserController_2 extends Controller
      *             "ManagerWrite"
      *         }
      *     }},
-     *     x={
-     *         "auth-type": "Application & Application User",
-     *         "throttling-tier": "Unlimited",
-     *         "wso2-application-security": {
-     *             "security-types": {"oauth2"},
-     *             "optional": "false"
-     *         }
-     *     },
      *
      *     @OA\RequestBody(
      *         required=true,

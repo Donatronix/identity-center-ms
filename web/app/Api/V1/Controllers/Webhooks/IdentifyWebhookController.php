@@ -3,6 +3,7 @@
 namespace App\Api\V1\Controllers\Webhooks;
 
 use App\Api\V1\Controllers\Controller;
+use App\Models\User;
 use App\Services\IdentityVerification;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -26,14 +27,6 @@ class IdentifyWebhookController extends Controller
      *             "ManagerWrite"
      *         }
      *     }},
-     *     x={
-     *         "auth-type": "Application & Application User",
-     *         "throttling-tier": "Unlimited",
-     *         "wso2-application-security": {
-     *             "security-types": {"oauth2"},
-     *             "optional": "false"
-     *         }
-     *     },
      *
      *     @OA\Parameter(
      *         name="type",
@@ -77,7 +70,7 @@ class IdentifyWebhookController extends Controller
 
         try {
             $user = User::find($result->user_id);
-            $user->is_verified = true;
+            $user->is_kyc_verified = true;
             $user->save();
 
         } catch (ModelNotFoundException $e) {
@@ -92,13 +85,4 @@ class IdentifyWebhookController extends Controller
         // Send status 200 OK
         return response('');
     }
-
-//    public function webhookEvents(Request $request){
-//        (new IdentityVerification())->handleWebhook('events', $request);
-//    }
-//
-//    public function webhookNotifications(Request $request){
-//        (new IdentityVerification())->handleWebhook('notifications', $request);
-//    }
-//
 }

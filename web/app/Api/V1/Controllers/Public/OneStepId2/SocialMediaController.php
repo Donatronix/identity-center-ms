@@ -102,7 +102,6 @@ class SocialMediaController extends Controller
                 "data" => $e->getMessage()
             ], 400);
         }
-
     }
 
     /**
@@ -192,7 +191,6 @@ class SocialMediaController extends Controller
                 "data" => $e->getMessage()
             ], 400);
         }
-
     }
 
     /**

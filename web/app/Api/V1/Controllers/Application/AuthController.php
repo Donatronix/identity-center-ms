@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\V1\Controllers\User;
+namespace App\Api\V1\Controllers\Application;
 
 use App\Api\V1\Controllers\Controller;
 use App\Traits\TokenHandler;

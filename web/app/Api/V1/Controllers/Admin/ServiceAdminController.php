@@ -31,15 +31,6 @@ class ServiceAdminController extends Controller
      *          },
      *     }},
      *
-     *     x={
-     *          "auth-type": "Application & Application User",
-     *          "throttling-tier": "Unlimited",
-     *          "wso2-application-security": {
-     *              "security-types": {"oauth2"},
-     *              "optional": "false"
-     *           },
-     *     },
-     *
      *     @OA\Parameter(
      *         name="user_id",
      *         in="query",
@@ -197,7 +188,6 @@ class ServiceAdminController extends Controller
         ], 200);
     }
 
-
     /**
      *  Update admin role
      *
@@ -213,15 +203,6 @@ class ServiceAdminController extends Controller
      *              "ManagerWrite"
      *          },
      *     }},
-     *
-     *     x={
-     *          "auth-type": "Application & Application User",
-     *          "throttling-tier": "Unlimited",
-     *          "wso2-application-security": {
-     *              "security-types": {"oauth2"},
-     *              "optional": "false"
-     *           },
-     *     },
      *
      *     @OA\Parameter(
      *         name="role",
@@ -389,7 +370,6 @@ class ServiceAdminController extends Controller
         ], 200);
     }
 
-
     /**
      *  Remove admin
      *
@@ -406,14 +386,6 @@ class ServiceAdminController extends Controller
      *          },
      *     }},
      *
-     *     x={
-     *          "auth-type": "Application & Application User",
-     *          "throttling-tier": "Unlimited",
-     *          "wso2-application-security": {
-     *              "security-types": {"oauth2"},
-     *              "optional": "false"
-     *           },
-     *     },
      *     @OA\Parameter(
      *         name="user_id",
      *         in="query",
@@ -569,6 +541,4 @@ class ServiceAdminController extends Controller
             'data' => User::find($request->user_id),
         ], 200);
     }
-
-
 }

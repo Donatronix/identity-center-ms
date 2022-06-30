@@ -17,31 +17,27 @@ class CreateUsersTable extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
+            /**
+             * User common data
+             */
             $table->string('first_name', 60)->nullable();
             $table->string('last_name', 60)->nullable();
-            $table->enum('gender', [null, 'm', 'f'])->nullable();
             $table->string('username', 25)->nullable()->unique();
+            $table->enum('gender', [null, 'm', 'f'])->nullable();
+            $table->date('birthday')->nullable();
             $table->unsignedBigInteger('phone')->unique();
             $table->string('email', 150)->nullable()->unique();
-            $table->date('birthday')->nullable();
-
             $table->string('avatar')->nullable();
-
-            $table->string('password', 60)->nullable();
-            $table->tinyInteger('status')->default(User::STATUS_INACTIVE);
             $table->string('locale')->nullable();
 
-            $table->timestamp('phone_verified_at')->nullable();
-            $table->timestamp('email_verified_at')->nullable();
-
-            // User address information
+            /**
+             * User address information
+             */
             $table->string('address_zip', 10)->nullable();
-            $table->string('address_city', 50)->nullable();
-            $table->string('address_line2', 100)->nullable();
-            $table->string('address_line1', 150)->nullable();
             $table->string('address_country', 150)->nullable();
-
-            $table->string('verification_code')->nullable();
+            $table->string('address_city', 50)->nullable();
+            $table->string('address_line1', 150)->nullable();
+            $table->string('address_line2', 100)->nullable();
 
             /**
              * User identity document info
@@ -50,11 +46,26 @@ class CreateUsersTable extends Migration
             $table->string('document_number')->nullable();  // Document number
             $table->string('document_country', 3)->nullable(); // ISO-2- String Country that issued the document
             $table->tinyInteger('document_type')->default(0);  // Document type
-            $table->text('document_file')->nullable();  // Document file
+            $table->mediumText('document_file')->nullable();  // Document file
 
-            $table->boolean('subscribed_to_announcement')->default(false);
-            $table->string('verify_token')->nullable();
+            /**
+             * SECURITY
+             */
+            $table->string('password', 60)->nullable();
             $table->rememberToken();
+            $table->string('verify_token')->nullable();
+            $table->string('verification_code')->nullable();
+            $table->timestamp('phone_verified_at')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
+
+            /**
+             * User status and agreement
+             */
+            $table->boolean('is_agreement')->default(0);
+            $table->unsignedTinyInteger('status')->default(User::STATUS_INACTIVE);
+            $table->boolean('is_kyc_verified')->default(0);
+            $table->boolean('subscribed_to_announcement')->default(false);
+
             $table->timestamps();
             $table->softDeletes();
         });
