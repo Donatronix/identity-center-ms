@@ -15,7 +15,9 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        LumenPassport::routes($this->app);
+        LumenPassport::routes($this->app, [
+            'prefix' => env('APP_API_VERSION', ''). '/auth'
+        ]);
     }
 
     /**
