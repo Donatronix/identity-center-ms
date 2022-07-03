@@ -163,9 +163,7 @@ class PhoneVerifyController extends Controller
                 'type' => 'danger',
                 'title' => 'Send phone',
                 'message' => "Validation error: " . $e->getMessage(),
-                'data' => [
-
-                ]
+                'data' => null
             ], 400);
         } catch (ModelNotFoundException $e) {
             //pass
