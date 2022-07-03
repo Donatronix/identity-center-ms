@@ -321,25 +321,25 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @param int|null $id
      * @return array
      */
-    public static function personalValidationRules(?int $id = null): array
+    public static function profileValidationRules(?int $id = null): array
     {
-        $rules = [
-            'first_name' => 'required|string|min:3|max:60',
-            'last_name' => 'required|string|min:3|max:60',
-            'email' => "sometimes|email|unique:users,email"
-                . ($id ? ",{$id}" : ''),
-            'phone' => "sometimes|regex:/\+?\d{7,16}/i|unique:users,phone"
-                . ($id ? ",{$id}" : ''),
+        return [
+            'first_name' => 'required|string|min:2|max:60',
+            'last_name' => 'required|string|min:2|max:60',
+
+            'email' => "sometimes|email|unique:users,email" . ($id ? ",{$id}" : ''),
+            'phone' => "sometimes|regex:/\+?\d{7,16}/i|unique:users,phone" . ($id ? ",{$id}" : ''),
             'birthday' => 'sometimes|nullable|date_format:d-m-Y',
             'subscribed_to_announcement' => 'sometimes|boolean',
+
             'address_country' => 'required|string|min:2|max:3',
             'address_line1' => 'required|string|max:150',
             'address_line2' => 'sometimes|nullable|string|max:100',
             'address_city' => 'sometimes|string|max:50',
             'address_zip' => 'required|string|max:10',
+//            'current_password' => 'required_with:password|min:6',
+//            'password' => 'required_with:current_password|confirmed|min:6|max:190',
         ];
-
-        return $rules;
     }
 
     /**
@@ -348,9 +348,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     public static function personValidationRules2(): array
     {
         return [
-            'first_name' => 'required|string|max:60',
-            'last_name' => 'required|string|max:60',
-            'email' => 'required|string|max:100',
+
             'address' => 'required|array:country,line1,line2,city,zip',
             'address.country' => 'required|string|max:3',
             'address.line1' => 'required|string|max:150',

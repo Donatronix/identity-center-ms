@@ -427,29 +427,23 @@ class UserProfileController extends Controller
      */
     public function update(Request $request, int $id): Response
     {
-//        $this->validate($request, [
-//            'phone' => "integer",
-//            'email' => "email|unique:users,email",
-//            'current_password' => 'required_with:password|min:6',
-//            'password' => 'required_with:current_password|confirmed|min:6|max:190',
-//        ]);
+        try {
+            $validatedData = $this->validate($request, User::profileValidationRules((int)$id));
 
-        $validatedData = $this->validate($request, User::personalValidationRules((int)$id));
+            $user = User::findOrFail($id);
 
-        $user = User::findOrFail($id);
+            if (!empty($request->email)) {
+                $user->status = User::STATUS_ACTIVE;
+                $user->verify_token = Str::random(32);
 
-        if (!empty($request->email)) {
-            $user->status = User::STATUS_ACTIVE;
-            $user->verify_token = Str::random(32);
-
-            PubSub::transaction(function () use ($user) {
-                $user->save();
-            })->publish('sendVerificationEmail', [
-                'email' => $user->email,
-                'display_name' => $user->display_name,
-                'verify_token' => $user->verify_token,
-            ], 'mail');
-        }
+                PubSub::transaction(function () use ($user) {
+                    $user->save();
+                })->publish('sendVerificationEmail', [
+                    'email' => $user->email,
+                    'display_name' => $user->display_name,
+                    'verify_token' => $user->verify_token,
+                ], 'mail');
+            }
 
 //        $update = $request->except(['password']);
 //
@@ -465,14 +459,18 @@ class UserProfileController extends Controller
 //            $user->fill($update);
 //            $user->save();
 
-        if (!empty($validatedData)) {
-            $user->fill($validatedData);
-            $user->save();
+            if (!empty($validatedData)) {
+                $user->fill($validatedData);
+                $user->save();
 
-            return response()->jsonApi(["message" => "updated"], 200);
+                return response()->jsonApi(["message" => "updated"], 200);
+            }
+
+            throw new BadRequestHttpException();
         }
+        catch(Exception $e){
 
-        throw new BadRequestHttpException();
+        }
     }
 
     /**
@@ -1091,13 +1089,13 @@ class UserProfileController extends Controller
      */
     public function updateCountry(Request $request): JsonResponse
     {
-        //validate input date
-        $input = $this->validate($request, [
-            'id' => 'required|string',
-            'country' => 'required|string'
-        ]);
-
         try {
+            //validate input date
+            $input = $this->validate($request, [
+                'id' => 'required|string',
+                'country' => 'required|string'
+            ]);
+
             // Check whether user already exist
             $userQuery = User::where(['id' => $input['id']]);
 

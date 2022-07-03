@@ -78,6 +78,7 @@ class AuthController extends Controller
 
         try {
             $token = $this->refreshToken($request->token);
+
             return response()->json([
                 "type" => "success",
                 "message" => "Token Refresh",
