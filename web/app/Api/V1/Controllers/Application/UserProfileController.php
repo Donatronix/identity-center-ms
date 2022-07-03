@@ -430,7 +430,14 @@ class UserProfileController extends Controller
         try {
             $validatedData = $this->validate($request, User::profileValidationRules((int)$id));
 
+            // Get User object
             $user = User::findOrFail($id);
+
+            // Update data and save
+            $user->fill($validatedData);
+            $user->save();
+
+
 
             if (!empty($request->email)) {
                 $user->status = User::STATUS_ACTIVE;
@@ -454,19 +461,14 @@ class UserProfileController extends Controller
 //                throw new BadRequestHttpException('Invalid current_password');
 //            }
 //        }
-//
-//        if (!empty($update)) {
-//            $user->fill($update);
-//            $user->save();
-
-            if (!empty($validatedData)) {
-                $user->fill($validatedData);
-                $user->save();
-
-                return response()->jsonApi(["message" => "updated"], 200);
-            }
-
-            throw new BadRequestHttpException();
+        }
+        catch (ValidationException $e) {
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title' => 'User profile update',
+                'message' => "Validation error: " . $e->getMessage(),
+                'data' => null
+            ], 400);
         }
         catch(Exception $e){
 
