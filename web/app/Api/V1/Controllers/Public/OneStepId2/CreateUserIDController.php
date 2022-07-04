@@ -159,7 +159,7 @@ class CreateUserIDController extends Controller
         $validator = Validator::make($input, VerifyStepInfo::rules());
 
         if ($validator->fails()) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Input validator errors. Try again.",
                 "data" => null
@@ -211,21 +211,21 @@ class CreateUserIDController extends Controller
                 $sendOTP->dispatchOTP($input['channel'], $sendto, $otpToken);
 
                 //Show response
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'success',
                     'message' => "{$channel} verification code sent to {$sendto}.",
                     "data" => $data
                 ], 200);
 
             } else {
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'danger',
                     'message' => "{$sendto} is already taken/verified by another user. Try again.",
                     "data" => null
                 ], 400);
             }
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again.",
                 "data" => $e->getMessage()
@@ -344,14 +344,14 @@ class CreateUserIDController extends Controller
             $sendOTP->dispatchOTP($input['channel'], $sendto, $token);
 
             //Show response
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'success',
                 'message' => "{$channel} verification code sent to {$sendto}.",
                 "data" => ['channel' => $input['channel'], 'id' => $sendto]
             ], 200);
 
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again.",
                 "data" => $e->getMessage()
@@ -444,7 +444,7 @@ class CreateUserIDController extends Controller
                 $existQuery->delete();
 
                 //Send success response
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'success',
                     'message' => "New user verification was successful.",
                     "data" => [
@@ -454,7 +454,7 @@ class CreateUserIDController extends Controller
                 ], 200);
             } else {
                 //Send invalid token response
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'danger',
                     'message' => "New user verification FAILED. Try again.",
                     "data" => null
@@ -462,7 +462,7 @@ class CreateUserIDController extends Controller
             }
         } catch (Exception $e) {
             // Error occured
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Unable to verify new use with token {$input['token']}. Try again.",
                 "data" => $e->getMessage()
@@ -579,7 +579,7 @@ class CreateUserIDController extends Controller
         $validator = Validator::make($input, User::rules());
 
         if ($validator->fails()) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Input validator errors. Try again.",
                 "data" => null
@@ -607,14 +607,14 @@ class CreateUserIDController extends Controller
 
             if ($user->save()) {
                 // Return response
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'success',
                     'title' => "Update user account step 3",
                     'message' => 'User account was successful updated',
                     'data' => ['username' => $input['username']]
                 ], 200);
             } else {
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'danger',
                     'title' => "Update user account step 1",
                     'message' => 'User account was NOT  updated',
@@ -623,7 +623,7 @@ class CreateUserIDController extends Controller
             }
 
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'title' => "Update user account",
                 'message' => $e->getMessage()
@@ -747,7 +747,7 @@ class CreateUserIDController extends Controller
         $validator = Validator::make($input, RecoveryQuestion::rules());
 
         if ($validator->fails()) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Input validator errors. Try again.",
                 "data" => null
@@ -772,27 +772,27 @@ class CreateUserIDController extends Controller
 
                 if ($question->save()) {
                     // Return response
-                    return response()->json([
+                    return response()->jsonApi([
                         'type' => 'success',
                         'message' => 'User account security questions was successful saved',
                         'data' => ['username' => $input['username']]
                     ], 200);
                 } else {
-                    return response()->json([
+                    return response()->jsonApi([
                         'type' => 'danger',
                         'message' => 'User account security questions was NOT  saved',
                         'data' => null
                     ], 400);
                 }
             } else {
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'danger',
                     'message' => 'User account was not found!',
                     'data' => null
                 ], 404);
             }
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => $e->getMessage(),
                 'data' => $input

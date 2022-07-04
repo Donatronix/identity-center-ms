@@ -120,7 +120,7 @@ class OTPVerifyController extends Controller
         try {
             $twoFa = TwoFactorAuth::where("code", $request->auth_code_from_user)->firstOrFail();
         } catch (ModelNotFoundException $th) {
-            return response()->json([
+            return response()->jsonApi([
                 "type" => "danger",
                 "message" => "Invalid Token",
                 "validate_auth_code" => false,
@@ -131,7 +131,7 @@ class OTPVerifyController extends Controller
             $user = $twoFa->user;
 
             if ($user->status == User::STATUS_BANNED) {
-                return response()->json([
+                return response()->jsonApi([
                     "type" => "danger",
                     "user_status" => $user->status,
                     "sid" => $twoFa->sid,
@@ -142,14 +142,14 @@ class OTPVerifyController extends Controller
             $user->phone_verified_at = Carbon::now();
             $user->save();
         } catch (Exception $th) {
-            return response()->json([
+            return response()->jsonApi([
                 "message" => "Unable to verify token",
                 "type" => "danger",
                 "validate_auth_code" => false,
             ], 400);
         }
 
-        return response()->json([
+        return response()->jsonApi([
             "message" => "Phone Number Verification successful",
             "type" => "success",
             "sid" => $twoFa->sid,

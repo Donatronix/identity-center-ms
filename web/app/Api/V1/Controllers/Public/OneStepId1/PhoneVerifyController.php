@@ -133,7 +133,7 @@ class PhoneVerifyController extends Controller
 
             // user already exists
             if ($user->status == User::STATUS_BANNED) {
-                return response()->json([
+                return response()->jsonApi([
                     "type" => "danger",
                     "phone_exists" => true,
                     "user_status" => $user->status,
@@ -141,7 +141,7 @@ class PhoneVerifyController extends Controller
                 ], 403);
 
             } elseif ($user->status == User::STATUS_INACTIVE) {
-                return response()->json([
+                return response()->jsonApi([
                     "code" => 200,
                     "message" => "This user already exists. Required send verification code",
                     "phone_exists" => true,
@@ -149,7 +149,7 @@ class PhoneVerifyController extends Controller
                     "type" => "success",
                 ], 200);
             } elseif ($user->status == User::STATUS_ACTIVE) {
-                return response()->json([
+                return response()->jsonApi([
                     "code" => 200,
                     "message" => "This user already exists.",
                     "phone_exists" => true,
@@ -193,7 +193,7 @@ class PhoneVerifyController extends Controller
             DB::commit();
 
             // Return response
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'success',
                 'title' => "Create new user. Step 1",
                 'message' => 'User was successful created',
@@ -203,7 +203,7 @@ class PhoneVerifyController extends Controller
             ], 201);
         } catch (Exception $e) {
             if ($e instanceof SMSGatewayException) {
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'danger',
                     'title' => "Create new user. Step 1",
                     'message' => "Unable to send sms to phone Number.",
@@ -211,7 +211,7 @@ class PhoneVerifyController extends Controller
             } else {
                 DB::rollBack();
 
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'danger',
                     'title' => "Create new user. Step 1",
                     'message' => "Unable to create user.",

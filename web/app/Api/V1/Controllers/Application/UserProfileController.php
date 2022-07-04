@@ -17,7 +17,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Sumra\SDK\JsonApiResponse;
+use Sumra\SDK\PubSub;
 
 /**
  * Class UserProfileController
@@ -86,34 +87,13 @@ class UserProfileController extends Controller
      */
     public function store(Request $request): mixed
     {
-        // Validate input
-        try {
-            $this->validate($request, User::personValidationRules());
-        } catch (ValidationException $e) {
-            return response()->jsonApi([
-                'type' => 'warning',
-                'title' => 'User person details data',
-                'message' => "Validation error",
-                'data' => $e->getMessage()
-            ], 400);
-        }
-
         // Try to save received data
         try {
-            // Get user_id as user_Id
-            $user_id = Auth::user()->getAuthIdentifier();
+            // Validate input
+            $this->validate($request, User::personValidationRules());
 
             // Find exist user
-            $user = User::find($user_id);
-
-            // If not exist, then to create it
-            if (!$user) {
-                // Create new
-                $user = User::create([
-                    'id' => $user_id,
-                    'status' => User::STATUS_STEP_1
-                ]);
-            }
+            $user = User::findOrFail(Auth::user()->id);
 
             // Convert address field and save person data
             $personData = $request->all();
@@ -133,6 +113,13 @@ class UserProfileController extends Controller
                 'message' => "User person detail data successfully saved",
                 'data' => $user->toArray()
             ], 200);
+        } catch (ValidationException $e) {
+            return response()->jsonApi([
+                'type' => 'warning',
+                'title' => 'User person details data',
+                'message' => "Validation error",
+                'data' => $e->getMessage()
+            ], 400);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
@@ -243,7 +230,7 @@ class UserProfileController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function show(Request $request): JsonResponse
+    public function show(Request $request): JsonApiResponse
     {
 //        $user = Auth::user();
 //        if ($user) {}
@@ -280,21 +267,21 @@ class UserProfileController extends Controller
                     'data' => $user->toArray(),
                 ]);
             } else {
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'danger',
                     'message' => "User profile does NOT exist.",
                     "data" => null
                 ], 400);
             }
         } catch (ModelNotFoundException $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'Get current user profile data',
                 'message' => "Unable to retrieve user profile.",
                 "data" => $e->getMessage()
             ], 400);
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'Get current user profile data',
                 'message' => $e->getMessage(),
@@ -476,7 +463,7 @@ class UserProfileController extends Controller
      * @return Response
      * @throws ValidationException
      */
-    public function update(Request $request, int $id): Response
+    public function update(Request $request, int $id): JsonApiResponse
     {
         try {
             //validate input date
@@ -488,7 +475,6 @@ class UserProfileController extends Controller
             // Update data and save
             $user->fill($inputData);
             $user->save();
-
 
 
             if (!empty($request->email)) {
@@ -521,34 +507,30 @@ class UserProfileController extends Controller
             $sendEmail->dispatchEmail($to['email'], $subject, $message);
 
             //Show response
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'success',
                 'message' => "Email update was successful."
-            ], 400);
-        }
-        catch (ValidationException $e) {
+            ], 200);
+        } catch (ValidationException $e) {
             return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'User profile update',
                 'message' => "Validation error: " . $e->getMessage(),
                 'data' => null
             ], 400);
-        }
-        catch (ModelNotFoundException $e) {
-            return response()->json([
+        } catch (ModelNotFoundException $e) {
+            return response()->jsonApi([
                 'type' => 'danger',
-                'message' => "Unable to update email.",
-                "data" => $e->getMessage()
-            ], 400);
-
-            return response()->json([
-                'type' => 'danger',
-                'message' => "User profile does NOT exist.",
+                'message' => 'User profile does NOT exist' . $e->getMessage(),
                 "data" => null
             ], 400);
-        }
-        catch(Exception $e){
-
+        } catch (Exception $e) {
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title' => 'User profile update',
+                'message' => "Validation error: " . $e->getMessage(),
+                'data' => null
+            ], 500);
         }
     }
 
@@ -582,7 +564,6 @@ class UserProfileController extends Controller
      *                  type="string",
      *                  description="verification code previously send",
      *              ),
-     *
      *          ),
      *     ),
      *
@@ -639,7 +620,7 @@ class UserProfileController extends Controller
      * @return Response
      * @throws Exception
      */
-    public function updatePhone(Request $request): Response
+    public function updatePhone(Request $request): JsonApiResponse
     {
         $rules = [
             'phone' => [
@@ -672,9 +653,13 @@ class UserProfileController extends Controller
             if (!$user->save()) {
                 throw new Exception();
             }
-            return response()->jsonApi(["message" => "Phone number updated"], 200);
+            return response()->jsonApi([
+                "message" => "Phone number updated"
+            ], 200);
         } catch (Exception $e) {
-            return response()->jsonApi(["message" => "An error occurred! Please, try again."], 500);
+            return response()->jsonApi([
+                "message" => "An error occurred! Please, try again."
+            ], 500);
         }
     }
 
@@ -779,7 +764,7 @@ class UserProfileController extends Controller
      *
      * @return JsonResponse
      */
-    public function updatePassword(Request $request, SendEmailNotify $sendEmail): JsonResponse
+    public function updatePassword(Request $request, SendEmailNotify $sendEmail): JsonApiResponse
     {
         $validData = $this->validate($request, [
             'id' => 'required|string',
@@ -808,21 +793,21 @@ class UserProfileController extends Controller
                 $sendEmail->dispatchEmail($to['email'], $subject, $message);
 
                 //Show response
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'success',
                     'message' => "User password updated successfully.",
                     "data" => null
                 ], 200);
 
             } else {
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'danger',
                     'message' => "Invalid user password. Try again",
                     "data" => null
                 ], 400);
             }
         } catch (ModelNotFoundException $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Unable to update user password.",
                 "data" => $e->getMessage()
@@ -917,7 +902,7 @@ class UserProfileController extends Controller
      * @return Response
      * @throws Exception
      */
-    public function updateMyEmail(Request $request): Response
+    public function updateMyEmail(Request $request): JsonApiResponse
     {
         $rules = [
             'phone' => [
@@ -946,11 +931,14 @@ class UserProfileController extends Controller
             $user = User::first(Auth::user()->id);
             $user->email = $request->email;
             $user->verification_code = null;
+
             if (!$user->save()) {
                 throw new Exception();
             }
             return response()->jsonApi(["message" => "Email updated"], 200);
+
         } catch (Exception $e) {
+
             return response()->jsonApi(["message" => "An error occurred! Please, try again."], 500);
         }
     }
@@ -998,7 +986,7 @@ class UserProfileController extends Controller
      *
      * @return JsonResponse
      */
-    public function verify_email(Request $request): JsonResponse
+    public function verify_email(Request $request): JsonApiResponse
     {
         $this->validate($request, [
             'email' => "required|email",
@@ -1086,7 +1074,7 @@ class UserProfileController extends Controller
      * @return Response
      * @throws Exception
      */
-    public function validateEditPhoneNumber(Request $request): Response
+    public function validateEditPhoneNumber(Request $request): JsonApiResponse
     {
         $this->validate($request, [
             'phone' => [
@@ -1193,7 +1181,7 @@ class UserProfileController extends Controller
      * @return Response
      * @throws Exception
      */
-    public function validateEditEmail(Request $request): Response
+    public function validateEditEmail(Request $request): JsonApiResponse
     {
         $this->validate($request, [
             'email' => [

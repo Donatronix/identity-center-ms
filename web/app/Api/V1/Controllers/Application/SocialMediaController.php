@@ -20,8 +20,8 @@ class SocialMediaController extends Controller
      * @OA\Post(
      *     path="/user-profile/redirect",
      *     summary="Create provider redirect URL",
-     *     description="Create social media provider redirect URL for One-Step 2.0",
-     *     tags={"Connect User to Social Media by OneStep 2.0"},
+     *     description="Create social media provider redirect URL",
+     *     tags={"Social Media Connect"},
      *
      *     security={{
      *         "passport": {
@@ -75,13 +75,13 @@ class SocialMediaController extends Controller
 
                 if (!empty($redirectUrl) && $redirectUrl != null) {
                     //Show response
-                    return response()->json([
+                    return response()->jsonApi([
                         'type' => 'success',
                         'message' => "Redirect URL created successfully.",
                         "data" => ['redirect_url' => $redirectUrl]
                     ], 200);
                 } else {
-                    return response()->json([
+                    return response()->jsonApi([
                         'type' => 'danger',
                         'message' => "Redirect URL was NOT created.",
                         "data" => null
@@ -89,14 +89,14 @@ class SocialMediaController extends Controller
                 }
 
             } else {
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'danger',
                     'message' => "User profile does not exist.",
                     "data" => null
                 ], 400);
             }
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Unable to create redirect URL. Try again.",
                 "data" => $e->getMessage()
@@ -110,8 +110,8 @@ class SocialMediaController extends Controller
      * @OA\Get(
      *     path="/user-profile/{provider}/callback",
      *     summary="Process provider callback",
-     *     description="Process social media provider callback for One-Step 2.0",
-     *     tags={"Connect User to Social Media by OneStep 2.0"},
+     *     description="Process social media provider callback",
+     *     tags={"Social Media Connect"},
      *
      *     security={{
      *         "passport": {
@@ -170,7 +170,7 @@ class SocialMediaController extends Controller
                 }
 
                 //Show response
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'success',
                     'message' => "{$provider} connection was successful.",
                     "data" => $mediaArray
@@ -178,14 +178,14 @@ class SocialMediaController extends Controller
 
             } else {
                 //Response with required info
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'danger',
                     'message' => "Unable to connect to {$provider}.",
                     "data" => null
                 ], 400);
             }
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Unable to connect to {$provider}. Try again.",
                 "data" => $e->getMessage()
@@ -194,13 +194,13 @@ class SocialMediaController extends Controller
     }
 
     /**
-     * Connect user to whatsapp social media for One-Step 2.0
+     * Connect user to whatsapp social media
      *
      * @OA\Get(
      *     path="/user-profile/whatsapp/connect",
      *     summary="Connect user to WhatsApp",
-     *     description="Connect user to WhatsApp social media for One-Step 2.0",
-     *     tags={"Connect User to Social Media by OneStep 2.0"},
+     *     description="Connect user to WhatsApp social media",
+     *     tags={"Social Media Connect"},
      *
      *     security={{
      *         "passport": {
@@ -253,7 +253,7 @@ class SocialMediaController extends Controller
                 }
 
                 //Show response
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'success',
                     'message' => "{$provider} connection was successful.",
                     "data" => $mediaArray
@@ -261,30 +261,29 @@ class SocialMediaController extends Controller
 
             } else {
                 //Response with required info
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'danger',
                     'message' => "Unable to connect to {$provider}.",
                     "data" => null
                 ], 400);
             }
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Unable to connect to {$provider}. Try again.",
                 "data" => $e->getMessage()
             ], 400);
         }
-
     }
 
     /**
-     * Connect user to social media for One-Step 2.0
+     * Connect user to social media
      *
      * @OA\Get(
      *     path="/user-profile/social/connections",
      *     summary="Retrieve social media connections",
-     *     description="Retrieve social media connections for One-Step 2.0",
-     *     tags={"Connect User to Social Media by OneStep 2.0"},
+     *     description="Retrieve social media connections",
+     *     tags={"Social Media Connect"},
      *
      *     security={{
      *         "passport": {
@@ -315,7 +314,7 @@ class SocialMediaController extends Controller
 
             if (!empty($userMedia) && $userMedia != null) {
                 //Show response
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'success',
                     'message' => "Retrieved media connections successfully.",
                     "data" => $userMedia->toArray()
@@ -323,19 +322,18 @@ class SocialMediaController extends Controller
 
             } else {
                 //Response with required info
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'danger',
                     'message' => "No media connection found.",
                     "data" => null
                 ], 404);
             }
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Unable to retrieved media connections. Try again.",
                 "data" => $e->getMessage()
             ], 400);
         }
-
     }
 }

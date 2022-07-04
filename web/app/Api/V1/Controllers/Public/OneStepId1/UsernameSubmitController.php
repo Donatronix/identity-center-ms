@@ -137,7 +137,7 @@ class UsernameSubmitController extends Controller
             // retrieve user using the sid
             $user = User::getBySid($request->sid);
         } catch (ModelNotFoundException $th) {
-            return response()->json([
+            return response()->jsonApi([
                 "type" => "danger",
                 "message" => "Invalid sid Token",
             ], 403);
@@ -146,7 +146,7 @@ class UsernameSubmitController extends Controller
         // check user status
         if ($user->status == User::STATUS_BANNED) {
             //report banned
-            return response()->json([
+            return response()->jsonApi([
                 "type" => "danger",
                 "user_status" => $user->status,
                 "message" => "User has been banned from this platform.",
@@ -160,7 +160,7 @@ class UsernameSubmitController extends Controller
         // check if username is taken
         $usernameExists = User::where("username", $request->username)->exists();
         if ($usernameExists) {
-            return response()->json([
+            return response()->jsonApi([
                 "type" => "danger",
                 "message" => "Username already exists.",
                 "user_status" => $user->status,
@@ -184,7 +184,7 @@ class UsernameSubmitController extends Controller
                 //throw $th;
                 $user->assignRole('client');
             } catch (Exception $th) {
-                return response()->json([
+                return response()->jsonApi([
                     "type" => "danger",
                     "message" => "Unable to save username.",
                 ], 400);
@@ -193,7 +193,7 @@ class UsernameSubmitController extends Controller
             return $this->login($user, $request->sid, $request->username);
         } else {
             // username already exists for this SID
-            return response()->json([
+            return response()->jsonApi([
                 "type" => "danger",
                 "message" => "Username already exists for this SID",
             ]);
@@ -234,7 +234,7 @@ class UsernameSubmitController extends Controller
                 if ($loginAttempts > self::MAX_LOGIN_ATTEMPTS - 1) {
                     // malicious user, warn and block
                     //TODO count login attempts and block
-                    return response()->json([
+                    return response()->jsonApi([
                         "type" => "danger",
                         "message" => "Unauthorized operation.",
                         "user_status" => $user->status,
@@ -252,13 +252,13 @@ class UsernameSubmitController extends Controller
 
             $redis->del($userLoginAttemptsKey);
 
-            return response()->json([
+            return response()->jsonApi([
                 "message" => "Login successful",
                 "type" => "success",
                 "token" => $token,
             ]);
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 "type" => "danger",
                 "message" => "Invalid SID",
             ], 403);
@@ -393,14 +393,14 @@ class UsernameSubmitController extends Controller
             ], 'new_user');
 
             // Return response
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'success',
                 'title' => "Create new user. Step 1",
                 'message' => 'User was successful created',
                 'data' => $user,
             ], 201);
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'title' => "Create new user. Step 1",
                 'message' => $e->getMessage(),

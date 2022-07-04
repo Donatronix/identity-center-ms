@@ -145,7 +145,7 @@ class UserInfoRecoveryController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Input validator errors. Try again.",
                 "data" => null
@@ -185,7 +185,7 @@ class UserInfoRecoveryController extends Controller
                 $sendOTP->dispatchOTP($channel, $sendto, $token);
 
                 //Show response
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'success',
                     'message' => "{$channel} verification code sent to {$sendto}.",
                     "data" => [
@@ -196,14 +196,14 @@ class UserInfoRecoveryController extends Controller
                 ], 200);
 
             } else {
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'danger',
                     'message' => "User account does not exist. Try again.",
                     "data" => null
                 ], 400);
             }
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Unable to send token for verification. Try again.",
                 "data" => $e->getMessage
@@ -292,14 +292,14 @@ class UserInfoRecoveryController extends Controller
                 $existQuery->delete();
 
                 //Send success response
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'success',
                     'message' => "User account verification was successful.",
                     "data" => ['username' => $username, 'id' => $id]
                 ], 200);
             } else {
                 //Send invalid token response
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'danger',
                     'message' => "User account verification FAILED. Try again.",
                     "data" => null
@@ -307,7 +307,7 @@ class UserInfoRecoveryController extends Controller
             }
         } catch (Exception $e) {
             // Error occured
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Unable to verify new use with token {$input['token']}. Try again.",
                 "data" => null
@@ -407,7 +407,7 @@ class UserInfoRecoveryController extends Controller
         $validator = Validator::make($input, RecoveryQuestion::rules());
 
         if ($validator->fails()) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Input validator errors. Try again.",
                 "data" => null
@@ -432,27 +432,27 @@ class UserInfoRecoveryController extends Controller
                     && $questions->answer_three === $input['answer3']
                 ) {
                     // Return response
-                    return response()->json([
+                    return response()->jsonApi([
                         'type' => 'success',
                         'message' => 'User account security questions verified.',
                         'data' => ['username' => $input['username']]
                     ], 200);
                 } else {
-                    return response()->json([
+                    return response()->jsonApi([
                         'type' => 'danger',
                         'message' => 'User account security questions NOT verified.',
                         'data' => null
                     ], 400);
                 }
             } else {
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'danger',
                     'message' => 'User account was not found!',
                     'data' => null
                 ], 404);
             }
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => $e->getMessage(),
                 'data' => null
@@ -572,7 +572,7 @@ class UserInfoRecoveryController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Input validator errors. Try again.",
                 "data" => null
@@ -602,21 +602,21 @@ class UserInfoRecoveryController extends Controller
                 }
 
                 // Return response
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'success',
                     'message' => 'User account ID has been sent.',
                     'data' => ['username' => $input['username']]
                 ], 200);
 
             } else {
-                return response()->json([
+                return response()->jsonApi([
                     'type' => 'danger',
                     'message' => 'User account was not found!',
                     'data' => null
                 ], 404);
             }
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => $e->getMessage(),
                 'data' => null

@@ -125,7 +125,7 @@ class SendSMSController extends Controller
 
             // user already exists
             if ($user->status == User::STATUS_BANNED) {
-                return response()->json([
+                return response()->jsonApi([
                     "phone_exists" => true,
                     "user_status" => $user->status,
                     "type" => "danger",
@@ -135,7 +135,7 @@ class SendSMSController extends Controller
             }
         } catch (ModelNotFoundException $e) {
             //Phone Number Does not exist
-            return response()->json([
+            return response()->jsonApi([
                 "message" => "This phone number does not exist",
                 "phone_exists" => false,
                 "type" => "danger"
@@ -155,7 +155,7 @@ class SendSMSController extends Controller
             ]);
 
             // Return response
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'success',
                 'message' => 'A token SMS has been sent to your phone number',
                 "phone_exists" => true,
@@ -166,7 +166,7 @@ class SendSMSController extends Controller
             ], 200);
 
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Unable to send sms to phone number. Try again",
                 "phone_exists" => true

@@ -79,13 +79,13 @@ class AuthController extends Controller
         try {
             $token = $this->refreshToken($request->token);
 
-            return response()->json([
+            return response()->jsonApi([
                 "type" => "success",
                 "message" => "Token Refresh",
                 "data" => $token
             ], 400);
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 "type" => "danger",
                 "message" => $e->getMessage(),
             ], 400);
