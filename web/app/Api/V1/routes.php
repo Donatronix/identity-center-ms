@@ -79,8 +79,6 @@ $router->group([
 
             $router->put('/update/phone', 'UserProfileController@updatePhone');
             $router->put('/update/password', "UserProfileController@updatePassword");
-            $router->put('/update/username', "UserProfileController@updateUsername");
-            $router->put('/update/fullname', "UserProfileController@updateFullname");
 
             $router->post('/update-email', 'UserProfileController@updateMyEmail');
             $router->post('/verify-email-send', 'UserProfileController@verify_email');
