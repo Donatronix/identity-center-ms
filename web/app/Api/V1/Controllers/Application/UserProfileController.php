@@ -353,13 +353,19 @@ class UserProfileController extends Controller
      *              @OA\Property(
      *                  property="first_name",
      *                  type="string",
-     *                  description="First name",
+     *                  description="User first name",
      *              ),
      *              @OA\Property(
      *                  property="last_name",
      *                  type="string",
-     *                  description="Last name",
+     *                  description="User Last name",
      *              ),
+     *              @OA\Property(
+     *                 property="username",
+     *                 type="string",
+     *                 description="User username for user profile update",
+     *                 example="john.kiels"
+     *             ),
      *              @OA\Property(
      *                 property="email",
      *                 type="string",
@@ -412,9 +418,8 @@ class UserProfileController extends Controller
      *                  property="address_zip",
      *                  type="string",
      *                  description="Zip code",
-     *              ),
-     *
-     *          ),
+     *              )
+     *          )
      *     ),
      *
      *     @OA\Response(
@@ -477,36 +482,8 @@ class UserProfileController extends Controller
             //validate input date
             $inputData = $this->validate($request, User::profileValidationRules((int)$id));
 
-
             // Get User object
             $user = User::findOrFail($id);
-
-
-            //Update username
-            $user->update([
-                'email' => $inputData['email']
-            ]);
-
-            //Update username
-            $user->update([
-                'username' => $inputData['username']
-            ]);
-
-            //Update full name
-            $user->update([
-                'first_name' => $inputData['firstname'],
-                'last_name' => $inputData['lastname']
-            ]);
-
-            //Update username
-            $user->update([
-                'country' => $inputData['country']
-            ]);
-
-            //Update username
-            $user->update([
-                'locale' => $inputData['locale']
-            ]);
 
             // Update data and save
             $user->fill($inputData);
@@ -536,6 +513,12 @@ class UserProfileController extends Controller
 //                throw new BadRequestHttpException('Invalid current_password');
 //            }
 //        }
+
+            // Send notification email
+            $subject = 'Change Username';
+            $message = 'Your username has been updated successfully.';
+            $sendEmail = new SendEmailNotify();
+            $sendEmail->dispatchEmail($to['email'], $subject, $message);
 
             //Show response
             return response()->json([
@@ -846,246 +829,6 @@ class UserProfileController extends Controller
             ], 400);
         }
     }
-
-    /**
-     * Update username for One-Step 2.0
-     *
-     * @OA\Put(
-     *     path="/user-profile/update/username",
-     *     summary="Update username",
-     *     description="Update username for One-Step 2.0",
-     *     tags={"User Profile"},
-     *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
-     *
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="username",
-     *                 type="string",
-     *                 description="User username for user profile update",
-     *                 example="john.kiels"
-     *             )
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *          response="201",
-     *          description="Success",
-     *
-     *          @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="type",
-     *                 type="string",
-     *                 example="success"
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="Username update was successful"
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *          response="400",
-     *          description="Bad Request",
-     *
-     *          @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="type",
-     *                 type="string",
-     *                 example="danger"
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="Username update FAILED"
-     *             )
-     *         )
-     *     )
-     * )
-     *
-     * @param Request $request
-     * @param SendEmailNotify $sendEmail
-     *
-     * @return JsonResponse
-     * @throws ValidationException
-     */
-    public function updateUsername(Request $request, SendEmailNotify $sendEmail): JsonResponse
-    {
-        //validate input date
-        $input = $this->validate($request, [
-            'username' => 'required|string'
-        ]);
-
-        try {
-            // Check whether user already exist
-            $userQuery = User::where([
-                'username' => $input['username']
-            ]);
-
-            if ($userQuery->exists()) {
-
-                $user = $userQuery->firstOrFail();
-
-                //Send notification email
-                $subject = 'Change Username';
-                $message = 'Your username has been updated successfully.';
-
-                $sendEmail->dispatchEmail($to['email'], $subject, $message);
-
-                //Show response
-                return response()->json([
-                    'type' => 'success',
-                    'message' => "Username update was successful."
-                ], 400);
-            } else {
-                return response()->json([
-                    'type' => 'danger',
-                    'message' => "User profile does NOT exist.",
-                    "data" => null
-                ], 400);
-            }
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'type' => 'danger',
-                'message' => "Unable to update Username.",
-                "data" => $e->getMessage()
-            ], 400);
-        }
-    }
-
-    /**
-     * Update username for One-Step 2.0
-     *
-     * @OA\Put(
-     *     path="/user-profile/update/fullname",
-     *     summary="Update fullname",
-     *     description="Update profile fullname",
-     *     tags={"User Profile"},
-     *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
-     *
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="id",
-     *                 type="string",
-     *                 description="User ID for user profile update",
-     *                 required={"true"},
-     *                 example="373458be-3f01-40ca-b6f3-245239c7889f"
-     *             ),
-     *             @OA\Property(
-     *                 property="firstname",
-     *                 type="string",
-     *                 description="User firstname for user profile update",
-     *                 example="john"
-     *             ),
-     *             @OA\Property(
-     *                 property="lastname",
-     *                 type="string",
-     *                 description="User lastname for user profile update",
-     *                 example="kiels"
-     *             )
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *          response="201",
-     *          description="Success",
-     *
-     *          @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="type",
-     *                 type="string",
-     *                 example="success"
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="Full name update was successful"
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *          response="400",
-     *          description="Bad Request",
-     *
-     *          @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="type",
-     *                 type="string",
-     *                 example="danger"
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="Full name update FAILED"
-     *             )
-     *         )
-     *     )
-     * )
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     * @throws ValidationException
-     */
-    public function updateFullname(Request $request): JsonResponse
-    {
-        try {
-            // Check whether user already exist
-            $userQuery = User::where(['id' => $input['id']]);
-
-            if ($userQuery->exists()) {
-
-                $user = $userQuery->firstOrFail();
-
-                //Show response
-                return response()->json([
-                    'type' => 'success',
-                    'message' => "Full name update was successful."
-                ], 400);
-            } else {
-                return response()->json([
-                    'type' => 'danger',
-                    'message' => "User profile does NOT exist.",
-                    "data" => null
-                ], 400);
-            }
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'type' => 'danger',
-                'message' => "Unable to update Full name.",
-                "data" => $e->getMessage()
-            ], 400);
-        }
-    }
-
 
     /**
      * Validate the verification code and update the current user's email

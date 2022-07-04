@@ -327,6 +327,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
             'first_name' => 'sometimes|string|min:2|max:60',
             'last_name' => 'sometimes|string|min:2|max:60',
 
+            'username' => 'required|string',
             'email' => "sometimes|email|unique:users,email" . ($id ? ",{$id}" : ''),
             'email' => 'required|string|email',
             'phone' => "sometimes|regex:/\+?\d{7,16}/i|unique:users,phone" . ($id ? ",{$id}" : ''),
