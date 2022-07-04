@@ -390,7 +390,8 @@ class UserProfileController extends Controller
      *              @OA\Property(
      *                  property="address_country",
      *                  type="string",
-     *                  description="Country code",
+     *                  description="User country code",
+     *                  example="uk"
      *              ),
      *              @OA\Property(
      *                  property="address_line1",
@@ -1085,124 +1086,6 @@ class UserProfileController extends Controller
         }
     }
 
-    /**
-     * Update Country for One-Step 2.0
-     *
-     * @OA\Put(
-     *     path="/user-profile/update/country",
-     *     summary="Update country",
-     *     description="Update country for One-Step 2.0",
-     *     tags={"User Profile"},
-     *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
-     *
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             type="object",
-     *
-     *            @OA\Property(
-     *                 property="id",
-     *                 type="string",
-     *                 description="User ID for user profile update",
-     *                 required={"true"},
-     *                 example="373458be-3f01-40ca-b6f3-245239c7889f"
-     *             ),
-     *             @OA\Property(
-     *                 property="country",
-     *                 type="string",
-     *                 description="User country for user profile update",
-     *                 example="United Kindom"
-     *             )
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *          response="201",
-     *          description="Success",
-     *
-     *          @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="type",
-     *                 type="string",
-     *                 example="success"
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="Country update was successful"
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *          response="400",
-     *          description="Bad Request",
-     *
-     *          @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="type",
-     *                 type="string",
-     *                 example="danger"
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="Country update FAILED"
-     *             )
-     *         )
-     *     )
-     * )
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     * @throws ValidationException
-     */
-    public function updateCountry(Request $request): JsonResponse
-    {
-        try {
-            //validate input date
-            $input = $this->validate($request, [
-                'id' => 'required|string',
-                'country' => 'required|string'
-            ]);
-
-            // Check whether user already exist
-            $userQuery = User::where(['id' => $input['id']]);
-
-            if ($userQuery->exists()) {
-
-                $user = $userQuery->firstOrFail();
-
-                //Show response
-                return response()->json([
-                    'type' => 'success',
-                    'message' => "Country update was successful."
-                ], 400);
-            } else {
-                return response()->json([
-                    'type' => 'danger',
-                    'message' => "User profile does NOT exist.",
-                    "data" => null
-                ], 400);
-            }
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'type' => 'danger',
-                'message' => "Unable to update country.",
-                "data" => $e->getMessage()
-            ], 400);
-        }
-    }
 
     /**
      * Validate the verification code and update the current user's email
