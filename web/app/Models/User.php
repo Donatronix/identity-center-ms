@@ -335,6 +335,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 
             'locale' => 'sometimes|string',
 
+
             'address_country' => 'required|string|min:2|max:3',
             'address_line1' => 'required|string|max:150',
             'address_line2' => 'sometimes|nullable|string|max:100',
