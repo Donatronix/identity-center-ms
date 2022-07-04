@@ -82,8 +82,6 @@ $router->group([
             $router->put('/update/username', "UserProfileController@updateUsername");
             $router->put('/update/fullname', "UserProfileController@updateFullname");
             $router->put('/update/country', "UserProfileController@updateCountry");
-            $router->put('/update/email', "UserProfileController@updateEmail");
-            $router->put('/update/locale', "UserProfileController@updateLocale");
 
             $router->post('/update-email', 'UserProfileController@updateMyEmail');
             $router->post('/verify-email-send', 'UserProfileController@verify_email');
