@@ -64,7 +64,7 @@ $router->group([
         'namespace' => 'Application',
         'middleware' => [
             'checkUser',
-            'auth:api'
+            // 'auth:api'
         ]
     ], function ($router) {
         /**
@@ -112,6 +112,17 @@ $router->group([
          * Auth - refresh token
          */
         $router->post('/refresh-token', 'AuthController@refresh');
+
+        /**
+         * Activities
+        */
+        $router->group([
+            'prefix' => 'activities',
+        ], function ($router) {
+            $router->post('/', "ActivityController@store");
+            $router->get('/', "ActivityController@index");
+            $router->delete('/{id:[a-fA-F0-9\-]{36}}', "ActivityController@destroy");
+        });
     });
 
     /**
