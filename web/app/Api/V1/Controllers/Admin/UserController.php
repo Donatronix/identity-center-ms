@@ -388,7 +388,7 @@ class UserController extends Controller
      *             "ManagerWrite"
      *         }
      *     }},
-     * 
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -435,7 +435,7 @@ class UserController extends Controller
     public function show(string $id): mixed
     {
         try {
-          
+
             $user = User::where('id', $id)->firstOrFail();
 
             return response()->jsonApi([

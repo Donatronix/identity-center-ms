@@ -6,6 +6,7 @@ use App\Exceptions\SMSGatewayException;
 use Exception;
 use Illuminate\Support\Str;
 use Laravel\Lumen\Routing\Controller as BaseController;
+use App\Traits\ResponseTrait;
 
 /**
  * @OA\Info(
@@ -84,4 +85,6 @@ use Laravel\Lumen\Routing\Controller as BaseController;
  *
  * @package App\Api\V1\Controllers
  */
-class Controller extends BaseController{}
+class Controller extends BaseController {
+    use ResponseTrait;
+}

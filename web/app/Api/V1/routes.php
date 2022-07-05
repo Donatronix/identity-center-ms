@@ -123,10 +123,20 @@ $router->group([
         'prefix' => 'admin',
         'namespace' => 'Admin',
         'middleware' => [
-            'checkUser',
-            'checkAdmin'
+            // 'checkUser',
+            //'checkAdmin'
         ]
     ], function ($router) {
+
+        /**
+         * KYC Management
+         *
+         */
+        $router->group(['prefix' => 'kyc'], function ($router) {
+            $router->get('/', 'IdentificationController@index');
+            $router->put('{id}', 'IdentificationController@updateKYC');
+        });
+
         /**
          * Users
          */
@@ -160,14 +170,6 @@ $router->group([
             $router->patch('/', 'ServiceAdminController@update');
             $router->delete('/', 'ServiceAdminController@destroy');
         });
-    });
-
-    /**
-     * KYC Management
-     */
-    $router->group(['prefix' => 'kyc'], function ($router) {
-        $router->get('/', 'IdentificationController@index');
-        $router->put('{id}', 'IdentificationController@update');
     });
 
     /**

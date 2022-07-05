@@ -7,7 +7,7 @@ use Sumra\SDK\Traits\UuidTrait;
 
 
 /**
- * User Identity Schema
+ * KYC Schema
  *
  * @package App\Models
  *
