@@ -62,10 +62,10 @@ $router->group([
      */
     $router->group([
         'namespace' => 'Application',
-        'middleware' => [
-            'checkUser',
-            'auth:api'
-        ]
+        // 'middleware' => [
+        //     'checkUser',
+        //     'auth:api'
+        // ]
     ], function ($router) {
         /**
          * User Profile
@@ -123,8 +123,8 @@ $router->group([
         'prefix' => 'admin',
         'namespace' => 'Admin',
         'middleware' => [
-            // 'checkUser',
-            // 'checkAdmin'
+            'checkUser',
+            'checkAdmin'
         ]
     ], function ($router) {
         /**
@@ -146,7 +146,7 @@ $router->group([
             $router->patch('/{id:[a-fA-F0-9\-]{36}}', 'UserController@approve');
             $router->delete('/{id:[a-fA-F0-9\-]{36}}', 'UserController@destroy');
             $router->post('/verify', 'UserController@verify');
-            $router->post('/verify/send', 'UserController@verify_email');
+            $router->post('/verify/send', 'UserController@verifyEmail');
         });
 
         /**

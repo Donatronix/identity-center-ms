@@ -323,7 +323,7 @@ class UserProfileController extends Controller
      *          @OA\Schema(
      *              type="integer",
      *              format="int64"
-     *          ),
+     *          )
      *     ),
      *
      *     security={{
@@ -358,7 +358,7 @@ class UserProfileController extends Controller
      *                 type="string",
      *                 description="User email for user profile update",
      *                 example="johnkiels@ultainfinity.com"
-     *             )
+     *             ),
      *              @OA\Property(
      *                  property="phone",
      *                  type="string",
@@ -563,8 +563,8 @@ class UserProfileController extends Controller
      *                  property="verification_code",
      *                  type="string",
      *                  description="verification code previously send",
-     *              ),
-     *          ),
+     *              )
+     *          )
      *     ),
      *
      *    @OA\Response(
@@ -609,7 +609,7 @@ class UserProfileController extends Controller
      *                     type="string",
      *                     example={"The verification code is invalid."},
      *                  )
-     *               ),
+     *               )
      *            )
      *         )
      *      )
@@ -844,9 +844,9 @@ class UserProfileController extends Controller
      *                  property="verification_code",
      *                  type="string",
      *                  description="verification code previously send",
-     *              ),
+     *              )
      *
-     *          ),
+     *          )
      *     ),
      *
      *    @OA\Response(
@@ -891,7 +891,7 @@ class UserProfileController extends Controller
      *                     type="string",
      *                     example={"The verification code is invalid."},
      *                  )
-     *               ),
+     *               )
      *            )
      *         )
      *      )
@@ -1027,8 +1027,8 @@ class UserProfileController extends Controller
      *                  property="phone",
      *                  type="string",
      *                  description="phone number of the user",
-     *              ),
-     *          ),
+     *              )
+     *          )
      *     ),
      *
      *    @OA\Response(
@@ -1046,10 +1046,10 @@ class UserProfileController extends Controller
      *                  @OA\Items(
      *                     type="string",
      *                     example={"The phone number is already taken.","The phone number is invalid."},
-     *                  ),
-     *               ),
-     *            ),
-     *         ),
+     *                  )
+     *               )
+     *            )
+     *         )
      *      ),
      *
      *     @OA\Response(
@@ -1133,9 +1133,9 @@ class UserProfileController extends Controller
      *                  property="email",
      *                  type="string",
      *                  description="email of the user",
-     *              ),
+     *              )
      *
-     *          ),
+     *          )
      *     ),
      *
      *    @OA\Response(
