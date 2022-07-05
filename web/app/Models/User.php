@@ -383,6 +383,56 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     }
 
     /**
+     * Validation rules for admin new user
+     *
+     * @return array
+     */
+    public static function adminValidationRules(): array
+    {
+        return [
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required|string',
+            'gender' => 'required|string',
+            'birthday' => 'required|string',
+            'password' => 'required|min:6|max::32',
+            'username' => 'required|string',
+            'birthday' => 'required|date_format:Y-m-d',
+            'accept_terms' => 'required|boolean',
+            'address_country' => 'required|string|max:3',
+            'address_line1' => 'required|string|max:150',
+            'address_line2' => 'string|max:100',
+            'address_city' => 'required|string|max:50',
+            'address_zip' => 'required|string|max:15'
+        ];
+    }
+   
+    /**
+     * Validation rules for admin new user
+     *
+     * @return array
+     */
+    public static function adminUpdateValidateRules(): array
+    {
+        return [
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|email',
+            'phone' => 'required|string',
+            'gender' => 'required|string',
+            'birthday' => 'required|string',
+            'username' => 'required|string',
+            'birthday' => 'required|date_format:Y-m-d',
+            'address_country' => 'required|string|max:3',
+            'address_line1' => 'required|string|max:150',
+            'address_line2' => 'string|max:100',
+            'address_city' => 'required|string|max:50',
+            'address_zip' => 'required|string|max:15'
+        ];
+    }
+
+    /**
      * Provide input data validation array.
      *
      * @return array

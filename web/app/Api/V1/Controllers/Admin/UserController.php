@@ -206,77 +206,123 @@ class UserController extends Controller
      *         }
      *     }},
      *
-     *     @OA\Parameter(
-     *         name="email",
-     *         required=true,
-     *         in="query",
-     *         @OA\Schema (
-     *             type="string"
-     *         )
-     *     ),
-     *     @OA\Parameter(
-     *         name="password",
-     *         required=true,
-     *         in="query",
-     *         @OA\Schema (
-     *             type="string",
-     *             format="password"
-     *         )
-     *     ),
-     *     @OA\Parameter(
-     *         name="password_confirmation",
-     *         required=true,
-     *         in="query",
-     *         @OA\Schema (
-     *             type="string",
-     *             format="password"
-     *         )
-     *     ),
-     *     @OA\Parameter(
-     *         name="first_name",
-     *         required=true,
-     *         in="query",
-     *         @OA\Schema (
-     *             type="string"
-     *         )
-     *     ),
-     *     @OA\Parameter(
-     *         name="last_name",
-     *          required=true,
-     *         in="query",
-     *         @OA\Schema (
-     *             type="string"
-     *         )
-     *     ),
-     *     @OA\Parameter(
-     *         name="birthday",
-     *          required=true,
-     *          in="query",
-     *          @OA\Schema (
-     *              type="string",
-     *              format="date"
-     *          )
-     *     ),
-     *     @OA\Parameter(
-     *         name="phone",
-     *         required=true,
-     *         in="query",
-     *         @OA\Schema(
-     *             type="string"
-     *         )
-     *     ),
-     *     @OA\Parameter(
-     *          name="accept_terms",
-     *          required=true,
-     *          in="query",
-     *          @OA\Schema (
-     *              type="integer",
-     *              enum={0,1}
-     *          )
-     *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/UserProfile")
+     *         @OA\JsonContent(
+     *             type="object",
+     *
+     *              @OA\Property(
+     *                 property="first_name",
+     *                 type="string",
+     *                 description="First name for new user account",
+     *                 required={"true"},
+     *                 example="John"
+     *             ),
+     *             @OA\Property(
+     *                 property="last_name",
+     *                 type="string",
+     *                 description="Last name for new user account",
+     *                 required={"true"},
+     *                 example="Kiels"
+     *             ),
+     *              @OA\Property(
+     *                 property="username",
+     *                 type="string",
+     *                 description="Username for new user account",
+     *                 required={"true"},
+     *                 example="johnkiels"
+     *             ),
+     *             @OA\Property(
+     *                 property="email",
+     *                 type="string",
+     *                 description="Email for user account",
+     *                 required={"true"},
+     *                 example="johnkiels@ultainfinity"
+     *             ),
+     *              @OA\Property(
+     *                 property="phone",
+     *                 type="string",
+     *                 description="Phone number for user account",
+     *                 required={"true"},
+     *                 example="+4492838989"
+     *             ),
+     *             @OA\Property(
+     *                 property="birthday",
+     *                 type="string",
+     *                 description="Birthday for user account",
+     *                 required={"true"},
+     *                 example="2002-04-09"
+     *             ),
+     *             @OA\Property(
+     *                 property="gender",
+     *                 type="string",
+     *                 description="Gender for user account",
+     *                 required={"true"},
+     *                 example="m"
+     *             ),
+     *             @OA\Property(
+     *                 property="status",
+     *                 type="string",
+     *                 description="Status for user account",
+     *                 example="0"
+     *             ),
+     *             @OA\Property(
+     *                 property="subscribed_to_announcement",
+     *                 type="string",
+     *                 description="subscribed to announcement",
+     *                 required={"true"},
+     *                  example=""
+     *             ),
+     *              @OA\Property(
+     *                 property="address_line1",
+     *                 type="string",
+     *                 description="Address line 1 for user account",
+     *                 required={"true"},
+     *                 example="45 kingston Street"
+     *             ),
+     *              @OA\Property(
+     *                 property="address_line2",
+     *                 type="string",
+     *                 description="Address line 2 for user account",
+     *                 required={"true"},
+     *                 example="Radek Layout"
+     *             ),
+     *              @OA\Property(
+     *                 property="address_city",
+     *                 type="string",
+     *                 description="Address_city for user account",
+     *                 required={"true"},
+     *                 example="Westbron"
+     *             ),
+     *              @OA\Property(
+     *                 property="address_country",
+     *                 type="string",
+     *                 description="Address country for user account",
+     *                 required={"true"},
+     *                 example="UK"
+     *             ),
+     *              @OA\Property(
+     *                 property="address_zip",
+     *                 type="string",
+     *                 description="Address zip for user account",
+     *                 required={"true"},
+     *                 example="+235"
+     *             ),
+     *             @OA\Property(
+     *                 property="password",
+     *                 type="string",
+     *                 description="Password for user account",
+     *                 required={"true"},
+     *                 example="xxxxxxx"
+     *             ),
+     *             @OA\Property(
+     *                 property="accept_terms",
+     *                 type="boolean",
+     *                 description="Accept terms for user account",
+     *                 required={"true"},
+     *                 example="true"
+     *             )
+     *         )
      *     ),
      *     @OA\Response(
      *         response="200",
@@ -317,31 +363,31 @@ class UserController extends Controller
     {
         // Try to add new user
         try {
-            $rules = [
-                'email' => 'required|email|unique:users,email',
-                'password' => 'required|confirmed|min:6',
-                'first_name' => 'required|string',
-                'last_name' => 'required|string',
-                'username' => 'required|string',
-                'birthday' => 'required|date_format:Y-m-d',
-                'phone' => 'required|integer',
-                'accept_terms' => 'required|boolean',
-            ];
+            
+            $validate = Validator::make($request->all(), User::adminValidationRules());
+            
+            //Validation response
+            if($validate->fails()){
+                return response()->jsonApi([
+                    'type' => 'danger',
+                    'title' => 'New user registration',
+                    'message' => $validate->errors(),
+                    'data' => null
+                ], 400);
+            }
 
-            $validated = $this->validate($request, $rules);
+            //Get validated input
+            $validated = $validate->validated();
 
+            //User data
             $input = array_merge($validated, [
                 'phone' => $validated['phone'],
                 'password' => Hash::make($validated['password']),
                 'status' => User::STATUS_ACTIVE,
                 'verify_token' => Str::random(32),
             ]);
-            $user = User::create($input);
 
-//            // Create new
-//            $user = new User();
-//            $user->fill($request->all());
-//            $user->save();
+            $user = User::create($input);
 
             PubSub::transaction(function () {
             })->publish('sendVerificationEmail', [
@@ -358,10 +404,12 @@ class UserController extends Controller
             // Return response to client
             return response()->jsonApi([
                 'type' => 'success',
-                'title' => 'New user registration',
+                'title' => 'Create admin user account',
                 'message' => "New user registered successfully!",
                 'data' => $user->toArray()
             ], 200);
+           
+
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
@@ -393,7 +441,7 @@ class UserController extends Controller
      *         name="id",
      *         in="path",
      *         description="User Id",
-     *         example="0aa06e6b-35de-3235-b925-b0c43f8f7c75",
+     *         example="96b47d3c-8197-4965-811b-74d04247d4f9",
      *         required=true,
      *         @OA\Schema(
      *             type="string"
@@ -459,7 +507,7 @@ class UserController extends Controller
      * Update user data
      *
      * @OA\Put(
-     *     path="/admin/users/{id}",
+     *     path="/admin/users/update/{id}",
      *     summary="Update user data",
      *     description="Update user data",
      *     tags={"Admin | Users"},
@@ -475,16 +523,102 @@ class UserController extends Controller
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
-     *         description="User Id",
-     *         example="0aa06e6b-35de-3235-b925-b0c43f8f7c75",
-     *         required=true,
+     *         description="User ID",
+     *         example="96b47d3c-8197-4965-811b-74d04247d4f9",
      *         @OA\Schema(
      *             type="string"
      *         )
      *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/UserProfile")
+     *         @OA\JsonContent(
+     *             type="object",
+     *
+     *             @OA\Property(
+     *                 property="first_name",
+     *                 type="string",
+     *                 description="First name for new user account",
+     *                 required={"true"},
+     *                 example="John"
+     *             ),
+     *             @OA\Property(
+     *                 property="last_name",
+     *                 type="string",
+     *                 description="Last name for new user account",
+     *                 required={"true"},
+     *                 example="Kiels"
+     *             ),
+     *              @OA\Property(
+     *                 property="username",
+     *                 type="string",
+     *                 description="Username for new user account",
+     *                 required={"true"},
+     *                 example="johnkiels"
+     *             ),
+     *             @OA\Property(
+     *                 property="email",
+     *                 type="string",
+     *                 description="Email for user account",
+     *                 required={"true"},
+     *                 example="johnkiels@ultainfinity"
+     *             ),
+     *              @OA\Property(
+     *                 property="phone",
+     *                 type="string",
+     *                 description="Phone number for user account",
+     *                 required={"true"},
+     *                 example="+4492838989"
+     *             ),
+     *             @OA\Property(
+     *                 property="birthday",
+     *                 type="string",
+     *                 description="Birthday for user account",
+     *                 required={"true"},
+     *                 example="2002-04-09"
+     *             ),
+     *             @OA\Property(
+     *                 property="gender",
+     *                 type="string",
+     *                 description="Gender for user account",
+     *                 required={"true"},
+     *                 example="m"
+     *             ),
+     *              @OA\Property(
+     *                 property="address_line1",
+     *                 type="string",
+     *                 description="Address line 1 for user account",
+     *                 required={"true"},
+     *                 example="45 kingston Street"
+     *             ),
+     *              @OA\Property(
+     *                 property="address_line2",
+     *                 type="string",
+     *                 description="Address line 2 for user account",
+     *                 required={"true"},
+     *                 example="Radek Layout"
+     *             ),
+     *              @OA\Property(
+     *                 property="address_city",
+     *                 type="string",
+     *                 description="Address_city for user account",
+     *                 required={"true"},
+     *                 example="Westbron"
+     *             ),
+     *              @OA\Property(
+     *                 property="address_country",
+     *                 type="string",
+     *                 description="Address country for user account",
+     *                 required={"true"},
+     *                 example="UK"
+     *             ),
+     *              @OA\Property(
+     *                 property="address_zip",
+     *                 type="string",
+     *                 description="Address zip for user account",
+     *                 required={"true"},
+     *                 example="+235"
+     *             )
+     *         )
      *     ),
      *
      *     @OA\Response(
@@ -502,84 +636,58 @@ class UserController extends Controller
      * )
      *
      * @param Request $request
-     * @param mixed $id
+     * @param string $id
      *
-     * @return Response
+     * @return JsonResponse
      * @throws ValidationException
      */
-    public function update(Request $request, mixed $id): Response
+    public function update(Request $request, string $id): JsonApiResponse
     {
-        // Validate input
-        $this->validate($request, User::validationRules());
-
-        // Read user model
-        $user = $this->getObject($id);
-        if ($user instanceof JsonApiResponse) {
-            return $user;
+        $validate = Validator::make($request->all(), User::adminUpdateValidateRules());
+            
+        //Validation response
+        if($validate->fails()){
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title' => 'Admin user update',
+                'message' => $validate->errors(),
+                'data' => null
+            ], 400);
         }
 
-        // Try update user data
         try {
-                $validated = $this->validate($request, [
-                    'phone' => "sometimes|integer",
-                    'email' => "required|email|unique:users,email",
-                    'current_password' => 'required_with:password|min:6',
-                    'password' => 'required_with:current_password|confirmed|min:6|max:190',
-                ]);
+            //Get validated input
+            $validated = $validate->validated();
 
-                $user = User::findOrFail($id);
+             $userQuery=User::where('id', $id);
+             
+            if ($userQuery->exists()) {
+                
+                //Update user
+                $user = $userQuery->update($validated);
+                
+                //Send response
+                return response()->jsonApi([
+                    'type' => 'success',
+                    'title' => 'Admin user update',
+                    'message' => "User successfully updated",
+                    'data' => $user
+                ], 200); 
 
-//                // Update data
-//                $user->fill($request->all());
-//                $user->save();
-
-                if (empty($user)) {
-                    throw new Exception("User does not exist!");
-                }
-
-                if (!empty($validated['email']) && ($user->email == $validated['email'])) {
-                    $user->status = User::STATUS_INACTIVE;
-                    $user->verify_token = Str::random(32);
-                    $user->save();
-
-                    PubSub::transaction(function () use ($user) {
-                        $user->save();
-                    })->publish('sendVerificationEmail', [
-                        'email' => $user->email,
-                        'display_name' => $user->display_name,
-                        'verify_token' => $user->verify_token,
-                    ], 'mail');
-
-                } else {
-                    throw new BadRequestHttpException('Invalid credentials');
-                }
-
-
-                if ($request->has('current_password')) {
-                    if (Hash::check($validated['current_password'], $user->password)) {
-                        $validated['password'] = Hash::make($validated['password']);
-                    } else {
-                        throw new BadRequestHttpException('Invalid credentials');
-                    }
-                }
-
-                if (!empty($validated)) {
-                    $user->update($validated);
-                    return response()->jsonApi(["message" => "Updated successfully"], 200);
-                }
-                throw new BadRequestHttpException();
+            }
 
             // Return response to client
             return response()->jsonApi([
-                'type' => 'success',
-                'title' => 'Changing user',
-                'message' => "User successfully updated",
-                'data' => $user->toArray()
-            ], 200);
+                'type' => 'danger',
+                'title' => 'Admin user update',
+                'message' => "User does NOT exist.",
+                'data' => null
+            ], 404);
+
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
-                'title' => 'Change a user',
+                'title' => 'Admin user update',
                 'message' => $e->getMessage(),
                 'data' => null
             ], 400);

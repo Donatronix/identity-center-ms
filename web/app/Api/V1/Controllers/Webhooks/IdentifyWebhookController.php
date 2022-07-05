@@ -5,6 +5,7 @@ namespace App\Api\V1\Controllers\Webhooks;
 use App\Api\V1\Controllers\Controller;
 use App\Models\User;
 use App\Services\IdentityVerification;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;

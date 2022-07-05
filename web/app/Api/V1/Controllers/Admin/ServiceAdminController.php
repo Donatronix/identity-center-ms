@@ -67,32 +67,6 @@ class ServiceAdminController extends Controller
      *     @OA\Response(
      *         response="200",
      *         description="Output data",
-     *
-     *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 description="Admin parameter list",
-     *                 @OA\Property(
-     *                     property="user_id",
-     *                     type="string",
-     *                     description="Admin uuid",
-     *                     example="9443407b-7eb8-4f21-8a5c-9614b4ec1bf9",
-     *                 ),
-     *                 @OA\Property(
-     *                     property="role",
-     *                     type="string",
-     *                     description="Admin role",
-     *                     example="admin",
-     *                 ),
-     *                 @OA\Property(
-     *                     property="service",
-     *                     type="string",
-     *                     description="Microservice",
-     *                     example="waiting-lists-ms",
-     *                 )
-     *             )
-     *         )
      *     ),
      *
      *     @OA\Response(
@@ -107,19 +81,6 @@ class ServiceAdminController extends Controller
      *     @OA\Response(
      *          response="404",
      *          description="Not found",
-     *          @OA\JsonContent(
-     *              type="object",
-     *              @OA\Property(
-     *                  property="user_id",
-     *                  type="string",
-     *                  description="Uuid admin not found"
-     *              ),
-     *              @OA\Property(
-     *                  property="role",
-     *                  type="string",
-     *                  description="Role not found"
-     *              )
-     *          )
      *     ),
      *
      *     @OA\Response(
@@ -270,44 +231,6 @@ class ServiceAdminController extends Controller
      *     @OA\Response(
      *         response="200",
      *         description="Output data",
-     *
-     *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 description="Admin parameter list",
-     *                 @OA\Property(
-     *                     property="id",
-     *                     type="string",
-     *                     description="Admin uuid",
-     *                     example="9443407b-7eb8-4f21-8a5c-9614b4ec1bf9",
-     *                 ),
-     *                 @OA\Property(
-     *                     property="name",
-     *                     type="string",
-     *                     description="Name",
-     *                     example="Vasya",
-     *                 ),
-     *                 @OA\Property(
-     *                     property="email",
-     *                     type="string",
-     *                     description="Admin email",
-     *                     example="sumra chat",
-     *                 ),
-     *                 @OA\Property(
-     *                     property="phone",
-     *                     type="string",
-     *                     description="Admin phone number",
-     *                     example="+445667474124146",
-     *                 ),
-     *                 @OA\Property(
-     *                     property="role",
-     *                     type="string",
-     *                     description="Admin role",
-     *                     example="admin",
-     *                 )
-     *             )
-     *         )
      *     ),
      *
      *     @OA\Response(
@@ -321,20 +244,7 @@ class ServiceAdminController extends Controller
      *
      *     @OA\Response(
      *          response="404",
-     *          description="Not found",
-     *          @OA\JsonContent(
-     *              type="object",
-     *              @OA\Property(
-     *                  property="user_id",
-     *                  type="string",
-     *                  description="Uuid admin not found"
-     *              ),
-     *              @OA\Property(
-     *                  property="role",
-     *                  type="string",
-     *                  description="Role not found"
-     *              )
-     *          )
+     *          description="Not found"
      *     ),
      *
      *     @OA\Response(
@@ -361,8 +271,8 @@ class ServiceAdminController extends Controller
                 if ($validator->fails()) {
                     return response()->jsonApi([
                         'type' => 'danger',
-                        'title' => "Not operation",
-                        'message' => $validator->messages()->toArray(),
+                        'title' => "Admin user update",
+                        'message' => $validator->errors(),
                         'data' => null,
                     ], 404);
                 }
@@ -370,42 +280,53 @@ class ServiceAdminController extends Controller
                 // Retrieve the validated input...
                 $validated = $validator->validated();
 
-                $admin = User::find($validated['user_id']);
-                if (empty($admin)) {
-                    throw new Exception('User does not exist');
+                $adminQuery = User::where('id',$validated['user_id']);
+
+                if ($adminQuery->exists()) {
+                    //Fetch user
+                    $admin = $adminQuery->first();
+                    
+                    //Update user
+                    // $adminQuery->update([
+                    //     'role' => $validated['role'],
+                    //     'service' => $validated['service'],
+                    // ]);
+
+                    //send message
+                    PubSub::transaction(function () {})
+                    ->publish('AdminManagerEvent', [
+                        'admin' => $admin,
+                        'role' => $validated['role'],
+                        'service' => $validated['service'],
+                        'action' => 'update',
+                    ], 'service_admin');
+
+                    return response()->jsonApi([
+                        'type' => 'success',
+                        'title' => 'Admin user update',
+                        'message' => 'Admin user updated successfully',
+                        'data' => null,
+                    ], 200);
                 }
 
-
-                PubSub::transaction(function () {
-
-                })->publish('AdminManagerEvent', [
-                    'admin' => $admin,
-                    'role' => $validated['role'],
-                    'service' => $validated['service'],
-                    'action' => 'update',
-                ], 'service_admin');
+                return response()->jsonApi([
+                    'type' => 'success',
+                    'title' => 'Admin user update',
+                    'message' => 'Admin user does NOT exist',
+                    'data' => null,
+                ], 404);
+                
             });
-        } catch (ModelNotFoundException $e) {
+        
+        } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
-                'title' => "Update failed",
-                'message' => "Admin does not exist",
-                'data' => null,
-            ], 404);
-        } catch (Throwable $e) {
-            return response()->jsonApi([
-                'type' => 'danger',
-                'title' => "Update failed",
+                'title' => "Admin user update",
                 'message' => $e->getMessage(),
                 'data' => null,
             ], 404);
         }
-        return response()->jsonApi([
-            'type' => 'success',
-            'title' => 'Update was a success',
-            'message' => 'Admin was updated successfully',
-            'data' => User::find($request->user_id),
-        ], 200);
+        
     }
 
     /**
@@ -444,44 +365,6 @@ class ServiceAdminController extends Controller
      *     @OA\Response(
      *         response="200",
      *         description="Output data",
-     *
-     *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 description="Admin parameter list",
-     *                 @OA\Property(
-     *                     property="id",
-     *                     type="string",
-     *                     description="Admin uuid",
-     *                     example="9443407b-7eb8-4f21-8a5c-9614b4ec1bf9",
-     *                 ),
-     *                 @OA\Property(
-     *                     property="name",
-     *                     type="string",
-     *                     description="Name",
-     *                     example="Vasya",
-     *                 ),
-     *                 @OA\Property(
-     *                     property="email",
-     *                     type="string",
-     *                     description="Admin email",
-     *                     example="sumra chat",
-     *                 ),
-     *                 @OA\Property(
-     *                     property="phone",
-     *                     type="string",
-     *                     description="Admin phone number",
-     *                     example="+445667474124146",
-     *                 ),
-     *                 @OA\Property(
-     *                     property="role",
-     *                     type="string",
-     *                     description="Admin role",
-     *                     example="admin",
-     *                 )
-     *             )
-     *         )
      *     ),
      *
      *     @OA\Response(
@@ -495,20 +378,7 @@ class ServiceAdminController extends Controller
      *
      *     @OA\Response(
      *          response="404",
-     *          description="Not found",
-     *          @OA\JsonContent(
-     *              type="object",
-     *              @OA\Property(
-     *                  property="user_id",
-     *                  type="string",
-     *                  description="Uuid admin not found"
-     *              ),
-     *              @OA\Property(
-     *                  property="role",
-     *                  type="string",
-     *                  description="Role not found"
-     *              )
-     *          )
+     *          description="Not found"
      *     ),
      *
      *     @OA\Response(

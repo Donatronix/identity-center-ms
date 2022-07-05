@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class AgreementController
@@ -21,7 +22,7 @@ class AgreementController extends Controller
      * Saving the user's acceptance of the agreement
      *
      * @OA\Patch(
-     *     path="/users/agreement",
+     *     path="/user-profile/agreement",
      *     summary="Saving the user's acceptance of the agreement",
      *     description="Saving the user's acceptance of the agreement",
      *     tags={"Users | Agreement"},
@@ -83,14 +84,24 @@ class AgreementController extends Controller
         // Try to save received data
         try {
             // Validate input
-            $this->validate($request, [
-                'is_agreement'
-            ]);
-
+            $input = $request->all();
+            $validate = Validator::make($input, [
+                            'is_agreement'=>'required|boolean'
+                        ]);
+            
+            //Validation response
+            if($validate->fails()){
+                return response()->jsonApi([
+                    'type' => 'danger',
+                    'title' => 'User agreement',
+                    'message' => $validate->errors(),
+                    'data' => null
+                ], 400);
+            }
+            
             // Find exist user
             $user = User::findOrFail(Auth::user()->id);
-            $user->fill($request->all());
-            // $user->status = User::STATUS_STEP_4;
+            $user->fill($input);
             $user->save();
 
             // Return response to client
