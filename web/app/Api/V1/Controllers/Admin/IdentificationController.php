@@ -16,7 +16,9 @@ class IdentificationController extends Controller
      */
     public function index()
     {
-        //
+        return response([
+            'data' => 'Okay'
+        ]);
     }
 
     /**
