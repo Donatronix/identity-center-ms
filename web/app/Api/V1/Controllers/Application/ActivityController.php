@@ -204,6 +204,7 @@ class ActivityController extends Controller
         // transform the request object to add date
             $request->merge([
                 'activity_time' => Carbon::now(),
+                "user_id" => $this->user_id
             ]);
 
         // Try to add new activity

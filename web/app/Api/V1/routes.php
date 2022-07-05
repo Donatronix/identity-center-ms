@@ -64,7 +64,7 @@ $router->group([
         'namespace' => 'Application',
         'middleware' => [
             'checkUser',
-            // 'auth:api'
+            'auth:api'
         ]
     ], function ($router) {
         /**
