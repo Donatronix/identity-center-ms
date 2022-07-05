@@ -18,6 +18,21 @@ $router->group([
         /**
          * OneStep 1.0
          */
+
+                 /**
+         * 2Fa Security
+         */
+
+        $router->group([
+            'prefix'=>'2fa'
+        ], function($router){
+            $router->get('/','TwoFASecurityController@show2faForm');
+            $router->post('/generateSecret','TwoFASecurityController@generate2faSecret');
+            $router->post('/enable2fa','TwoFASecurityController@enable2fa');
+            $router->post('/disable2fa','TwoFASecurityController@disable2fa');
+        });
+
+
         $router->group([
             'prefix' => 'user-account/v1',
             "namespace" => "OneStepId1",
@@ -112,6 +127,7 @@ $router->group([
          * Auth - refresh token
          */
         $router->post('/refresh-token', 'AuthController@refresh');
+
     });
 
     /**
