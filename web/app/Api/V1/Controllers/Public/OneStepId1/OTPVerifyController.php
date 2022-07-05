@@ -19,7 +19,7 @@ class OTPVerifyController extends Controller
      * OTP Code Verify
      *
      * @OA\Post(
-     *     path="/auth/send-code",
+     *     path="/user-account/v1/auth/send-code",
      *     summary="OTP Code Verify",
      *     description="OTP Code Verify",
      *     tags={"OneStep 1.0 | Auth"},

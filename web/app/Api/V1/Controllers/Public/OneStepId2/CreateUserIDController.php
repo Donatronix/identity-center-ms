@@ -19,7 +19,7 @@ class CreateUserIDController extends Controller
      * Create new user for One-Step 2.0
      *
      * @OA\Post(
-     *     path="/user-account/create",
+     *     path="/user-account/v2/create",
      *     summary="Create new user for One-Step 2.0",
      *     description="Verify phone number and handler to create new user for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account"},
@@ -237,7 +237,7 @@ class CreateUserIDController extends Controller
      * Resend OTP for One-Step 2.0
      *
      * @OA\Post(
-     *     path="/user-account/otp/resend",
+     *     path="/user-account/v2/otp/resend",
      *     summary="Resend OTP for One-Step 2.0",
      *     description="Resend OTP to create new user for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account"},
@@ -363,7 +363,7 @@ class CreateUserIDController extends Controller
      * Verify new user OTP for One-Step 2.0
      *
      * @OA\Post(
-     *     path="/user-account/otp/verify",
+     *     path="/user-account/v2/otp/verify",
      *     summary="Verify new user OTP for One-Step 2.0",
      *     description="Verify phone number or handler to create new user for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account"},
@@ -474,7 +474,7 @@ class CreateUserIDController extends Controller
      * Create new user for One-Step 2.0
      *
      * @OA\Post(
-     *     path="/user-account/update",
+     *     path="/user-account/v2/update",
      *     summary="Update new user personal info",
      *     description="Update new user for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account"},
@@ -635,7 +635,7 @@ class CreateUserIDController extends Controller
      * Save new user recovery questions for One-Step 2.0
      *
      * @OA\Post(
-     *     path="/user-account/update/recovery",
+     *     path="/user-account/v2/update/recovery",
      *     summary="Update new user recovery questions",
      *     description="Update new user recovery questions for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account"},

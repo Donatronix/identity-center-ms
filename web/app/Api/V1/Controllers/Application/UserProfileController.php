@@ -91,7 +91,17 @@ class UserProfileController extends Controller
         // Try to save received data
         try {
             // Validate input
-            $this->validate($request, User::personValidationRules());
+           $validate = Validator::make($request->all(), User::userValidationRules());
+            
+            //Validation response
+            if($validate->fails()){
+                return response()->jsonApi([
+                    'type' => 'danger',
+                    'title' => 'New user registration',
+                    'message' => $validate->errors(),
+                    'data' => null
+                ], 400);
+            }
 
             // Find exist user
             $user = User::findOrFail(Auth::user()->id);
@@ -114,14 +124,7 @@ class UserProfileController extends Controller
                 'message' => "User person detail data successfully saved",
                 'data' => $user->toArray()
             ], 200);
-        } catch (ValidationException $e) {
-            return response()->jsonApi([
-                'type' => 'warning',
-                'title' => 'User person details data',
-                'message' => "Validation error",
-                'data' => $e->getMessage()
-            ], 400);
-        } catch (Exception $e) {
+        }  catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'Saving user personal data',
@@ -320,10 +323,9 @@ class UserProfileController extends Controller
      *          in="path",
      *          name="id",
      *          required=true,
-     *          example="1",
+     *          example="96b47d3c-8197-4965-811b-74d04247d4f9",
      *          @OA\Schema(
-     *              type="integer",
-     *              format="int64"
+     *              type="string"
      *          )
      *     ),
      *
@@ -459,12 +461,12 @@ class UserProfileController extends Controller
      * )
      *
      * @param Request $request
-     * @param int $id
+     * @param string $id
      *
      * @return Response
      * @throws ValidationException
      */
-    public function update(Request $request, int $id): JsonApiResponse
+    public function update(Request $request, string $id): JsonApiResponse
     {
         try {
             //validate input date
@@ -491,15 +493,15 @@ class UserProfileController extends Controller
                 ], 'mail');
             }
 
-//        $update = $request->except(['password']);
-//
-//        if ($request->has('current_password')) {
-//            if (Hash::check($request->current_password, $user->password)) {
-//                $update['password'] = Hash::make($request->password);
-//            } else {
-//                throw new BadRequestHttpException('Invalid current_password');
-//            }
-//        }
+    //    $update = $request->except(['password']);
+
+    //    if ($request->has('current_password')) {
+    //        if (Hash::check($request->current_password, $user->password)) {
+    //            $update['password'] = Hash::make($request->password);
+    //        } else {
+    //            throw new BadRequestHttpException('Invalid current_password');
+    //        }
+    //    }
 
             // Send notification email
             $subject = 'Change Username';

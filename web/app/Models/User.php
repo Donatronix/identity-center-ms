@@ -341,14 +341,12 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
             'address_line1' => 'required|string|max:150',
             'address_line2' => 'sometimes|nullable|string|max:100',
             'address_city' => 'sometimes|string|max:50',
-            'address_zip' => 'required|string|max:10',
-//            'current_password' => 'required_with:password|min:6',
-//            'password' => 'required_with:current_password|confirmed|min:6|max:190',
+            'address_zip' => 'required|string|max:10'
         ];
     }
 
     /**
-     * @return string[]
+     * @return array
      */
     public static function personValidationRules2(): array
     {
@@ -366,7 +364,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     /**
      * Validation rules for identity verification
      *
-     * @return string[]
+     * @return array
      */
     public static function identifyValidationRules(): array
     {
@@ -421,13 +419,33 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
             'email' => 'required|email',
             'phone' => 'required|string',
             'gender' => 'required|string',
-            'birthday' => 'required|string',
             'username' => 'required|string',
             'birthday' => 'required|date_format:Y-m-d',
             'address_country' => 'required|string|max:3',
             'address_line1' => 'required|string|max:150',
             'address_line2' => 'string|max:100',
             'address_city' => 'required|string|max:50',
+            'address_zip' => 'required|string|max:15'
+        ];
+    }
+
+     /**
+     * Validation rules for admin new user
+     *
+     * @return array
+     */
+    public static function userValidationRules(): array
+    {
+        return [
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|string',
+            'phone' => 'required|string',
+            'username' => 'required|string',
+            'birthday' => 'required|date_format:Y-m-d',
+            'address_country' => 'required|string|max:3',
+            'address_line1' => 'required|string|max:150',
+            'address_line2' => 'string|max:100',
             'address_zip' => 'required|string|max:15'
         ];
     }
