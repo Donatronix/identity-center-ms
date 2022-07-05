@@ -30,31 +30,37 @@ class ServiceAdminController extends Controller
      *              "ManagerWrite"
      *          },
      *     }},
+     * 
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
      *
-     *     @OA\Parameter(
-     *         name="user_id",
-     *         in="query",
-     *         description="User id of admin",
-     *         @OA\Schema(
-     *             type="string"
-     *         )
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="role",
-     *         in="query",
-     *         description="Admin role",
-     *         @OA\Schema(
-     *             type="string"
-     *         )
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="service",
-     *         in="query",
-     *         description="Microservice Admin",
-     *         @OA\Schema(
-     *             type="string"
+     *              @OA\Property(
+     *                 property="role",
+     *                 type="string",
+     *                 description="Admin role",
+     *                 required={"true"},
+     *                 example="admin"
+     *             ),
+     *              @OA\Property(
+     *                 property="service",
+     *                 type="string",
+     *                 description="Microservice Admin",
+     *                 example="keiland"
+     *             ),
+     *             @OA\Property(
+     *                 property="email",
+     *                 type="string",
+     *                 description="Admin email",
+     *                 example="kiels@ultainfinity.com"
+     *             ),
+     *             @OA\Property(
+     *                 property="phone",
+     *                 type="string",
+     *                 description="Admin phone number",
+     *                 example="+448494840383"
+     *             )
      *         )
      *     ),
      *
@@ -84,9 +90,9 @@ class ServiceAdminController extends Controller
      *                     type="string",
      *                     description="Microservice",
      *                     example="waiting-lists-ms",
-     *                 ),
-     *             ),
-     *         ),
+     *                 )
+     *             )
+     *         )
      *     ),
      *
      *     @OA\Response(
@@ -112,14 +118,14 @@ class ServiceAdminController extends Controller
      *                  property="role",
      *                  type="string",
      *                  description="Role not found"
-     *              ),
-     *          ),
+     *              )
+     *          )
      *     ),
      *
      *     @OA\Response(
      *         response="500",
      *         description="Unknown error"
-     *     ),
+     *     )
      * )
      *
      * @param Request $request
@@ -130,62 +136,79 @@ class ServiceAdminController extends Controller
     {
         try {
             $admin = null;
-            DB::transaction(function () use ($request, &$admin) {
-                $validator = Validator::make($request->all(), [
-                    'user_id' => 'required|string|exists:users,id',
-                    'role' => 'required|string|exists:roles,name',
-                    'service' => 'required|string',
-                ]);
+           
+            $validator = Validator::make($request->all(), [
+                'role' => 'required|string|exists:roles,name',
+                'service' => 'required|string',
+                'phone' => 'required|string',
+                'email' => 'required|string|email',
+            ]);
 
-                if ($validator->fails()) {
-                    return response()->jsonApi([
-                        'type' => 'danger',
-                        'title' => "Invalid data",
-                        'message' => $validator->messages()->toArray(),
-                        'data' => null,
-                    ], 404);
-                }
+            if ($validator->fails()) {
+                return response()->jsonApi([
+                    'type' => 'danger',
+                    'title' => "Add new admin",
+                    'message' => $validator->messages()->toArray(),
+                    'data' => null,
+                ], 404);
+            }
 
-                // Retrieve the validated input...
-                $validated = $validator->validated();
+            // Retrieve the validated input...
+            $input = $validator->validated();
 
-                $admin = User::find($validated['user_id']);
-                if (empty($admin)) {
-                    throw new Exception('User does not exist');
-                }
+            $adminQuery = User::where('email', $input['email']);
 
+            if ($adminQuery->doesntExist()) {
+                //Save new admin
+                User::create($input);
 
-                PubSub::transaction(function () use ($validated, &$admin) {
-                    $admin = User::find($validated['user_id']);
+                //Send message
+                PubSub::transaction(function () use ($adminQuery, $input, &$admin) {
+                    $admin = $adminQuery->first();
                 })->publish('AdminManagerEvent', [
                     'admin' => $admin,
-                    'role' => $validated['role'],
-                    'service' => $validated['service'],
+                    'role' => $input['role'],
+                    'service' => $input['service'],
                     'action' => 'store',
                 ], 'service_admin');
 
-            });
+                $respData = $adminQuery->first();
+                
+                return response()->jsonApi([
+                    'type' => 'success',
+                    'title' => 'Add new admin',
+                    'message' => 'Admin role was updated successfully',
+                    'data' => [
+                        'user_id'=>$respData['id'],
+                        'role'=>$respData['role'],
+                        'service'=>$respData['service']
+                    ]
+                ], 200);
+            }
+
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title' => "Add new admin",
+                'message' => "Admin already exist. Please try again.",
+                'data' => null,
+            ], 400);
+  
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'type' => 'danger',
-                'title' => "Not operation",
+                'title' => "Add new admin",
                 'message' => "Admin was not added. Please try again.",
                 'data' => null,
             ], 404);
         } catch (Throwable $e) {
             return response()->jsonApi([
                 'type' => 'danger',
-                'title' => "Operation failed",
+                'title' => "Add new admin",
                 'message' => $e->getMessage(),
                 'data' => null,
             ], 404);
         }
-        return response()->jsonApi([
-            'type' => 'success',
-            'title' => 'Operation was a success',
-            'message' => 'Admin role was updated successfully',
-            'data' => $admin->toArray(),
-        ], 200);
+        
     }
 
     /**
@@ -204,28 +227,43 @@ class ServiceAdminController extends Controller
      *          },
      *     }},
      *
-     *     @OA\Parameter(
-     *         name="role",
-     *         in="query",
-     *         description="Admin role",
-     *         @OA\Schema(
-     *             type="string"
-     *         ),
-     *     ),
-     *     @OA\Parameter(
-     *         name="user_id",
-     *         in="query",
-     *         description="Admin user id",
-     *         @OA\Schema(
-     *             type="string"
-     *         ),
-     *     ),     *
-     *     @OA\Parameter(
-     *         name="service",
-     *         in="query",
-     *         description="Microservice Admin",
-     *         @OA\Schema(
-     *             type="string"
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *
+     *              @OA\Property(
+     *                 property="user_id",
+     *                 type="string",
+     *                 description="Admin user ID",
+     *                 required={"true"},
+     *                 example="admin9443407b-7eb8-4f21-8a5c-9614b4ec1bf9"
+     *             ),
+     *             @OA\Property(
+     *                 property="role",
+     *                 type="string",
+     *                 description="Admin role",
+     *                 required={"true"},
+     *                 example="admin"
+     *             ),
+     *              @OA\Property(
+     *                 property="service",
+     *                 type="string",
+     *                 description="Microservice Admin",
+     *                 example="keiland"
+     *             ),
+     *             @OA\Property(
+     *                 property="email",
+     *                 type="string",
+     *                 description="Admin email",
+     *                 example="kiels@ultainfinity.com"
+     *             ),
+     *             @OA\Property(
+     *                 property="phone",
+     *                 type="string",
+     *                 description="Admin phone number",
+     *                 example="+448494840383"
+     *             )
      *         )
      *     ),
      *
@@ -267,9 +305,9 @@ class ServiceAdminController extends Controller
      *                     type="string",
      *                     description="Admin role",
      *                     example="admin",
-     *                 ),
-     *             ),
-     *         ),
+     *                 )
+     *             )
+     *         )
      *     ),
      *
      *     @OA\Response(
@@ -295,14 +333,14 @@ class ServiceAdminController extends Controller
      *                  property="role",
      *                  type="string",
      *                  description="Role not found"
-     *              ),
-     *          ),
+     *              )
+     *          )
      *     ),
      *
      *     @OA\Response(
      *         response="500",
      *         description="Unknown error"
-     *     ),
+     *     )
      * )
      *
      * @param Request $request
@@ -383,7 +421,7 @@ class ServiceAdminController extends Controller
      *              "ManagerRead",
      *              "Admin",
      *              "ManagerWrite"
-     *          },
+     *          }
      *     }},
      *
      *     @OA\Parameter(
@@ -392,8 +430,8 @@ class ServiceAdminController extends Controller
      *         description="Admin user id",
      *         @OA\Schema(
      *             type="string"
-     *         ),
-     *     ),     *
+     *         )
+     *     ),     
      *     @OA\Parameter(
      *         name="service",
      *         in="query",
@@ -441,9 +479,9 @@ class ServiceAdminController extends Controller
      *                     type="string",
      *                     description="Admin role",
      *                     example="admin",
-     *                 ),
-     *             ),
-     *         ),
+     *                 )
+     *             )
+     *         )
      *     ),
      *
      *     @OA\Response(
@@ -469,14 +507,14 @@ class ServiceAdminController extends Controller
      *                  property="role",
      *                  type="string",
      *                  description="Role not found"
-     *              ),
-     *          ),
+     *              )
+     *          )
      *     ),
      *
      *     @OA\Response(
      *         response="500",
      *         description="Unknown error"
-     *     ),
+     *     )
      * )
      *
      * @param Request $request

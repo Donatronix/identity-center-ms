@@ -137,9 +137,9 @@ class UserController extends Controller
      *                     type="string",
      *                     description="User status",
      *                     example="1",
-     *                 ),
-     *             ),
-     *         ),
+     *                 )
+     *             )
+     *         )
      *     ),
      *
      *     @OA\Response(
@@ -388,6 +388,17 @@ class UserController extends Controller
      *             "ManagerWrite"
      *         }
      *     }},
+     * 
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="User Id",
+     *         example="0aa06e6b-35de-3235-b925-b0c43f8f7c75",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="string"
+     *         )
+     *     ),
      *
      *     @OA\Response(
      *         response="200",
@@ -418,45 +429,30 @@ class UserController extends Controller
      * )
      *
      * @param mixed $id
-     * @param Request $request
      *
      * @return mixed
      */
-    public function show(Request $request, mixed $id): mixed
+    public function show(string $id): mixed
     {
-        $builder = User::where('id', $id);
-        //$builder = User::where('id', Auth::user()->id);
+        try {
+          
+            $user = User::where('id', $id)->firstOrFail();
 
-        $user = new User();
-        if ($includes = $request->get('include')) {
-            foreach (explode(',', $includes) as $include) {
-                if (method_exists($user, $include) && $user->{$include}() instanceof Relation) {
-                    $builder->with($include);
-                }
-            }
+            return response()->jsonApi([
+                'type' => 'success',
+                'title' => 'User details',
+                'message' => "user details received",
+                'data' => $user->toArray()
+            ], 200);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title' => "User details",
+                'message' => "Unable to receive user details",
+                'data' => null,
+            ], 404);
         }
-
-        $user = $builder->firstOrFail();
-
-        //$user = User::where('id', $id)->first();
-        // TODO maybe we need to return public user data for everyone and secure user data for user
-        //if (Auth::id() == $user->id) {
-        //    return $user;
-        //}
-
-        // Get object
-//        $user = $this->getObject($id);
-//
-//        if ($user instanceof JsonApiResponse) {
-//            return $user;
-//        }
-
-        return response()->jsonApi([
-            'type' => 'success',
-            'title' => 'User details',
-            'message' => "user details received",
-            'data' => $user->toArray()
-        ], 200);
     }
 
     /**
@@ -693,7 +689,7 @@ class UserController extends Controller
      * Verify User
      *
      * @OA\Post(
-     *     path="/admin/verify",
+     *     path="/admin/users/verify",
      *     summary="Create new user",
      *     description="Create new user",
      *     tags={"Admin | Users"},
@@ -778,7 +774,7 @@ class UserController extends Controller
      * Send verification email
      *
      * @OA\Post(
-     *     path="/admin/verify/send",
+     *     path="/admin/users/verify/send",
      *     summary="Create new user",
      *     description="Create new user",
      *     tags={"Admin | Users"},
