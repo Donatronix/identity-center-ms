@@ -63,13 +63,13 @@ class IdentificationController extends Controller
         return response()->json([
             'type' => 'success',
             'title' => 'Get KYC',
-            'message' => 'Submitted KYCs',
+            'message' => 'Pending Submitted KYCs',
             'data' => $kycs
         ], 200);
     }
 
     /**
-     * Method for Approving for Rejecting KYC
+     * Endpoint for Approving OR Rejecting KYC
      *
      * @OA\Put(
      *     path="/admin/kyc/{id}",
@@ -137,17 +137,19 @@ class IdentificationController extends Controller
             $kyc->status = $request->status;
             $kyc->save();
 
-
             /**
              * Notify User
              *
              */
-            $user = User::find($kyc->user_id);
-            PubSub::publish("KYC" . $request->status, [
-                'email' => $user->email,
-                'display_name' => $user->display_name,
-                'kyc' => $kyc,
-            ], 'mail');
+            try {
+                $user = User::find($kyc->user_id);
+                \PubSub::publish("KYC" . $request->status, [
+                    'email' => $user->email,
+                    'display_name' => $user->display_name,
+                    'kyc' => $kyc,
+                ], 'mail');
+            }
+            catch (\Throwable $th) {}
 
             return response()->json([
                 'type' => 'success',

@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
 use Sumra\SDK\JsonApiResponse;
 use Sumra\SDK\PubSub;
 
@@ -538,7 +539,7 @@ class UserProfileController extends Controller
      * Validate the verification code and update phone number
      *
      * @OA\Put(
-     *     path="/user-profile/update-phone",
+     *     path="/user-profile/update/phone",
      *     summary="Update current user's phone number",
      *     description="Validate the verification code and update phone number of the current user",
      *     tags={"User Profile"},
@@ -986,7 +987,7 @@ class UserProfileController extends Controller
      *
      * @return JsonResponse
      */
-    public function verify_email(Request $request): JsonApiResponse
+    public function verifyEmail(Request $request): JsonApiResponse
     {
         $this->validate($request, [
             'email' => "required|email",

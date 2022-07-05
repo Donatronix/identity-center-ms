@@ -62,10 +62,10 @@ $router->group([
      */
     $router->group([
         'namespace' => 'Application',
-        // 'middleware' => [
-        //     'checkUser',
-        //     'auth:api'
-        // ]
+        'middleware' => [
+            'checkUser',
+            'auth:api'
+        ]
     ], function ($router) {
         /**
          * User Profile
@@ -84,6 +84,12 @@ $router->group([
             $router->post('/verify-email-send', 'UserProfileController@verify_email');
             $router->post('/validate-edit-phone', 'UserProfileController@validateEditPhoneNumber');
             $router->post('/validate-edit-email', 'UserProfileController@validateEditEmail');
+
+            /**
+             * User Agreement
+             */
+            $router->patch('/agreement', "AgreementController");
+
         });
 
         /**
@@ -112,6 +118,7 @@ $router->group([
          * Auth - refresh token
          */
         $router->post('/refresh-token', 'AuthController@refresh');
+
     });
 
     /**
@@ -123,8 +130,8 @@ $router->group([
         'prefix' => 'admin',
         'namespace' => 'Admin',
         'middleware' => [
-            // 'checkUser',
-            //'checkAdmin'
+            'checkUser',
+            'checkAdmin'
         ]
     ], function ($router) {
 
@@ -146,14 +153,15 @@ $router->group([
         ], function () use ($router) {
             $router->get('/', 'UserController@index');
             $router->post('/', 'UserController@store');
+            $router->post('add', 'UserController@addUser');
             $router->get('/{id:[a-fA-F0-9\-]{36}}', 'UserController@show');
             $router->delete('/{id:[a-fA-F0-9\-]{36}}', 'UserController@destroy');
 
             $router->get('/', 'UserController@index');
             $router->post('/', 'UserController@store');
             $router->get('/{id:[a-fA-F0-9\-]{36}}', 'UserController@show');
-            $router->put('/{id:[a-fA-F0-9\-]{36}}', 'UserController@update');
-            $router->patch('/{id:[a-fA-F0-9\-]{36}}', 'UserController@approve');
+            $router->put('/update/{id:[a-fA-F0-9\-]{36}}', 'UserController@update');
+            $router->patch('/approve/{id:[a-fA-F0-9\-]{36}}', 'UserController@approve');
             $router->delete('/{id:[a-fA-F0-9\-]{36}}', 'UserController@destroy');
             $router->post('/verify', 'UserController@verify');
             $router->post('/verify/send', 'UserController@verifyEmail');

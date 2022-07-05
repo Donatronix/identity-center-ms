@@ -134,7 +134,7 @@ class IdentificationController extends Controller
      *     path="/user-identity",
      *     summary="Saving user identity data",
      *     description="Saving user identity data",
-     *     tags={"User Identity"},
+     *     tags={"User | KYC"},
      *
      *     security={{
      *         "default": {
