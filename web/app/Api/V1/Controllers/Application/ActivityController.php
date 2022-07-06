@@ -21,7 +21,7 @@ class ActivityController extends Controller
     public function __construct(Activity $model)
     {
         $this->model = $model;
-        $this->user_id = auth()->user()->getAuthIdentifier();
+        $this->user_id = auth()->user()->id;
     }
 
     /**
@@ -156,6 +156,7 @@ class ActivityController extends Controller
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/Activity")
      *     ),
+     * 
      *     @OA\Response(
      *         response="200",
      *         description="Successfully save"
