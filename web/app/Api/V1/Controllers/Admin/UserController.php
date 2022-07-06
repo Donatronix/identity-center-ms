@@ -181,7 +181,17 @@ class UserController extends Controller
             $type = $request->type;
             if (!$type || strtolower($type) == 'all') {
                 $users = User::paginate($request->get('limit', config('settings.pagination_limit')));
-            } else {
+            }
+            else {
+
+                /**
+                 *
+                 */
+                if (!in_array(ucfirst($request->type), User::$types)) {
+                    throw new \Exception("User Type not allowed", 400);
+                }
+                Role::firstOrCreate(['name' => $request->type]);
+
                 $users = User::role($type)
                     ->paginate($request->get('limit', config('settings.pagination_limit')));
             }
@@ -190,7 +200,7 @@ class UserController extends Controller
             return response()->jsonApi([
                 'type' => 'success',
                 'title' => 'Users list',
-                'message' => 'List of users users successfully received',
+                'message' => 'List of users successfully received',
                 'data' => $users->toArray()
             ], 200);
         } catch (Exception $e) {
@@ -754,8 +764,6 @@ class UserController extends Controller
      *     )
      * )
      *
-     * Remove the specified resource from storage.
-     *
      * @param mixed $id
      *
      * @return mixed
@@ -1050,7 +1058,7 @@ class UserController extends Controller
      *                 description="Default Password",
      *                 required={"true"},
      *                 example="password"
-     *             )
+     *             ),
      *             @OA\Property(
      *                 property="user_type",
      *                 type="string",
@@ -1109,7 +1117,7 @@ class UserController extends Controller
             $input['verify_token'] = Str::random(32);
             $input['password'] = Hash::make($input['password']);
 
-            $user = User::where('username', 'domain')->first();
+            $user = User::create($input);
             $user->roles()->sync($role->id);
 
             /**
@@ -1138,7 +1146,7 @@ class UserController extends Controller
 
             return response()->json([
                 'type' => 'danger',
-                'title' => 'KYC Response',
+                'title' => 'Add user account',
                 'message' => $e->getMessage(),
             ], 500);
         }
