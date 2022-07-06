@@ -19,7 +19,7 @@ class UserInfoRecoveryController extends Controller
      * User account recovery information for One-Step 2.0
      *
      * @OA\Post(
-     *     path="/user-account/recovery/userinfo",
+     *     path="/user-account/v2/recovery/userinfo",
      *     summary="Recover user account for One-Step 2.0",
      *     description="Receive user account recovery info for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account Recovery"},
@@ -206,7 +206,7 @@ class UserInfoRecoveryController extends Controller
             return response()->jsonApi([
                 'type' => 'danger',
                 'message' => "Unable to send token for verification. Try again.",
-                "data" => $e->getMessage
+                "data" => $e->getMessage()
             ], 400);
         }
 
@@ -216,7 +216,7 @@ class UserInfoRecoveryController extends Controller
      * Verify user account OTP for One-Step 2.0
      *
      * @OA\Post(
-     *     path="/user-account/recovery/otp/verify",
+     *     path="/user-account/v2/recovery/otp/verify",
      *     summary="Recover user account for One-Step 2.0",
      *     description="Verify phone number or handler to recover user account for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account Recovery"},
@@ -320,7 +320,7 @@ class UserInfoRecoveryController extends Controller
      * Verify user account recovery questions for One-Step 2.0
      *
      * @OA\Post(
-     *     path="/user-account/recovery/questions",
+     *     path="/user-account/v2/recovery/questions",
      *     summary="Get user account recovery questions",
      *     description="Verify user account recovery questions for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account Recovery"},
@@ -464,7 +464,7 @@ class UserInfoRecoveryController extends Controller
      * Send user account recovered ID for One-Step 2.0
      *
      * @OA\Post(
-     *     path="/user-account/recovery/sendid",
+     *     path="/user-account/v2/recovery/sendid",
      *     summary="User account recovered ID",
      *     description="Send user account recovered ID for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account Recovery"},

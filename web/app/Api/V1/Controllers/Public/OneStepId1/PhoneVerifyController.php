@@ -20,7 +20,7 @@ class PhoneVerifyController extends Controller
      * Verify phone and send sms
      *
      * @OA\Post(
-     *     path="/auth/send-phone",
+     *     path="/user-account/v1/auth/send-phone",
      *     summary="Verify phone and send sms",
      *     description="Verify phone and send sms",
      *     tags={"OneStep 1.0 | Auth"},

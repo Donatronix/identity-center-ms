@@ -19,7 +19,7 @@ $router->group([
          * OneStep 1.0
          */
         $router->group([
-            'prefix' => 'user-account/v1',
+            'prefix' => 'user-account/v1/auth',
             "namespace" => "OneStepId1",
         ], function ($router) {
             $router->post('/send-phone', "PhoneVerifyController");
@@ -131,7 +131,7 @@ $router->group([
         /**
          * Auth - refresh token
          */
-        $router->post('/refresh-token', 'AuthController@refresh');
+        $router->post('/auth/refresh-token', 'AuthController@refresh');
 
         /**
          * Activities
