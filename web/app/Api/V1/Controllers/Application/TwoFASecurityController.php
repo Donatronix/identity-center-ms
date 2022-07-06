@@ -135,17 +135,18 @@ class TwoFASecurityController extends Controller
 
             return response()->jsonApi([
                 "type" => "success",
+                'title' => 'Generating 2FA qr-code image',
                 "message" => "Image generated",
                 "data" => $data
             ], 200);
         } catch (\Throwable $th) {
             return response()->jsonApi([
                 "type" => "danger",
+                'title' => 'Generating 2FA qr-code image',
                 "message" => $th->getMessage(),
                 "data" => null
             ], 500);
         }
-
     }
 
     /**
@@ -231,12 +232,14 @@ class TwoFASecurityController extends Controller
 
             return response()->jsonApi([
                 "type" => "success",
+                'title' => 'Generating 2FA secret',
                 "message" => "Secret key is generated.",
                 "data" => $login_security
             ], 200);
         } catch (\Throwable $th) {
             return response()->jsonApi([
                 "type" => "danger",
+                'title' => 'Generating 2FA secret',
                 "message" => $th->getMessage(),
                 "data" => null
             ], 500);
@@ -326,12 +329,14 @@ class TwoFASecurityController extends Controller
             $user->loginSecurity->save();
             return response()->jsonApi([
                 "type" => "success",
+                'title' => 'Enabling 2FA',
                 "message" => '2FA is enabled successfully',
                 "data" => null
             ], 200);
         }else{
             return response()->jsonApi([
                 "type" => "danger",
+                'title' => 'Enabling 2FA',
                 "message" => 'Invalid verification Code, Please try again.',
                 "data" => null
             ], 500);
@@ -407,12 +412,12 @@ class TwoFASecurityController extends Controller
      * @throws ValidationException
      */
     public function disable2fa(Request $request){
-
         try {
             if (!(Hash::check($request->get('current-password'), Auth::user()->password))) {
                 // The passwords matches
                 return response()->jsonApi([
                     "type" => "danger",
+                    'title' => 'Disabling 2FA',
                     "message" => 'Your password does not matches with your account password. Please try again.',
                     "data" => null
                 ], 403);
@@ -428,13 +433,14 @@ class TwoFASecurityController extends Controller
 
             return response()->jsonApi([
                 "type" => "success",
+                'title' => 'Disabling 2FA',
                 "message" => '2FA is now disabled.',
                 "data" => null
             ], 200);
-
         } catch (\Throwable $th) {
             return response()->jsonApi([
                 "type" => "danger",
+                'title' => 'Disabling 2FA',
                 "message" => $th->getMessage(),
                 "data" => null
             ], 403);
