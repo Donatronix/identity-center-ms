@@ -235,7 +235,7 @@ class IdentificationController extends Controller
              *
              */
             $data = $request->all();
-            $data['user_id'] = Auth::user()->id;
+            $data['user_id'] = $request->header('user-id');
 
             $kyc = KYC::create($data);
             return response()->jsonApi([

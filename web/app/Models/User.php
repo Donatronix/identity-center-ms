@@ -240,7 +240,15 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     const SUPER_USER = 'Super';
     const STAFF_USER = 'Staff';
     const CLIENT_USER = 'Client';
-    const CLIENT_INVESTOR = 'Investor';
+    const INVESTOR_USER = 'Investor';
+
+    public static array $types = [
+        self::ADMIN_USER,
+        self::SUPER_USER,
+        self::STAFF_USER,
+        self::CLIENT_USER,
+        self::INVESTOR_USER
+    ];
 
     /**
      * @var string[]
