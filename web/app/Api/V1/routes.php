@@ -18,8 +18,6 @@ $router->group([
         /**
          * OneStep 1.0
          */
-
-
         $router->group([
             'prefix' => 'user-account/v1',
             "namespace" => "OneStepId1",
@@ -129,6 +127,16 @@ $router->group([
          */
         $router->post('/refresh-token', 'AuthController@refresh');
 
+        /**
+         * Activities
+        */
+        $router->group([
+            'prefix' => 'activities',
+        ], function ($router) {
+            $router->post('/', "ActivityController@store");
+            $router->get('/', "ActivityController@index");
+            $router->delete('/{id:[a-fA-F0-9\-]{36}}', "ActivityController@destroy");
+        });
     });
 
     /**

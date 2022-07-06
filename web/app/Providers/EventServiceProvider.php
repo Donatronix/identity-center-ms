@@ -17,6 +17,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         'getUserByPhone' => [
             'App\Listeners\GetUserByPhoneListener'
+        ],
+        'logActivity' => [
+            'App\Listeners\ActivityLogListener'
         ]
     ];
 
