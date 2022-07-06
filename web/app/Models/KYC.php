@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Sumra\SDK\Traits\UuidTrait;
 
-
 /**
  * KYC Schema
  *
@@ -19,30 +18,30 @@ use Sumra\SDK\Traits\UuidTrait;
  *         type="string",
  *         description="National identification number",
  *     ),
-*      @OA\Property(
-*          property="number",
-*          type="integer",
-*          description="Document number",
-*          example="FG1452635"
-*      ),
-*      @OA\Property(
-*          property="country",
-*          type="string",
-*          description="Document country",
-*          example=""
-*      ),
-*      @OA\Property(
-*          property="type",
-*          type="string",
-*          description="Document type (1 = PASSPORT, 2 = ID_CARD, 3 = DRIVERS_LICENSE, 4 = RESIDENCE_PERMIT)",
-*          example="1"
-*      ),
-*      @OA\Property(
-*          property="file",
-*          type="string",
-*          description="Document file",
-*          example=""
-*      )
+ *      @OA\Property(
+ *          property="number",
+ *          type="integer",
+ *          description="Document number",
+ *          example="FG1452635"
+ *      ),
+ *      @OA\Property(
+ *          property="country",
+ *          type="string",
+ *          description="Document country",
+ *          example=""
+ *      ),
+ *      @OA\Property(
+ *          property="type",
+ *          type="string",
+ *          description="Document type (1 = PASSPORT, 2 = ID_CARD, 3 = DRIVERS_LICENSE, 4 = RESIDENCE_PERMIT)",
+ *          example="1"
+ *      ),
+ *      @OA\Property(
+ *          property="file",
+ *          type="string",
+ *          description="Document file",
+ *          example=""
+ *      )
  * )
  */
 class KYC extends Model
@@ -88,7 +87,6 @@ class KYC extends Model
         3 => self::DOCUMENT_TYPES_DRIVERS_LICENSE,
         4 => self::DOCUMENT_TYPES_RESIDENCE_PERMIT
     ];
-
 
     /**
      * Validation rules
