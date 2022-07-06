@@ -25,7 +25,7 @@ class CreateUsersTable extends Migration
             $table->string('username', 25)->nullable()->unique();
             $table->enum('gender', [null, 'm', 'f'])->nullable();
             $table->date('birthday')->nullable();
-            $table->unsignedBigInteger('phone')->unique();
+            $table->unsignedBigInteger('phone')->nullable()->unique();
             $table->string('email', 150)->nullable()->unique();
             $table->string('avatar')->nullable();
             $table->string('locale')->nullable();

@@ -9,6 +9,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use App\Models\KYC;
 
 /**
  * Class IdentificationController
@@ -17,6 +18,7 @@ use Illuminate\Validation\ValidationException;
  */
 class IdentificationController extends Controller
 {
+
     /**
      * Initialize identity verification session
      *
@@ -132,7 +134,7 @@ class IdentificationController extends Controller
      *     path="/user-identity",
      *     summary="Saving user identity data",
      *     description="Saving user identity data",
-     *     tags={"User Identity"},
+     *     tags={"User | KYC"},
      *
      *     security={{
      *         "default": {
@@ -144,7 +146,7 @@ class IdentificationController extends Controller
      *
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/UserIdentify")
+     *         @OA\JsonContent(ref="#/components/schemas/KYC")
      *     ),
      *     @OA\Response(
      *         response="200",
@@ -180,12 +182,14 @@ class IdentificationController extends Controller
      *
      * @return mixed
      */
-    public function post(Request $request): mixed
+    public function store(Request $request): mixed
     {
         // Validate input
         try {
-            $this->validate($request, User::identifyValidationRules());
-        } catch (ValidationException $e) {
+            $this->validate(
+                $request, KYC::validationRules());
+        }
+        catch (ValidationException $e) {
             return response()->jsonApi([
                 'type' => 'warning',
                 'title' => 'User data identification',
@@ -197,15 +201,15 @@ class IdentificationController extends Controller
         // Try to save received document data
         try {
             // Find existing user
-            $user = User::find(Auth::user()->id);
-            if (!$user) {
-                return response()->jsonApi([
-                    'type' => 'danger',
-                    'title' => "Get user",
-                    'message' => "User with id #" . Auth::user()->id . " not found!",
-                    'data' => '',
-                ], 404);
-            }
+            // $user = User::find(Auth::user()->id);
+            // if (!$user) {
+            //     return response()->jsonApi([
+            //         'type' => 'danger',
+            //         'title' => "Get user",
+            //         'message' => "User with id #" . Auth::user()->id . " not found!",
+            //         'data' => '',
+            //     ], 404);
+            // }
 
 //            // Find exist user
 //            $user = $this->getObject(Auth::user()->getAuthIdentifier());
@@ -214,30 +218,37 @@ class IdentificationController extends Controller
 //            }
 
             // Transform data and save
-            $identifyData = $request->all();
-            foreach ($identifyData['document'] as $key => $value) {
-                $identifyData['document_' . $key] = $value;
-            }
-            unset($identifyData['document']);
+            // $identifyData = $request->all();
+            // foreach ($identifyData['document'] as $key => $value) {
+            //     $identifyData['document_' . $key] = $value;
+            // }
+            // unset($identifyData['document']);
 
-            $user->fill($identifyData);
-            $user->status = User::STATUS_ACTIVE;
-            // $user->status = User::STATUS_STEP_3;
-            $user->save();
-
+            // $user->fill($identifyData);
+            // $user->status = User::STATUS_ACTIVE;
+            // // $user->status = User::STATUS_STEP_3;
+            // $user->save();
             // Return response to client
+
+            /**
+             * Save KYC info
+             *
+             */
+            $data = $request->all();
+            $data['user_id'] = Auth::user()->id;
+
+            $kyc = KYC::create($data);
             return response()->jsonApi([
                 'type' => 'success',
-                'title' => 'New user registration',
-                'message' => "User identity verified successfully",
-                'data' => []
+                'title' => 'User Identity',
+                'message' => "User identity submitted successfully",
             ], 200);
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'warning',
                 'title' => 'User data identification',
-                'message' => "Unknown error",
-                'data' => $e->getMessage(),
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
