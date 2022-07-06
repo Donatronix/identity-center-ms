@@ -16,7 +16,7 @@ class CreateKYCSTable extends Migration
     {
         Schema::create('k_y_c_s', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('user_id')->nullable();
+            $table->uuid('user_id');
             $table->string('id_number')->nullable(); // National identification number
             $table->string('document_number')->nullable();  // Document number
             $table->string('document_country', 3)->nullable(); // ISO-2- String Country that issued the document
