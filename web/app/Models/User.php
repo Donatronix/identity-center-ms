@@ -439,4 +439,9 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     {
         return $this->hasMany(Identification::class);
     }
+
+    public function loginSecurity()
+    {
+        return $this->hasOne(TwoFactorSecurity::class);
+    }
 }
