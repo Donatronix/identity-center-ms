@@ -30,7 +30,7 @@ class ServiceAdminController extends Controller
      *              "ManagerWrite"
      *          },
      *     }},
-     * 
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -97,7 +97,7 @@ class ServiceAdminController extends Controller
     {
         try {
             $admin = null;
-           
+
             $validator = Validator::make($request->all(), [
                 'role' => 'required|string|exists:roles,name',
                 'service' => 'required|string',
@@ -134,15 +134,15 @@ class ServiceAdminController extends Controller
                 ], 'service_admin');
 
                 $respData = $adminQuery->first();
-                
+
                 return response()->jsonApi([
                     'type' => 'success',
                     'title' => 'Add new admin',
                     'message' => 'Admin role was updated successfully',
                     'data' => [
-                        'user_id'=>$respData['id'],
-                        'role'=>$respData['role'],
-                        'service'=>$respData['service']
+                        'user_id' => $respData['id'],
+                        'role' => $respData['role'],
+                        'service' => $respData['service']
                     ]
                 ], 200);
             }
@@ -153,7 +153,7 @@ class ServiceAdminController extends Controller
                 'message' => "Admin already exist. Please try again.",
                 'data' => null,
             ], 400);
-  
+
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'type' => 'danger',
@@ -169,7 +169,7 @@ class ServiceAdminController extends Controller
                 'data' => null,
             ], 404);
         }
-        
+
     }
 
     /**
@@ -280,12 +280,12 @@ class ServiceAdminController extends Controller
                 // Retrieve the validated input...
                 $validated = $validator->validated();
 
-                $adminQuery = User::where('id',$validated['user_id']);
+                $adminQuery = User::where('id', $validated['user_id']);
 
                 if ($adminQuery->exists()) {
                     //Fetch user
                     $admin = $adminQuery->first();
-                    
+
                     //Update user
                     // $adminQuery->update([
                     //     'role' => $validated['role'],
@@ -293,13 +293,14 @@ class ServiceAdminController extends Controller
                     // ]);
 
                     //send message
-                    PubSub::transaction(function () {})
-                    ->publish('AdminManagerEvent', [
-                        'admin' => $admin,
-                        'role' => $validated['role'],
-                        'service' => $validated['service'],
-                        'action' => 'update',
-                    ], 'service_admin');
+                    PubSub::transaction(function () {
+                    })
+                        ->publish('AdminManagerEvent', [
+                            'admin' => $admin,
+                            'role' => $validated['role'],
+                            'service' => $validated['service'],
+                            'action' => 'update',
+                        ], 'service_admin');
 
                     return response()->jsonApi([
                         'type' => 'success',
@@ -315,9 +316,9 @@ class ServiceAdminController extends Controller
                     'message' => 'Admin user does NOT exist',
                     'data' => null,
                 ], 404);
-                
+
             });
-        
+
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
@@ -326,7 +327,7 @@ class ServiceAdminController extends Controller
                 'data' => null,
             ], 404);
         }
-        
+
     }
 
     /**
@@ -352,7 +353,7 @@ class ServiceAdminController extends Controller
      *         @OA\Schema(
      *             type="string"
      *         )
-     *     ),     
+     *     ),
      *     @OA\Parameter(
      *         name="service",
      *         in="query",

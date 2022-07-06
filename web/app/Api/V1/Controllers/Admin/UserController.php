@@ -7,20 +7,17 @@ use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use PubSub;
-use Sumra\SDK\JsonApiResponse;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Throwable;
 use Spatie\Permission\Models\Role;
+use Sumra\SDK\JsonApiResponse;
+use Throwable;
 
 /**
  * Class UserController
@@ -177,7 +174,6 @@ class UserController extends Controller
     public function index(Request $request): mixed
     {
         try {
-
             /**
              * User Category OR Role
              *
@@ -185,8 +181,7 @@ class UserController extends Controller
             $type = $request->type;
             if (!$type || strtolower($type) == 'all') {
                 $users = User::paginate($request->get('limit', config('settings.pagination_limit')));
-            }
-            else {
+            } else {
                 $users = User::role($type)
                     ->paginate($request->get('limit', config('settings.pagination_limit')));
             }
@@ -230,7 +225,7 @@ class UserController extends Controller
      *         @OA\JsonContent(
      *             type="object",
      *
-     *              @OA\Property(
+     *             @OA\Property(
      *                 property="first_name",
      *                 type="string",
      *                 description="First name for new user account",
@@ -244,7 +239,7 @@ class UserController extends Controller
      *                 required={"true"},
      *                 example="Kiels"
      *             ),
-     *              @OA\Property(
+     *             @OA\Property(
      *                 property="username",
      *                 type="string",
      *                 description="Username for new user account",
@@ -258,7 +253,7 @@ class UserController extends Controller
      *                 required={"true"},
      *                 example="johnkiels@ultainfinity"
      *             ),
-     *              @OA\Property(
+     *             @OA\Property(
      *                 property="phone",
      *                 type="string",
      *                 description="Phone number for user account",
@@ -292,35 +287,35 @@ class UserController extends Controller
      *                 required={"true"},
      *                  example=""
      *             ),
-     *              @OA\Property(
+     *             @OA\Property(
      *                 property="address_line1",
      *                 type="string",
      *                 description="Address line 1 for user account",
      *                 required={"true"},
      *                 example="45 kingston Street"
      *             ),
-     *              @OA\Property(
+     *             @OA\Property(
      *                 property="address_line2",
      *                 type="string",
      *                 description="Address line 2 for user account",
      *                 required={"true"},
      *                 example="Radek Layout"
      *             ),
-     *              @OA\Property(
+     *             @OA\Property(
      *                 property="address_city",
      *                 type="string",
      *                 description="Address_city for user account",
      *                 required={"true"},
      *                 example="Westbron"
      *             ),
-     *              @OA\Property(
+     *             @OA\Property(
      *                 property="address_country",
      *                 type="string",
      *                 description="Address country for user account",
      *                 required={"true"},
      *                 example="UK"
      *             ),
-     *              @OA\Property(
+     *             @OA\Property(
      *                 property="address_zip",
      *                 type="string",
      *                 description="Address zip for user account",
@@ -382,11 +377,10 @@ class UserController extends Controller
     {
         // Try to add new user
         try {
-
             $validate = Validator::make($request->all(), User::adminValidationRules());
 
             //Validation response
-            if($validate->fails()){
+            if ($validate->fails()) {
                 return response()->jsonApi([
                     'type' => 'danger',
                     'title' => 'New user registration',
@@ -427,8 +421,6 @@ class UserController extends Controller
                 'message' => "New user registered successfully!",
                 'data' => $user->toArray()
             ], 200);
-
-
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
@@ -472,26 +464,26 @@ class UserController extends Controller
      *         description="Data of user"
      *     ),
      *     @OA\Response(
-     *          response="404",
-     *          description="User not found",
+     *         response="404",
+     *         description="User not found",
      *
-     *          @OA\JsonContent(
-     *              type="object",
-     *              @OA\Property(
-     *                  property="error",
-     *                  type="object",
-     *                  @OA\Property(
-     *                      property="code",
-     *                      type="string",
-     *                      description="code of error"
-     *                  ),
-     *                  @OA\Property(
-     *                      property="message",
-     *                      type="string",
-     *                      description="error message"
-     *                  )
-     *              )
-     *          )
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="error",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="code",
+     *                     type="string",
+     *                     description="code of error"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="message",
+     *                     type="string",
+     *                     description="error message"
+     *                 )
+     *             )
+     *         )
      *     )
      * )
      *
@@ -502,7 +494,6 @@ class UserController extends Controller
     public function show(string $id): mixed
     {
         try {
-
             $user = User::where('id', $id)->firstOrFail();
 
             return response()->jsonApi([
@@ -511,7 +502,6 @@ class UserController extends Controller
                 'message' => "user details received",
                 'data' => $user->toArray()
             ], 200);
-
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'type' => 'danger',
@@ -567,7 +557,7 @@ class UserController extends Controller
      *                 required={"true"},
      *                 example="Kiels"
      *             ),
-     *              @OA\Property(
+     *             @OA\Property(
      *                 property="username",
      *                 type="string",
      *                 description="Username for new user account",
@@ -581,7 +571,7 @@ class UserController extends Controller
      *                 required={"true"},
      *                 example="johnkiels@ultainfinity"
      *             ),
-     *              @OA\Property(
+     *             @OA\Property(
      *                 property="phone",
      *                 type="string",
      *                 description="Phone number for user account",
@@ -602,35 +592,35 @@ class UserController extends Controller
      *                 required={"true"},
      *                 example="m"
      *             ),
-     *              @OA\Property(
+     *             @OA\Property(
      *                 property="address_line1",
      *                 type="string",
      *                 description="Address line 1 for user account",
      *                 required={"true"},
      *                 example="45 kingston Street"
      *             ),
-     *              @OA\Property(
+     *             @OA\Property(
      *                 property="address_line2",
      *                 type="string",
      *                 description="Address line 2 for user account",
      *                 required={"true"},
      *                 example="Radek Layout"
      *             ),
-     *              @OA\Property(
+     *             @OA\Property(
      *                 property="address_city",
      *                 type="string",
      *                 description="Address_city for user account",
      *                 required={"true"},
      *                 example="Westbron"
      *             ),
-     *              @OA\Property(
+     *             @OA\Property(
      *                 property="address_country",
      *                 type="string",
      *                 description="Address country for user account",
      *                 required={"true"},
      *                 example="UK"
      *             ),
-     *              @OA\Property(
+     *             @OA\Property(
      *                 property="address_zip",
      *                 type="string",
      *                 description="Address zip for user account",
@@ -665,7 +655,7 @@ class UserController extends Controller
         $validate = Validator::make($request->all(), User::adminUpdateValidateRules());
 
         //Validation response
-        if($validate->fails()){
+        if ($validate->fails()) {
             return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'Admin user update',
@@ -678,10 +668,9 @@ class UserController extends Controller
             //Get validated input
             $validated = $validate->validated();
 
-             $userQuery=User::where('id', $id);
+            $userQuery = User::where('id', $id);
 
             if ($userQuery->exists()) {
-
                 //Update user
                 $user = $userQuery->update($validated);
 
@@ -692,7 +681,6 @@ class UserController extends Controller
                     'message' => "User successfully updated",
                     'data' => $user
                 ], 200);
-
             }
 
             // Return response to client
@@ -702,7 +690,6 @@ class UserController extends Controller
                 'message' => "User does NOT exist.",
                 'data' => null
             ], 404);
-
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
@@ -783,7 +770,6 @@ class UserController extends Controller
 
         // Try to delete user
         try {
-
             $user = User::findOrFail($id);
             $user->delete();
 
@@ -809,6 +795,26 @@ class UserController extends Controller
                 'message' => $e->getMessage(),
                 'data' => null
             ], 400);
+        }
+    }
+
+    /**
+     * Get user object
+     *
+     * @param $id
+     * @return mixed
+     */
+    private function getObject($id): mixed
+    {
+        try {
+            return User::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title' => "Get user",
+                'message' => "User with id #{$id} not found: {$e->getMessage()}",
+                'data' => ''
+            ], 404);
         }
     }
 
@@ -855,8 +861,6 @@ class UserController extends Controller
     {
         try {
             DB::transaction(function () use ($request) {
-
-
                 $validator = Validator::make($request->all(), [
                     'token' => ['required'],
                 ]);
@@ -870,7 +874,6 @@ class UserController extends Controller
                 if ($select->get()->isEmpty()) {
                     throw new Exception('Invalid verification token');
                 }
-
 
                 $user = User::where('email', $select->first()->email)->first();
                 $user->email_verified_at = Carbon::now()->getTimestamp();
@@ -994,27 +997,6 @@ class UserController extends Controller
     }
 
     /**
-     * Get user object
-     *
-     * @param $id
-     * @return mixed
-     */
-    private function getObject($id): mixed
-    {
-        try {
-            return User::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
-            return response()->jsonApi([
-                'type' => 'danger',
-                'title' => "Get user",
-                'message' => "User with id #{$id} not found: {$e->getMessage()}",
-                'data' => ''
-            ], 404);
-        }
-    }
-
-
-    /**
      * Admin adding of User
      *
      * @OA\Put(
@@ -1069,7 +1051,7 @@ class UserController extends Controller
      *                 required={"true"},
      *                 example="password"
      *             )
-     *              @OA\Property(
+     *             @OA\Property(
      *                 property="user_type",
      *                 type="string",
      *                 description="User Type: Staff, Admin, Investor, Super",
@@ -1101,12 +1083,12 @@ class UserController extends Controller
     {
         try {
             $this->validate($request, [
-                    'first_name' => 'required|string',
-                    'password' => 'required|string|min:6',
-                    'email' => 'required|email|unique:users,email',
-                    'username' => 'required|string|unique:users,username',
-                    'user_type' => 'required|in:Client,Staff,Admin,Super,Investor'
-                ]);
+                'first_name' => 'required|string',
+                'password' => 'required|string|min:6',
+                'email' => 'required|email|unique:users,email',
+                'username' => 'required|string|unique:users,username',
+                'user_type' => 'required|in:Client,Staff,Admin,Super,Investor'
+            ]);
 
             //
             $input = $request->all();
@@ -1133,13 +1115,13 @@ class UserController extends Controller
             /**
              * Notify
              */
-            \PubSub::publish('sendVerificationEmail', [
+            PubSub::publish('sendVerificationEmail', [
                 'email' => $user->email,
                 'display_name' => $user->display_name,
                 'verify_token' => $user->verify_token,
             ], 'mail');
 
-            \PubSub::publish('NewUserRegisteredListener', [
+            PubSub::publish('NewUserRegisteredListener', [
                 'user' => $user->toArray(),
             ], 'new-user-registered');
 
@@ -1150,16 +1132,15 @@ class UserController extends Controller
                 'message' => "New user registered successfully!",
                 'data' => $user
             ], 200);
-        }
-        catch (Exception $e) {
-            if(isset($user))
+        } catch (Exception $e) {
+            if (isset($user))
                 $user->delete();
 
             return response()->json([
                 'type' => 'danger',
                 'title' => 'KYC Response',
                 'message' => $e->getMessage(),
-            ], 500);;
+            ], 500);
         }
     }
 }

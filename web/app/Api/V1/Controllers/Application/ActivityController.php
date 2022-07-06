@@ -115,7 +115,7 @@ class ActivityController extends Controller
         try {
             // Get activities
             $activities = $this->model
-            ->where("user_id", $this->user_id)
+                ->where("user_id", $this->user_id)
                 ->orderBy($request->get('sort-by', 'created_at'), $request->get('sort-order', 'desc'))
                 ->paginate($request->get('limit', 20));
 
@@ -202,10 +202,10 @@ class ActivityController extends Controller
         }
 
         // transform the request object to add date
-            $request->merge([
-                'activity_time' => Carbon::now(),
-                "user_id" => $this->user_id
-            ]);
+        $request->merge([
+            'activity_time' => Carbon::now(),
+            "user_id" => $this->user_id
+        ]);
 
         // Try to add new activity
         try {

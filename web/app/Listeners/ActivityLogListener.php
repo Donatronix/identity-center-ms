@@ -3,8 +3,8 @@
 namespace App\Listeners;
 
 use App\Models\Activity;
-use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class ActivityLogListener
@@ -30,24 +30,24 @@ class ActivityLogListener
     {
         // validate input
         $validator = Validator::make($data, [
-        "title" => "required|string",
-        "description" => "required|string",
-        "activity_time" => "required|string",
-        "user_id" => "required|string",
-    ]);
-    if ($validator->fails()) {
-        throw new Exception($validator->errors()->first());
-    }
+            "title" => "required|string",
+            "description" => "required|string",
+            "activity_time" => "required|string",
+            "user_id" => "required|string",
+        ]);
+        if ($validator->fails()) {
+            throw new Exception($validator->errors()->first());
+        }
 
-    // Try to add new activity
-    try {
-        // Create new
-        $activity = Activity::create($data);
+        // Try to add new activity
+        try {
+            // Create new
+            $activity = Activity::create($data);
 
-        // Return response to client
-        Log::info("Activity Logged");
-    } catch (Exception $e) {
-        Log::info($e->getMessage());
-    }
+            // Return response to client
+            Log::info("Activity Logged");
+        } catch (Exception $e) {
+            Log::info($e->getMessage());
+        }
     }
 }
