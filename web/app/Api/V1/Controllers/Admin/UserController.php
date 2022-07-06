@@ -1007,7 +1007,7 @@ class UserController extends Controller
     /**
      * Admin adding of User
      *
-     * @OA\Put(
+     * @OA\Post(
      *     path="/admin/users/add",
      *     description="Add a new User",
      *     tags={"Admin | Users"},
