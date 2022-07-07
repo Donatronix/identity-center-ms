@@ -42,6 +42,11 @@ $router->group([
             $router->post('/update/recovery', "CreateUserIDController@updateRecoveryQuestion");
 
             /**
+             * Admin access token verification
+             */
+            $router->post('/verify-access-token', "AdminTokenController");
+
+            /**
              * Recovery user account
              */
             $router->group([
@@ -73,10 +78,10 @@ $router->group([
      */
     $router->group([
         'namespace' => 'Application',
-        'middleware' => [
-            'checkUser',
-            'auth:api'
-        ]
+        // 'middleware' => [
+        //     'checkUser',
+        //     'auth:api'
+        // ]
     ], function ($router) {
 
         /**

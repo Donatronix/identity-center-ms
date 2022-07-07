@@ -8,6 +8,30 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Sumra\SDK\Traits\UuidTrait;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * Activity Scheme
+ *
+ * @package App\Models
+ *
+ * @OA\Schema(
+ *     schema="Activity",
+ *
+ *     @OA\Property(
+ *         property="product_id",
+ *         type="string",
+ *         description="Title of activity",
+ *         example="Password Update"
+ *     ),
+ *     @OA\Property(
+ *         property="description",
+ *         type="string",
+ *         description="Description of activity",
+ *         example="Your password has been updated"
+ *     ),
+ * 
+ * )
+ */
+
 class Activity extends Model
 {
     use HasFactory;
