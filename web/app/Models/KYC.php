@@ -19,27 +19,33 @@ use Sumra\SDK\Traits\UuidTrait;
  *         description="National identification number",
  *     ),
  *      @OA\Property(
- *          property="number",
+ *          property="document_number",
  *          type="integer",
  *          description="Document number",
  *          example="FG1452635"
  *      ),
  *      @OA\Property(
- *          property="country",
+ *          property="document_country",
  *          type="string",
  *          description="Document country",
  *          example=""
  *      ),
  *      @OA\Property(
- *          property="type",
+ *          property="document_type",
  *          type="string",
  *          description="Document type (1 = PASSPORT, 2 = ID_CARD, 3 = DRIVERS_LICENSE, 4 = RESIDENCE_PERMIT)",
  *          example="1"
  *      ),
  *      @OA\Property(
- *          property="file",
+ *          property="document_file",
  *          type="string",
  *          description="Document file",
+ *          example=""
+ *      ),
+ *      @OA\Property(
+ *          property="document_back",
+ *          type="string",
+ *          description="Document back view",
  *          example=""
  *      )
  * )

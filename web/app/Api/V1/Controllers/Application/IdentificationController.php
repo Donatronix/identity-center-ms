@@ -150,7 +150,7 @@ class IdentificationController extends Controller
      *     ),
      *     @OA\Response(
      *         response="200",
-     *         description="User identity verified successfully"
+     *         description="User identity saved successfully"
      *     ),
      *     @OA\Response(
      *         response="201",
