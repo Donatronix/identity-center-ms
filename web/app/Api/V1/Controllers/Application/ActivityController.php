@@ -154,7 +154,7 @@ class ActivityController extends Controller
      *     }},
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/Activity")
+     *         @OA\JsonContent()
      *     ),
      *     @OA\Response(
      *         response="200",

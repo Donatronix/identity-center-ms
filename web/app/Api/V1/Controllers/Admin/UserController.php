@@ -1050,7 +1050,7 @@ class UserController extends Controller
      *                 description="Default Password",
      *                 required={"true"},
      *                 example="password"
-     *             )
+     *             ),
      *             @OA\Property(
      *                 property="user_type",
      *                 type="string",

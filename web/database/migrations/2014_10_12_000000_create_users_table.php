@@ -52,6 +52,7 @@ class CreateUsersTable extends Migration
              * SECURITY
              */
             $table->string('password', 60)->nullable();
+            $table->string('access_code', 20)->nullable();
             $table->rememberToken();
             $table->string('verify_token')->nullable();
             $table->string('verification_code')->nullable();
