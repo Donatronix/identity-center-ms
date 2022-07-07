@@ -271,6 +271,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'email',
         'birthday',
         'password',
+        'access_code',
 
         'address_country',
         'address_line1',

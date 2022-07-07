@@ -317,7 +317,12 @@ class UserProfileController extends Controller
      *     summary="update user",
      *     description="update user",
      *     tags={"User Profile"},
-     *
+     *     security={{
+     *         "passport": {
+     *             "User",
+     *             "ManagerRead"
+     *         }
+     *     }},
      *     @OA\Parameter(
      *          description="ID of User",
      *          in="path",
@@ -328,13 +333,6 @@ class UserProfileController extends Controller
      *              type="string"
      *          )
      *     ),
-     *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
      *
      *     @OA\RequestBody(
      *          required=true,
@@ -659,6 +657,7 @@ class UserProfileController extends Controller
             return response()->jsonApi([
                 "message" => "Phone number updated"
             ], 200);
+            
         } catch (Exception $e) {
             return response()->jsonApi([
                 "message" => "An error occurred! Please, try again."

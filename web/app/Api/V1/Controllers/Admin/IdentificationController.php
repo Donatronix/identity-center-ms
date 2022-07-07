@@ -19,7 +19,7 @@ class IdentificationController extends Controller
      * Display a listing of Pending KYC
      *
      * @OA\Get(
-     *     path="/admin/key",
+     *     path="/admin/kyc",
      *     description="Get list of KYC",
      *     tags={"Admin | KYC"},
      *
