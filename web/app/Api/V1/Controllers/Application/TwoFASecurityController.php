@@ -3,156 +3,28 @@
 namespace App\Api\V1\Controllers\Application;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use App\Models\Identification;
 use App\Http\Controllers\Controller;
 use App\Models\TwoFactorSecurity;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Exception;
+use Illuminate\Support\Facades\Validator;
 
 class TwoFASecurityController extends Controller
 {
-    /**
-     * Show the 2Fa Image barcode
-     *
-     * @OA\Post(
-     *     path="/2fa",
-     *     summary="Show the 2Fa Image barcode",
-     *     description="How the Barcode image that will be scanned by authenticator app",
-     *     tags={"2fa"},
-     *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
-     *
-     *     @OA\Response(
-     *          response="200",
-     *          description="Success",
-     *
-     *          @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="type",
-     *                 type="string",
-     *                 example="success"
-     *             ),
-     *             @OA\Property(
-     *                 property="google2fa_url",
-     *                 type="string",
-     *                 example="image url"
-     *             ),
-     *             @OA\Property(
-     *                 property="secret",
-     *                 type="string",
-     *                 example="user phone number is secret"
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="Image generated"
-     *             ),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 description="User object",
-     *
-     *                 @OA\Property(
-     *                     property="id",
-     *                     type="string",
-     *                     example="+4492838989290"
-     *                 ),
-     *                 @OA\Property(
-     *                     property="username",
-     *                     type="string",
-     *                     example="john.kiels"
-     *                 ),
-     *                 @OA\Property(
-     *                     property="channel",
-     *                     type="string",
-     *                     example="sms"
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *          response="400",
-     *          description="Bad Request",
-     *
-     *          @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="type",
-     *                 type="string",
-     *                 example="danger"
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example=""
-     *             ),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 description="User object",
-     *                 example=""
-     *             )
-     *         )
-     *     )
-     * )
-     *
-     * @param Request $request
-     * @param SendVerifyToken $sendOTP
-     *
-     * @return JsonResponse
-     * @throws ValidationException
-     */
-    public function show2faForm(){
-        try {
-            $user = Auth::user();
-            $google2fa_url = "";
-            $secret_key = "";
 
-            if($user->loginSecurity()->exists()){
-                $google2fa = (new \PragmaRX\Google2FAQRCode\Google2FA());
-                $google2fa_url = $google2fa->getQRCodeInline(
-                    env('APP_NAME'),
-                    $user->phone,
-                    $user->loginSecurity->google2fa_secret
-                );
-                $secret_key = $user->loginSecurity->google2fa_secret;
-            }
-
-            $data = array(
-                'user' => $user,
-                'secret' => $secret_key,
-                'google2fa_url' => $google2fa_url
-            );
-
-            return response()->jsonApi([
-                "type" => "success",
-                'title' => 'Generating 2FA qr-code image',
-                "message" => "Image generated",
-                "data" => $data
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->jsonApi([
-                "type" => "danger",
-                'title' => 'Generating 2FA qr-code image',
-                "message" => $th->getMessage(),
-                "data" => null
-            ], 500);
-        }
+    public function __construct()
+    {
+        $this->user_id = auth()->user()->id;
+        $this->app_name = "ULTAINFINITY WEALTH LAUNCHPAD";
     }
+
 
     /**
      * Generate a 2Fa Secret
      *
-     * @OA\Post(
+     * @OA\Get(
      *     path="/2fa/generateSecret",
      *     summary="generate the 2Fa Secret",
      *     description="Generate the 2Fa secret",
@@ -166,81 +38,63 @@ class TwoFASecurityController extends Controller
      *     }},
      *
      *     @OA\Response(
-     *          response="200",
-     *          description="Success",
-     *
-     *          @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="type",
-     *                 type="string",
-     *                 example="success"
-     *             ),
-     *             @OA\Property(
-     *                 property="login_security object",
-     *                 type="object",
-     *                 example="login_security object"
-     *             )
-     *         )
+     *         response="200",
+     *         description="Success"
      *     ),
      *     @OA\Response(
-     *          response="400",
-     *          description="Bad Request",
-     *
-     *          @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="type",
-     *                 type="string",
-     *                 example="danger"
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example=""
-     *             ),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 description="User object",
-     *                 example=""
-     *             )
-     *         )
+     *         response="401",
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Invalid request"
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Forbidden"
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Not found"
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Internal server error"
      *     )
      * )
      *
-     * @param Request $request
-     * @param SendVerifyToken $sendOTP
      *
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function generate2faSecret(Request $request){
+    public function generate2faSecret()
+    {
         try {
-            $user = Auth::user();
-            // Initialise the 2FA class
-            $google2fa = (new \PragmaRX\Google2FAQRCode\Google2FA());
 
-            // Add the secret key to the registration data
-            $login_security = TwoFactorSecurity::where('user_id', $user->id)->first();
-            $login_security->user_id = $user->id;
-            $login_security->google2fa_enable = 0;
-            $login_security->google2fa_secret = $google2fa->generateSecretKey();
-            $login_security->save();
+            // Initialise the 2FA class
+            $tfa = new \RobThree\Auth\TwoFactorAuth($this->app_name);
+            $secret = $tfa->createSecret();
+            $qrcode_url = $tfa->getQRCodeImageAsDataUri($this->app_name, $secret);
+
+            // Add the secret key to the user if exist or create new
+            $data = TwoFactorSecurity::updateOrCreate(
+                ['user_id' => $this->user_id],
+                ['secret' => $secret]
+            );
+
+            $data['qrcode_url'] = $qrcode_url;
 
             return response()->jsonApi([
                 "type" => "success",
                 'title' => 'Generating 2FA secret',
                 "message" => "Secret key is generated.",
-                "data" => $login_security
+                "data" => $data->toArray()
             ], 200);
-        } catch (\Throwable $th) {
+        } catch (Exception $e) {
             return response()->jsonApi([
                 "type" => "danger",
                 'title' => 'Generating 2FA secret',
-                "message" => $th->getMessage(),
+                "message" => $e->getMessage(),
                 "data" => null
             ], 500);
         }
@@ -261,85 +115,192 @@ class TwoFASecurityController extends Controller
      *             "ManagerRead"
      *         }
      *     }},
+     * 
+     *      @OA\RequestBody(
+     *            @OA\JsonContent(
+     *                type="object",
+     *                @OA\Property(
+     *                    property="code",
+     *                    type="string",
+     *                    description="code from authenticator app",
+     *                    example="155667"
+     *                ),
+     *           ),
+     *       ),
      *
      *     @OA\Response(
-     *          response="200",
-     *          description="Success",
-     *
-     *          @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="type",
-     *                 type="string",
-     *                 example="success"
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="2FA is enabled successfully"
-     *             )
-     *         )
+     *         response="200",
+     *         description="Success"
      *     ),
      *     @OA\Response(
-     *          response="400",
-     *          description="Bad Request",
-     *
-     *          @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="type",
-     *                 type="string",
-     *                 example="danger"
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example=""
-     *             ),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 description="User object",
-     *                 example=""
-     *             )
-     *         )
+     *         response="401",
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Invalid request"
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Forbidden"
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Not found"
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Internal server error"
      *     )
      * )
      *
      * @param Request $request
-     * @param SendVerifyToken $sendOTP
      *
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function enable2fa(Request $request){
-        $this->validate($request, [
-            'secret' => 'required'
+    public function enable2fa(Request $request)
+    {
+        // Validate input
+        $validator = Validator::make($request->all(), [
+            'code' => 'required'
         ]);
-        $user = Auth::user();
-        $google2fa = (new \PragmaRX\Google2FAQRCode\Google2FA());
+        if ($validator->fails()) {
+            throw new Exception($validator->errors()->first());
+        }
+        try {
+            $tfa = new \RobThree\Auth\TwoFactorAuth($this->app_name);
 
-        $secret = $request->secret;
-        $valid = $google2fa->verifyKey($user->loginSecurity->google2fa_secret, $secret);
+            $google2fa = TwoFactorSecurity::where('user_id', $this->user_id);
+            $secret = $google2fa->value("secret");
 
-        if($valid){
-            $user->loginSecurity->google2fa_enable = 1;
-            $user->loginSecurity->save();
+            $valid = $tfa->verifyCode($secret, $request->code);
+
+            if ($valid) {
+                $google2fa->update(['status' => 1]);
+                return response()->jsonApi([
+                    "type" => "success",
+                    'title' => 'Enabling 2FA',
+                    "message" => '2FA is enabled successfully',
+                    "data" => null
+                ], 200);
+            } else {
+                return response()->jsonApi([
+                    "type" => "danger",
+                    'title' => 'Enabling 2FA',
+                    "message" => 'Invalid verification Code, Please try again.',
+                    "data" => null
+                ], 500);
+            }
+        } catch (Exception $e) {
             return response()->jsonApi([
-                "type" => "success",
-                'title' => 'Enabling 2FA',
-                "message" => '2FA is enabled successfully',
-                "data" => null
-            ], 200);
-        }else{
+                'type' => 'danger',
+                'title' => "Enable 2fa",
+                'message' => $e->getMessage(),
+                'data' => null
+            ], 400);
+        }
+    }
+
+    /**
+     * Verify 2fa code
+     *
+     * @OA\Post(
+     *     path="/2fa/verify",
+     *     summary="Verify 2fa code",
+     *     description="Verify 2fa code",
+     *     tags={"2fa"},
+     *
+     *     security={{
+     *         "passport": {
+     *             "User",
+     *             "ManagerRead"
+     *         }
+     *     }},
+     * 
+     *      @OA\RequestBody(
+     *            @OA\JsonContent(
+     *                type="object",
+     *                @OA\Property(
+     *                    property="code",
+     *                    type="string",
+     *                    description="code from authenticator app",
+     *                    example="155667"
+     *                ),
+     *           ),
+     *       ),
+     *
+     *
+     *     @OA\Response(
+     *         response="200",
+     *         description="Success"
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Invalid request"
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Forbidden"
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Not found"
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Internal server error"
+     *     )
+     * )
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     * @throws ValidationException
+     */
+    public function verify2fa(Request $request)
+    {
+        // Validate input
+        $validator = Validator::make($request->all(), [
+            'code' => 'required'
+        ]);
+        if ($validator->fails()) {
+            throw new Exception($validator->errors()->first());
+        }
+        try {
+            $tfa = new \RobThree\Auth\TwoFactorAuth($this->app_name);
+
+            $google2fa = TwoFactorSecurity::where('user_id', $this->user_id);
+            $secret = $google2fa->value("secret");
+
+            $valid = $tfa->verifyCode($secret, $request->code);
+
+            if ($valid) {
+                return response()->jsonApi([
+                    "type" => "success",
+                    'title' => 'Code is valid',
+                    "message" => 'Code is valid',
+                    "data" => null
+                ], 200);
+            } else {
+                return response()->jsonApi([
+                    "type" => "danger",
+                    'title' => 'Enabling 2FA',
+                    "message" => 'Invalid verification Code, Please try again.',
+                    "data" => null
+                ], 500);
+            }
+        } catch (Exception $e) {
             return response()->jsonApi([
-                "type" => "danger",
-                'title' => 'Enabling 2FA',
-                "message" => 'Invalid verification Code, Please try again.',
-                "data" => null
-            ], 500);
+                'type' => 'danger',
+                'title' => "verify code",
+                'message' => $e->getMessage(),
+                'data' => null
+            ], 400);
         }
     }
 
@@ -358,63 +319,65 @@ class TwoFASecurityController extends Controller
      *             "ManagerRead"
      *         }
      *     }},
+     * 
+     *      @OA\RequestBody(
+     *            @OA\JsonContent(
+     *                type="object",
+     *                @OA\Property(
+     *                    property="password",
+     *                    type="string",
+     *                    description="current password",
+     *                    example="password"
+     *                ),
+     *           ),
+     *       ),
+     *
      *
      *     @OA\Response(
-     *          response="200",
-     *          description="Success",
-     *
-     *          @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="type",
-     *                 type="string",
-     *                 example="success"
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="2FA is disabled successfully"
-     *             )
-     *         )
+     *         response="200",
+     *         description="Success"
      *     ),
      *     @OA\Response(
-     *          response="400",
-     *          description="Bad Request",
-     *
-     *          @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="type",
-     *                 type="string",
-     *                 example="danger"
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example=""
-     *             ),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 description="User object",
-     *                 example=""
-     *             )
-     *         )
+     *         response="401",
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Invalid request"
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Forbidden"
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Not found"
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Internal server error"
      *     )
      * )
      *
      * @param Request $request
-     * @param SendVerifyToken $sendOTP
      *
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function disable2fa(Request $request){
+    public function disable2fa(Request $request)
+    {
+        // Validate input
+        $validator = Validator::make($request->all(), [
+            'password' => 'required'
+        ]);
+        if ($validator->fails()) {
+            throw new Exception($validator->errors()->first());
+        }
+
         try {
-            if (!(Hash::check($request->get('current-password'), Auth::user()->password))) {
-                // The passwords matches
+            $password = User::find($this->user_id)->password;
+            if (!(Hash::check($request->get('password'), $password))) {
+                // The password doesn't match
                 return response()->jsonApi([
                     "type" => "danger",
                     'title' => 'Disabling 2FA',
@@ -423,13 +386,9 @@ class TwoFASecurityController extends Controller
                 ], 403);
             }
 
-            $this->validate($request, [
-                'current-password' => 'required'
-            ]);
+            $google2fa = TwoFactorSecurity::where('user_id', $this->user_id);
 
-            $user = Auth::user();
-            $user->loginSecurity->google2fa_enable = 0;
-            $user->loginSecurity->save();
+            $google2fa->update(['status' => 0]);
 
             return response()->jsonApi([
                 "type" => "success",
@@ -437,11 +396,11 @@ class TwoFASecurityController extends Controller
                 "message" => '2FA is now disabled.',
                 "data" => null
             ], 200);
-        } catch (\Throwable $th) {
+        } catch (Exception $e) {
             return response()->jsonApi([
                 "type" => "danger",
                 'title' => 'Disabling 2FA',
-                "message" => $th->getMessage(),
+                "message" => $e->getMessage(),
                 "data" => null
             ], 403);
         }
