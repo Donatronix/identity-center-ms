@@ -53,6 +53,17 @@ $router->group([
                 $router->post('/sendid', "UserInfoRecoveryController@sendRecoveredID");
             });
         });
+
+        /**
+         * Sign In
+         *
+         */
+        $router->group([
+            'prefix' => 'sign-in',
+        ], function ($router) {
+            $router->post('/', "AuthController@login");
+            $router->post('/otp', "AuthController@verifyOTP");
+        });
     });
 
     /**

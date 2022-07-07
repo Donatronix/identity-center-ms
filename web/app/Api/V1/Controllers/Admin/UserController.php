@@ -1062,7 +1062,7 @@ class UserController extends Controller
      *             @OA\Property(
      *                 property="user_type",
      *                 type="string",
-     *                 description="User Type: Staff, Admin, Investor, Super",
+     *                 description="User Type: Client, Admin, Super",
      *                 required={"true"},
      *                 example="Super"
      *             )
@@ -1095,7 +1095,7 @@ class UserController extends Controller
                 'password' => 'required|string|min:6',
                 'email' => 'required|email|unique:users,email',
                 'username' => 'required|string|unique:users,username',
-                'user_type' => 'required|in:Client,Staff,Admin,Super,Investor'
+                'user_type' => 'required|in:Client,Admin,Super'
             ]);
 
             //

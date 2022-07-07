@@ -236,18 +236,16 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * User Category OR Roles
      *
      */
-    const ADMIN_USER = 'Admin';
-    const SUPER_USER = 'Super';
-    const STAFF_USER = 'Staff';
     const CLIENT_USER = 'Client';
-    const INVESTOR_USER = 'Investor';
+    const ADMIN_USER = 'Admin';
+    const SUPER_ADMIN_USER = 'Super';
+    //const STAFF_USER = 'Staff';
+    //const INVESTOR_USER = 'Investor';
 
     public static array $types = [
         self::ADMIN_USER,
-        self::SUPER_USER,
-        self::STAFF_USER,
-        self::CLIENT_USER,
-        self::INVESTOR_USER
+        self::SUPER_ADMIN_USER,
+        self::CLIENT_USER
     ];
 
     /**

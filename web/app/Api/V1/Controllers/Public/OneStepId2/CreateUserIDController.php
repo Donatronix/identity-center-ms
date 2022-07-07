@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
 
 class CreateUserIDController extends Controller
 {
@@ -190,8 +191,17 @@ class CreateUserIDController extends Controller
                 $user->phone = $input['phone'];
                 $user->save();
 
+                /**
+                 * Add Client Role to User
+                 *
+                 */
+                $role = Role::firstOrCreate([
+                    'name' => USER::CLIENT_USER
+                ]);
+                $user->roles()->sync($role->id);
+
                 // Generate authentication access token
-                $data['token'] = $user->createToken('OneStep')->accessToken;
+                // $data['token'] = $user->createToken($user->username)->accessToken;
 
                 //Other response data array
                 $data['channel'] = $input['channel'];
