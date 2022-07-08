@@ -153,10 +153,7 @@ class CreateUserIDController extends Controller
      */
     public function createAccount(Request $request, SendVerifyToken $sendOTP): JsonResponse
     {
-        //validate input date
-        $input = $request->all();
-
-        $validator = Validator::make($input, VerifyStepInfo::rules());
+        $validator = Validator::make($request->all(), VerifyStepInfo::rules());
 
         if ($validator->fails()) {
             return response()->jsonApi([
@@ -165,6 +162,9 @@ class CreateUserIDController extends Controller
                 "data" => null
             ], 400);
         }
+        
+        //validate input date
+        $input = $validator->validated();
 
         //Receiver token
         $sendto = $this->getTokenReceiver($input);
@@ -189,9 +189,6 @@ class CreateUserIDController extends Controller
                 $user->username = $input['username'];
                 $user->phone = $input['phone'];
                 $user->save();
-
-                // Generate authentication access token
-                $data['token'] = $user->createToken('OneStep')->accessToken;
 
                 //Other response data array
                 $data['channel'] = $input['channel'];
@@ -761,7 +758,8 @@ class CreateUserIDController extends Controller
             //Does the user account exist?
             if ($userQuery->exists()) {
                 //get the user ID
-                $userId = $userQuery->first()->id;
+                $user = $userQuery->first();
+                $userId = $user->id;
 
                 //Save recovery question
                 $question = new RecoveryQuestion;
@@ -770,12 +768,18 @@ class CreateUserIDController extends Controller
                 $question->answer_two = $input['answer2'];
                 $question->answer_three = $input['answer3'];
 
+                 // Generate authentication access token
+                 $token = $user->createToken($user->username)->accessToken;
+
                 if ($question->save()) {
                     // Return response
                     return response()->jsonApi([
                         'type' => 'success',
                         'message' => 'User account security questions was successful saved',
-                        'data' => ['username' => $input['username']]
+                        'data' => [
+                                'username' => $input['username'],
+                                'access_token' => $token
+                            ]
                     ], 200);
                 } else {
                     return response()->jsonApi([
