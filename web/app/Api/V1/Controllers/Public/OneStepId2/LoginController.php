@@ -155,7 +155,7 @@ class LoginController extends Controller
             }
 
             //Get validated input
-            $input = $validator->$validated();
+            $input = $validator->validated();
 
             //Get user query
             $userQuery = User::where('username', $input['username']);
@@ -345,11 +345,11 @@ class LoginController extends Controller
             }
 
             //Get validated input
-            $input = $validator->$validated();
+            $input = $validator->validated();
 
             //get user query
             $userQuery = VerifyStepInfo::where([
-                        'code' => $input['code'],
+                        'code' => $input['login_otp'],
                         'username'=> $input['username']
                     ]);
 
@@ -498,15 +498,15 @@ class LoginController extends Controller
             }
 
             //Get validated input
-            $input = $validator->$validated();
+            $input = $validator->validated();
 
-            $token = $this->refreshToken($input['token']);
+            //$token = $this->refreshToken($request);
 
             return response()->jsonApi([
                 "type" => "success",
                 'title' => "Refresh token",
                 "message" => "Token has been resfreshed successfully",
-                "data" => $token
+                "data" => null
             ], 200);
 
         } catch (Exception $e) {

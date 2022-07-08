@@ -87,6 +87,11 @@ class CreateUserIDController extends Controller
      *                 example="success"
      *             ),
      *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="Create new user"
+     *             ),
+     *             @OA\Property(
      *                 property="message",
      *                 type="string",
      *                 example="SMS verification code sent to +4492838989290"
@@ -129,7 +134,7 @@ class CreateUserIDController extends Controller
      *             @OA\Property(
      *                 property="title",
      *                 type="string",
-     *                 example="Create new user account One-Step 2.0"
+     *                 example="Create new user"
      *             ),
      *             @OA\Property(
      *                 property="message",
@@ -159,6 +164,7 @@ class CreateUserIDController extends Controller
         if ($validator->fails()) {
             return response()->jsonApi([
                 'type' => 'danger',
+                'title' => 'Create new user',
                 'message' => "Input validator errors. Try again.",
                 "data" => null
             ], 400);
@@ -181,6 +187,8 @@ class CreateUserIDController extends Controller
             if ($userExist) {
                 // Create verification token (OTP - One Time Password)
                 $otpToken = VerifyStepInfo::generateOTP(7);
+                $data['otpToken'] = $otpToken;
+                
 
                 //Generate token expiry time in minutes
                 $validity = VerifyStepInfo::tokenValidity(30);
@@ -220,6 +228,7 @@ class CreateUserIDController extends Controller
                 //Show response
                 return response()->jsonApi([
                     'type' => 'success',
+                    'title' => 'Create new user',
                     'message' => "{$channel} verification code sent to {$sendto}.",
                     "data" => $data
                 ], 200);
@@ -227,6 +236,7 @@ class CreateUserIDController extends Controller
             } else {
                 return response()->jsonApi([
                     'type' => 'danger',
+                    'title' => 'Create new user',
                     'message' => "{$sendto} is already taken/verified by another user. Try again.",
                     "data" => null
                 ], 400);
