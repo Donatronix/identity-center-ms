@@ -778,7 +778,7 @@ class CreateUserIDController extends Controller
                 $question->answer_two = $input['answer2'];
                 $question->answer_three = $input['answer3'];
 
-                 // Generate authentication access token
+                 // Generate user access token
                  $token = $user->createToken($user->username)->accessToken;
 
                 if ($question->save()) {
