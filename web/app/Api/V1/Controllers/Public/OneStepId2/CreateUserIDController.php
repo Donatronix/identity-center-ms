@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Spatie\Permission\Models\Role;
 
 class CreateUserIDController extends Controller
@@ -486,7 +487,7 @@ class CreateUserIDController extends Controller
     }
 
     /**
-     * Create new user for One-Step 2.0
+     * Update new user personal info for One-Step 2.0
      *
      * @OA\Post(
      *     path="/user-account/v2/update",
@@ -554,6 +555,11 @@ class CreateUserIDController extends Controller
      *                 example="success"
      *             ),
      *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="New user personal info"
+     *             ),
+     *             @OA\Property(
      *                 property="message",
      *                 type="string",
      *                 example="User personal data updated"
@@ -571,6 +577,11 @@ class CreateUserIDController extends Controller
      *                 property="type",
      *                 type="string",
      *                 example="danger"
+     *             ),
+     *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="New user personal info"
      *             ),
      *             @OA\Property(
      *                 property="message",
@@ -596,6 +607,7 @@ class CreateUserIDController extends Controller
         if ($validator->fails()) {
             return response()->jsonApi([
                 'type' => 'danger',
+                'title'=>'New user personal info',
                 'message' => "Input validator errors. Try again.",
                 "data" => null
             ], 400);
@@ -624,14 +636,14 @@ class CreateUserIDController extends Controller
                 // Return response
                 return response()->jsonApi([
                     'type' => 'success',
-                    'title' => "Update user account step 3",
+                    'title' => "New user personal info",
                     'message' => 'User account was successful updated',
                     'data' => ['username' => $input['username']]
                 ], 200);
             } else {
                 return response()->jsonApi([
                     'type' => 'danger',
-                    'title' => "Update user account step 1",
+                    'title' => "New user personal info",
                     'message' => 'User account was NOT  updated',
                     'data' => null
                 ], 400);
@@ -640,8 +652,9 @@ class CreateUserIDController extends Controller
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
-                'title' => "Update user account",
-                'message' => $e->getMessage()
+                'title' => "New user personal info",
+                'message' => $e->getMessage(),
+                'data' => null
             ], 400);
         }
     }
@@ -710,6 +723,11 @@ class CreateUserIDController extends Controller
      *                 example="danger"
      *             ),
      *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="New user recovery questions"
+     *             ),
+     *             @OA\Property(
      *                 property="message",
      *                 type="string",
      *                 example="Create new user account step 1"
@@ -733,6 +751,11 @@ class CreateUserIDController extends Controller
      *                 property="type",
      *                 type="string",
      *                 example="danger"
+     *             ),
+     *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="New user recovery questions"
      *             ),
      *             @OA\Property(
      *                 property="message",
@@ -764,6 +787,7 @@ class CreateUserIDController extends Controller
         if ($validator->fails()) {
             return response()->jsonApi([
                 'type' => 'danger',
+                'title'=> 'New user recovery questions',
                 'message' => "Input validator errors. Try again.",
                 "data" => null
             ], 400);
@@ -779,44 +803,46 @@ class CreateUserIDController extends Controller
                 $user = $userQuery->first();
                 $userId = $user->id;
 
-                //Save recovery question
-                $question = new RecoveryQuestion;
-                $question->user_id = $userId;
-                $question->answer_one = $input['answer1'];
-                $question->answer_two = $input['answer2'];
-                $question->answer_three = $input['answer3'];
+                RecoveryQuestion::firstOrCreate([
+                    'user_id' => $userId,
+                    'answer_one' => $input['answer1'],
+                    'answer_two' => $input['answer2'],
+                    'answer_three' => $input['answer3']
+                ]);
 
-                 // Generate user access token
-                 $token = $user->createToken($user->username)->accessToken;
+                // Generate user access token
+                $token = $user->createToken($user->username)->accessToken;
 
-                if ($question->save()) {
-                    // Return response
-                    return response()->jsonApi([
-                        'type' => 'success',
-                        'message' => 'User account security questions was successful saved',
-                        'data' => [
-                                'username' => $input['username'],
-                                'access_token' => $token
-                            ]
-                    ], 200);
-                } else {
-                    return response()->jsonApi([
-                        'type' => 'danger',
-                        'message' => 'User account security questions was NOT  saved',
-                        'data' => null
-                    ], 400);
-                }
+                
+                return response()->jsonApi([
+                    'type' => 'success',
+                    'title'=> 'New user recovery questions',
+                    'message' => 'User account security questions was successful saved',
+                    'data' => [
+                            'username' => $input['username'],
+                            'access_token' => $token
+                        ]
+                ], 200);
             } else {
                 return response()->jsonApi([
                     'type' => 'danger',
+                    'title'=> 'New user recovery questions',
                     'message' => 'User account was not found!',
-                    'data' => null
+                    'data' => $input
                 ], 404);
             }
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
+                'title'=> 'New user recovery questions',
                 'message' => $e->getMessage(),
+                'data' => $input
+            ], 400);
+        }catch (ModelNotFoundException $ex) {
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title'=> 'New user recovery questions',
+                'message' => $ex->getMessage(),
                 'data' => $input
             ], 400);
         }

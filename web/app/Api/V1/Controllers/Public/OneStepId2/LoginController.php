@@ -182,7 +182,7 @@ class LoginController extends Controller
                 ]);
 
                 $sendOTP = new SendVerifyToken();
-                $sendOTP->dispatchOTP($input['channel'], $sendto, $otpToken);
+                //$sendOTP->dispatchOTP($input['channel'], $sendto, $otpToken);
                 $data['login_otp'] = $otpToken;
 
                 //Send response
@@ -355,19 +355,19 @@ class LoginController extends Controller
 
             if ($userQuery->exists()) {
                 //Get user
-                $user = $userQuery->first('username');
+                $user = User::where('username', $input['username'])->first();
 
                 //Create user access token
                 $data['token'] = $user->createToken($input['username'])->accessToken;
-                $data['user'] = $user;
+                $data['user'] = $user->username;
 
                 //Delete login OTP
                 $userQuery->delete();
 
                 return response()->jsonApi([
-                    'type' => 'warning',
+                    'type' => 'success',
                     'title' => 'Verify user login',
-                    'message' => "Username OR Token not correct",
+                    'message' => "User login was successfull",
                     'data' => $data
                 ], 200);
             }
