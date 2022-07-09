@@ -89,10 +89,10 @@ $router->group([
      */
     $router->group([
         'namespace' => 'Application',
-        // 'middleware' => [
-        //     'checkUser',
-        //     'auth:api'
-        // ]
+        'middleware' => [
+            'checkUser',
+            'auth:api'
+        ]
     ], function ($router) {
 
         /**
