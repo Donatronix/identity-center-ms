@@ -73,9 +73,9 @@ class UserInfoRecoveryController extends Controller
      *                 example="success"
      *             ),
      *             @OA\Property(
-     *                 property="message",
+     *                 property="title",
      *                 type="string",
-     *                 example="SMS verification code sent to +4492838989290"
+     *                 example="User account recovery"
      *             ),
      *             @OA\Property(
      *                 property="data",
@@ -113,6 +113,11 @@ class UserInfoRecoveryController extends Controller
      *                 example="danger"
      *             ),
      *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="User account recovery"
+     *             ),
+     *             @OA\Property(
      *                 property="message",
      *                 type="string",
      *                 example="User account account recovery."
@@ -147,6 +152,7 @@ class UserInfoRecoveryController extends Controller
         if ($validator->fails()) {
             return response()->jsonApi([
                 'type' => 'danger',
+                'title'=> 'User account recovery',
                 'message' => "Input validator errors. Try again.",
                 "data" => null
             ], 400);
@@ -187,6 +193,7 @@ class UserInfoRecoveryController extends Controller
                 //Show response
                 return response()->jsonApi([
                     'type' => 'success',
+                    'title'=> 'User account recovery',
                     'message' => "{$channel} verification code sent to {$sendto}.",
                     "data" => [
                         'channel' => $channel,
@@ -198,6 +205,7 @@ class UserInfoRecoveryController extends Controller
             } else {
                 return response()->jsonApi([
                     'type' => 'danger',
+                    'title'=> 'User account recovery',
                     'message' => "User account does not exist. Try again.",
                     "data" => null
                 ], 400);
@@ -205,6 +213,7 @@ class UserInfoRecoveryController extends Controller
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
+                'title'=> 'User account recovery',
                 'message' => "Unable to send token for verification. Try again.",
                 "data" => $e->getMessage()
             ], 400);
@@ -294,6 +303,7 @@ class UserInfoRecoveryController extends Controller
                 //Send success response
                 return response()->jsonApi([
                     'type' => 'success',
+                    'title'=> 'Verify user account OTP',
                     'message' => "User account verification was successful.",
                     "data" => ['username' => $username, 'id' => $id]
                 ], 200);
@@ -301,6 +311,7 @@ class UserInfoRecoveryController extends Controller
                 //Send invalid token response
                 return response()->jsonApi([
                     'type' => 'danger',
+                    'title'=> 'Verify user account OTP',
                     'message' => "User account verification FAILED. Try again.",
                     "data" => null
                 ], 400);
@@ -309,6 +320,7 @@ class UserInfoRecoveryController extends Controller
             // Error occured
             return response()->jsonApi([
                 'type' => 'danger',
+                'title'=> 'Verify user account OTP',
                 'message' => "Unable to verify new use with token {$input['token']}. Try again.",
                 "data" => null
             ], 400);

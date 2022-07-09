@@ -243,6 +243,7 @@ class CreateUserIDController extends Controller
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
+                'title' => 'Create new user',
                 'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again.",
                 "data" => $e->getMessage()
             ], 400);
