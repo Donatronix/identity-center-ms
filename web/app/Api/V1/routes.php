@@ -42,6 +42,17 @@ $router->group([
             $router->post('/update/recovery', "CreateUserIDController@updateRecoveryQuestion");
 
             /**
+             * User Login
+             */
+            $router->group([
+                'prefix' => 'login',
+            ], function ($router) {
+                $router->post('/', "LoginController@login");
+                $router->post('/verify-otp', "LoginController@verifyOTP");
+                $router->post('/refresh-token', "LoginController@refreshToken");
+            });
+
+            /**
              * Admin access token verification
              */
             $router->post('/verify-access-token', "AdminTokenController");
@@ -78,10 +89,10 @@ $router->group([
      */
     $router->group([
         'namespace' => 'Application',
-        // 'middleware' => [
-        //     'checkUser',
-        //     'auth:api'
-        // ]
+        'middleware' => [
+            'checkUser',
+            'auth:api'
+        ]
     ], function ($router) {
 
         /**

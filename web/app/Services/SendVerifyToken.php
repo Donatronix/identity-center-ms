@@ -16,7 +16,8 @@ class SendVerifyToken
         $headers = $this->getHeaders();
 
         try {
-            $response = Http::withHeaders($headers)->post($url, $params);
+            $response = Http::withHeaders($headers)
+                             ->post($url, $params);
         } catch (Excection $e) {
             return false;
         } catch (ConnectException $e) {
@@ -58,14 +59,4 @@ class SendVerifyToken
         ];
     }
 
-    protected function sendSms($botID, $phoneNumber, $message)
-    {
-        try {
-            //  api call to communication MS
-        } catch (Exception $th) {
-            throw new SMSGatewayException("Unable to send sms");
-        }
-
-        return Str::random(16);
-    }
 }
