@@ -4,7 +4,7 @@
 **/.editorconfig
 **/.gitignore
 **/.gitkeep
-**/.env.example
+web/.env
 **/.styleci.yml
 **/vendor
 **/composer.lock
