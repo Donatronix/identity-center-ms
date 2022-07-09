@@ -154,9 +154,9 @@ class ActivityController extends Controller
      *     }},
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent()
+     *         @OA\JsonContent(ref="#/components/schemas/Activity")
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Successfully save"

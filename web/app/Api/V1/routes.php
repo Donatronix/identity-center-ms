@@ -102,9 +102,9 @@ $router->group([
         $router->group([
             'prefix'=>'2fa'
         ], function($router){
-            $router->get('/','TwoFASecurityController@show2faForm');
-            $router->post('/generateSecret','TwoFASecurityController@generate2faSecret');
+            $router->get('/generateSecret','TwoFASecurityController@generate2faSecret');
             $router->post('/enable2fa','TwoFASecurityController@enable2fa');
+            $router->post('/verify','TwoFASecurityController@verify2fa');
             $router->post('/disable2fa','TwoFASecurityController@disable2fa');
         });
 

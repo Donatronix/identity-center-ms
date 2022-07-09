@@ -18,8 +18,8 @@ class CreateTwoFactorSecuritiesTable extends Migration
             $table->foreignUuid('user_id')->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
-            $table->boolean('google2fa_enable')->default(false);
-            $table->string('google2fa_secret')->nullable();
+            $table->boolean('status')->default(0);
+            $table->string('secret');
             $table->timestamps();
         });
     }

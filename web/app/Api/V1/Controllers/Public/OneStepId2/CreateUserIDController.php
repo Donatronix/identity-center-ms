@@ -199,13 +199,11 @@ class CreateUserIDController extends Controller
                 $user->phone = $input['phone'];
                 $user->save();
 
-                /**
-                 * Add Client Role to User
-                 *
-                 */
+                //Add Client Role to User
                 $role = Role::firstOrCreate([
                     'name' => USER::CLIENT_USER
                 ]);
+
                 $user->roles()->sync($role->id);
 
                 //Other response data array
