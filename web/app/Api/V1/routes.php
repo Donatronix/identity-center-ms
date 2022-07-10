@@ -185,7 +185,6 @@ $router->group([
             'checkAdmin'
         ]
     ], function ($router) {
-
         /**
          * KYC Management
          *
