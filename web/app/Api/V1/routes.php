@@ -241,5 +241,6 @@ $router->group([
         'namespace' => 'Webhooks'
     ], function ($router) {
         $router->post('identify/{object}', 'IdentifyWebhookController');
+        $router->post('identities', 'IdentitiesWebhookController');
     });
 });
