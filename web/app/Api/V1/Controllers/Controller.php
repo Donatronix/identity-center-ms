@@ -34,8 +34,8 @@ use App\Traits\ResponseTrait;
  *
  *     @OA\Flow(
  *         flow="password",
- *         tokenUrl= "http://localhost:8200/oauth/token",
- *         refreshUrl="http://localhost:8200/oauth/token",
+ *         tokenUrl= "http://localhost:8200/v1/auth/token",
+ *         refreshUrl="http://localhost:8200/v1/auth/token",
  *         scopes={
  *             "Client"="User access",
  *             "Staff":"Staff access",
