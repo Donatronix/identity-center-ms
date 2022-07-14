@@ -13,7 +13,7 @@ use Illuminate\Http\Response;
 use PubSub;
 use Throwable;
 
-class IdentificationController extends Controller
+class KYCController extends Controller
 {
     /**
      * Display a listing of Pending KYC

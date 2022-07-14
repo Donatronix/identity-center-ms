@@ -183,11 +183,12 @@ $router->group([
     ], function ($router) {
         /**
          * KYC Management
-         *
          */
-        $router->group(['prefix' => 'kyc'], function ($router) {
+        $router->group([
+            'prefix' => 'kyc'
+        ], function ($router) {
             $router->get('/', 'KYCController@index');
-            $router->put('{id}', 'KYCController@updateKYC');
+            $router->put('/{id}', 'KYCController@updateKYC');
         });
 
         /**

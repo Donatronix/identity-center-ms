@@ -29,26 +29,7 @@ use App\Traits\ResponseTrait;
  * @OA\SecurityScheme(
  *     type="oauth2",
  *     description="Auth Scheme",
- *     name="oAuth2 Access",
- *     securityScheme="default",
- *
- *     @OA\Flow(
- *         flow="implicit",
- *         authorizationUrl="https://sumraid.com/oauth2",
- *         scopes={
- *             "ManagerRead"="Manager can read",
- *             "User":"User access",
- *             "ManagerWrite":"Manager can write"
- *         }
- *     )
- * )
- */
-
-/**
- * @OA\SecurityScheme(
- *     type="oauth2",
- *     description="Auth Scheme",
- *     name="Password Grant Access",
+ *     name="OneStep oAuth2 Access",
  *     securityScheme="passport",
  *
  *     @OA\Flow(
@@ -56,10 +37,10 @@ use App\Traits\ResponseTrait;
  *         tokenUrl= "http://localhost:8200/oauth/token",
  *         refreshUrl="http://localhost:8200/oauth/token",
  *         scopes={
- *             "Client"="",
- *             "Admin":"",
- *             "Staff":"",
- *             "Super Admin": ""
+ *             "Client"="User access",
+ *             "Staff":"Staff access",
+ *             "Admin":"Admin access",
+ *             "Super Admin": "Super Admin access"
  *         }
  *     )
  * )

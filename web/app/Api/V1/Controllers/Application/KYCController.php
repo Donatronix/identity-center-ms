@@ -177,9 +177,9 @@ class KYCController extends Controller
         } catch (ValidationException $e) {
             return response()->jsonApi([
                 'type' => 'warning',
-                'title' => 'User data identification',
-                'message' => "Validation error",
-                'data' => $e->getMessage()
+                'title' => 'User KYC identification',
+                'message' => "Validation error: " . $e->getMessage(),
+                'data' => null
             ], 400);
         }
 
@@ -226,14 +226,16 @@ class KYCController extends Controller
 
             return response()->jsonApi([
                 'type' => 'success',
-                'title' => 'User Identity',
+                'title' => 'User KYC identification',
                 'message' => "User identity submitted successfully",
+                'data' => null
             ], 200);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
-                'title' => 'User Identification',
+                'title' => 'User KYC identification',
                 'message' => $e->getMessage(),
+                'data' => null
             ], 500);
         }
     }

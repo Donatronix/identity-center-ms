@@ -42,12 +42,6 @@ use Sumra\SDK\Traits\UuidTrait;
  *         example="1"
  *     ),
  *     @OA\Property(
- *         property="portrait",
- *         type="string",
- *         description="Uploaded selfie in base64",
- *         example=""
- *     ),
- *     @OA\Property(
  *         property="document_front",
  *         type="string",
  *         description="Uploaded document front view in base64",
@@ -58,7 +52,13 @@ use Sumra\SDK\Traits\UuidTrait;
  *         type="string",
  *         description="Uploaded document back view in base64",
  *         example=""
- *     )
+ *     ),
+ *     @OA\Property(
+ *         property="portrait",
+ *         type="string",
+ *         description="Uploaded selfie in base64",
+ *         example=""
+ *     ),
  * )
  */
 class KYC extends Model
