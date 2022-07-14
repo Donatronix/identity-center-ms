@@ -28,10 +28,10 @@ class CreateOauthClientsTable extends Migration
      *
      * @return string|null
      */
-    public function getConnection()
-    {
-        return config('passport.storage.database.connection');
-    }
+    // public function getConnection()
+    // {
+    //     return config('passport.storage.database.connection');
+    // }
 
     /**
      * Run the migrations.
@@ -42,6 +42,7 @@ class CreateOauthClientsTable extends Migration
     {
         $this->schema->create('oauth_clients', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            //$table->id();
             $table->uuid('user_id')->nullable()->index();
             $table->string('name');
             $table->string('secret', 100)->nullable();

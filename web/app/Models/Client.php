@@ -8,7 +8,7 @@ use Laravel\Passport\Client as PassportClient;
 class Client extends PassportClient
 {
     public $incrementing = false;
-    
+
     public static function boot()
     {
         static::creating(function ($model) {

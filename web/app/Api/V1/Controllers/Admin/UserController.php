@@ -18,6 +18,7 @@ use PubSub;
 use Spatie\Permission\Models\Role;
 use Sumra\SDK\JsonApiResponse;
 use Throwable;
+use Auth;
 
 /**
  * Class UserController
@@ -46,7 +47,7 @@ class UserController extends Controller
      *     @OA\Parameter(
      *         name="type",
      *         in="query",
-     *         description="Category of Users to get: Staff, Admin, Super, Investor",
+     *         description="Category of Users to get: Admin, Super, Investor",
      *         @OA\Schema(
      *             type="All"
      *         )
@@ -1062,7 +1063,7 @@ class UserController extends Controller
      *             @OA\Property(
      *                 property="user_type",
      *                 type="string",
-     *                 description="User Type: Client, Admin, Super",
+     *                 description="User Type: Investor, Admin, Super",
      *                 required={"true"},
      *                 example="Super"
      *             )
@@ -1095,7 +1096,7 @@ class UserController extends Controller
                 'password' => 'required|string|min:6',
                 'email' => 'required|email|unique:users,email',
                 'username' => 'required|string|unique:users,username',
-                'user_type' => 'required|in:Client,Admin,Super'
+                'user_type' => 'required|in:Investor,Admin,Super'
             ]);
 
             //
@@ -1147,6 +1148,83 @@ class UserController extends Controller
             return response()->json([
                 'type' => 'danger',
                 'title' => 'Add user account',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+    /**
+     * Admin Details of Users
+     *
+     * @OA\Post(
+     *     path="/admin/users/details",
+     *     description="Get details of users",
+     *     tags={"Admin | Users"},
+     *
+     *     security={{
+     *         "passport": {
+     *             "ManagerRead",
+     *             "User",
+     *             "ManagerWrite"
+     *         }
+     *     }},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="users",
+     *                 type="array",
+     *                 description="Array of user IDs",
+     *                 required={"true"},
+     *                 @OA\Items()
+     *             ),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Details fetched"
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Not found"
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Unknown error"
+     *     )
+     * )
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function usersDetails(Request $request)
+    {
+        try {
+            $this->validate($request, [
+                'users' => 'required|array',
+            ]);
+
+            foreach ($request->users as $key => $user) {
+                $user = User::find($user);
+                if ($user) {
+                    $users[] = $user;
+                }
+            }
+
+            return response()->jsonApi([
+                'type' => 'success',
+                'title' => 'Users Details',
+                'message' => "Information fetched successfully!",
+                'data' => $users
+            ], 200);
+        }
+        catch (Exception $e) {
+            return response()->json([
+                'type' => 'danger',
+                'title' => 'Users Details',
                 'message' => $e->getMessage(),
             ], 500);
         }

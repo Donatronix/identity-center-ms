@@ -78,10 +78,10 @@ $router->group([
      */
     $router->group([
         'namespace' => 'Application',
-        // 'middleware' => [
-        //     'checkUser',
-        //     'auth:api'
-        // ]
+        'middleware' => [
+            //'checkUser',
+            'auth:api'
+        ]
     ], function ($router) {
 
         /**
@@ -119,7 +119,6 @@ $router->group([
              * User Agreement
              */
             $router->patch('/agreement', "AgreementController");
-
         });
 
         /**
@@ -170,8 +169,9 @@ $router->group([
         'prefix' => 'admin',
         'namespace' => 'Admin',
         'middleware' => [
-            'checkUser',
-            'checkAdmin'
+            // 'checkUser',
+            // 'checkAdmin',
+            'auth:api'
         ]
     ], function ($router) {
 
@@ -194,6 +194,7 @@ $router->group([
             $router->get('/', 'UserController@index');
             $router->post('/', 'UserController@store');
             $router->post('add', 'UserController@addUser');
+            $router->post('details', 'UserController@usersDetails');
             $router->get('/{id:[a-fA-F0-9\-]{36}}', 'UserController@show');
             $router->delete('/{id:[a-fA-F0-9\-]{36}}', 'UserController@destroy');
 

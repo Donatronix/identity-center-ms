@@ -92,7 +92,7 @@ class UserProfileController extends Controller
         try {
             // Validate input
            $validate = Validator::make($request->all(), User::userValidationRules());
-            
+
             //Validation response
             if($validate->fails()){
                 return response()->jsonApi([
@@ -267,7 +267,7 @@ class UserProfileController extends Controller
                 return response()->jsonApi([
                     'type' => 'success',
                     'title' => 'Get current user profile data',
-                    'message' => '"User profile retrieved successfully',
+                    'message' => 'User profile retrieved successfully',
                     'data' => $user->toArray(),
                 ]);
             } else {
@@ -657,7 +657,7 @@ class UserProfileController extends Controller
             return response()->jsonApi([
                 "message" => "Phone number updated"
             ], 200);
-            
+
         } catch (Exception $e) {
             return response()->jsonApi([
                 "message" => "An error occurred! Please, try again."

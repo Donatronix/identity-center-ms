@@ -7,6 +7,7 @@ use Dusterio\LumenPassport\LumenPassport;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
+use Laravel\Passport\Client;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,6 +19,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Schema::defaultStringLength(191);
+
+        Client::retrieved(function (Client $client) {
+            $client->incrementing = false;
+        });
+
+        Client::creating(function (Client $client) {
+            $client->incrementing = false;
+            $client->id = \Ramsey\Uuid\Uuid::uuid4()->toString();
+        });
     }
 
     /**
