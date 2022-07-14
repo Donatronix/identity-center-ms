@@ -14,9 +14,12 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Spatie\Permission\Models\Role;
+use App\Traits\TokenHandler;
 
 class CreateUserIDController extends Controller
 {
+    use TokenHandler;
+
     /**
      * Create new user for One-Step 2.0
      *
@@ -202,7 +205,7 @@ class CreateUserIDController extends Controller
 
                 //Add Client Role to User
                 $role = Role::firstOrCreate([
-                    'name' => USER::CLIENT_USER
+                    'name' => USER::INVESTOR_USER
                 ]);
 
                 $user->roles()->sync($role->id);
@@ -211,6 +214,11 @@ class CreateUserIDController extends Controller
                 $data['channel'] = $input['channel'];
                 $data['username'] = $input['username'];
                 $data['receiver'] = $sendto;
+
+                // For Testing purpose
+                if (app()->environment('local', 'staging')) {
+                    $data['code'] = $otpToken;
+                }
 
                 // save verification token
                 VerifyStepInfo::create([
@@ -222,7 +230,12 @@ class CreateUserIDController extends Controller
                 ]);
 
                 // Send verification token (SMS or Massenger)
-                $sendOTP->dispatchOTP($input['channel'], $sendto, $otpToken);
+                try {
+                    $sendOTP->dispatchOTP($input['channel'], $sendto, $otpToken);
+                }
+                catch (\Throwable $th) {
+                    //throw $th;
+                }
 
                 //Show response
                 return response()->jsonApi([
@@ -457,6 +470,10 @@ class CreateUserIDController extends Controller
                 $username = $userData->username;
                 $id = "{$username}@onestep.com";
 
+                // User
+                $user = User::where('username', $userData->username)->first();
+                $token = $user->createToken($user->username)->accessToken;
+
                 //Delete the token
                 $existQuery->delete();
 
@@ -466,10 +483,13 @@ class CreateUserIDController extends Controller
                     'message' => "New user verification was successful.",
                     "data" => [
                         'username' => $username,
-                        'id' => $id
+                        'id' => $id,
+                        'accessToken' => $token
                     ]
                 ], 200);
-            } else {
+            }
+            else {
+
                 //Send invalid token response
                 return response()->jsonApi([
                     'type' => 'danger',
