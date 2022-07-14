@@ -37,9 +37,15 @@ use Sumra\SDK\Traits\UuidTrait;
  *          example="1"
  *      ),
  *      @OA\Property(
- *          property="document_file",
+ *          property="portrait",
  *          type="string",
  *          description="Document file",
+ *          example=""
+ *      ),
+ *      @OA\Property(
+ *          property="document_front",
+ *          type="string",
+ *          description="Document Front View",
  *          example=""
  *      ),
  *      @OA\Property(
@@ -60,7 +66,8 @@ class KYC extends Model
         'document_number',
         'document_country',
         'document_type',
-        'document_file',
+        'portrait',
+        'document_front',
         'document_back',
         'status'
     ];
@@ -102,13 +109,11 @@ class KYC extends Model
     public static function validationRules(): array
     {
         return [
-            // 'gender' => 'required|string',
-            // 'birthday' => 'required|string',
             'id_number' => 'string|max:100',
             'document_number' => 'string',
             'document_country' => 'string|max:3',
             'document_type' => 'integer|in:1,2,3,4',
-            'document_file' => 'required|string'
+            'document_front' => 'required|string'
         ];
     }
 }

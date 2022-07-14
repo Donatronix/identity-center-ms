@@ -56,7 +56,6 @@ class FetchWhatsAppInfo
     public function getHeaders()
     {
         return [
-            'user-id' => '10000000-1000-1000-1000-000000000001',
             'Content-Type' => 'application/json',
             'Access-Control-Allow-Origin' => '*',
             'Authorization' => 'Bearer' . env('WHATSAPP_TOKEN')

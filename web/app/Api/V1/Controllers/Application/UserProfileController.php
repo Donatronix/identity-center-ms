@@ -92,7 +92,7 @@ class UserProfileController extends Controller
         try {
             // Validate input
            $validate = Validator::make($request->all(), User::userValidationRules());
-            
+
             //Validation response
             if($validate->fails()){
                 return response()->jsonApi([
@@ -236,9 +236,6 @@ class UserProfileController extends Controller
      */
     public function show(Request $request): JsonApiResponse
     {
-//        $user = Auth::user();
-//        if ($user) {}
-
         try {
             $builder = User::where('id', Auth::user()->id);
 
@@ -267,7 +264,7 @@ class UserProfileController extends Controller
                 return response()->jsonApi([
                     'type' => 'success',
                     'title' => 'Get current user profile data',
-                    'message' => '"User profile retrieved successfully',
+                    'message' => 'User profile retrieved successfully',
                     'data' => $user->toArray(),
                 ]);
             } else {
@@ -292,21 +289,6 @@ class UserProfileController extends Controller
                 'data' => []
             ], 404);
         }
-
-
-        // Get object
-//        $user = $this->getObject(Auth::user()->getAuthIdentifier());
-//
-//        if ($user instanceof JsonApiResponse) {
-//            return $user;
-//        }
-//
-//        return response()->jsonApi([
-//            'type' => 'success',
-//            'title' => 'User details data',
-//            'message' => "User detail data has been received",
-//            'data' => $user->toArray()
-//        ], 200);
     }
 
     /**
@@ -426,10 +408,15 @@ class UserProfileController extends Controller
      *                 type="string",
      *                 example="success"
      *             ),
+     *              @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="Update user info"
+     *             ),
      *             @OA\Property(
      *                 property="message",
      *                 type="string",
-     *                 example="Email update was successful"
+     *                 example="User updated successfully"
      *             )
      *         )
      *     ),
@@ -446,9 +433,14 @@ class UserProfileController extends Controller
      *                 example="danger"
      *             ),
      *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="Update user info"
+     *             ),
+     *             @OA\Property(
      *                 property="message",
      *                 type="string",
-     *                 example="Email update FAILED"
+     *                 example="User update FAILED"
      *             )
      *         )
      *     ),
@@ -467,13 +459,23 @@ class UserProfileController extends Controller
     public function update(Request $request, string $id): JsonApiResponse
     {
         try {
-            //validate input date
-            $inputData = $this->validate($request, User::profileValidationRules((int)$id));
+            //validate input data
+            $validator = Validator::make($request->all(), User::profileValidationRules((int)$id));
+    
+            if ($validator->fails()) {
+                return response()->jsonApi([
+                    'type' => 'danger',
+                    'title' => "Update user info",
+                    'message' => "Input validator errors. Try again.",
+                    "data" => null
+                ], 400);
+            }
 
             // Get User object
             $user = User::findOrFail($id);
 
             // Update data and save
+            $inputData = $validator->validated();
             $user->fill($inputData);
             $user->save();
 
@@ -491,15 +493,7 @@ class UserProfileController extends Controller
                 ], 'mail');
             }
 
-    //    $update = $request->except(['password']);
-
-    //    if ($request->has('current_password')) {
-    //        if (Hash::check($request->current_password, $user->password)) {
-    //            $update['password'] = Hash::make($request->password);
-    //        } else {
-    //            throw new BadRequestHttpException('Invalid current_password');
-    //        }
-    //    }
+ 
 
             // Send notification email
             $subject = 'Change Username';
@@ -657,7 +651,7 @@ class UserProfileController extends Controller
             return response()->jsonApi([
                 "message" => "Phone number updated"
             ], 200);
-            
+
         } catch (Exception $e) {
             return response()->jsonApi([
                 "message" => "An error occurred! Please, try again."

@@ -117,20 +117,17 @@ class AuthController extends Controller
             }
             catch (\Throwable $th) {}
 
-            /**
-             * For Testing
-             *
-             */
-            $data = [
-                'code' => $otpToken
-            ];
+            // For Testing
+            if (app()->environment('local', 'staging')) {
+                $data = ['code' => $otpToken];
+            }
 
             //Show response
             return response()->jsonApi([
                 'type' => 'success',
                 'title' => 'Login',
                 'message' => "{$input['channel']} verification code sent to {$sendto}.",
-                "data" => $data
+                "data" => $data ?? null
             ], 200);
         }
         catch (\Exception $e) {
@@ -220,7 +217,6 @@ class AuthController extends Controller
             }
 
             /**
-             *
              * Create Auth Token
              *
              */
@@ -228,7 +224,7 @@ class AuthController extends Controller
             $token = $user->createToken($user->username)->accessToken;
             $data = [
                 'user' => $user,
-                'access-token' => $token
+                'accessToken' => $token
             ];
 
             /**

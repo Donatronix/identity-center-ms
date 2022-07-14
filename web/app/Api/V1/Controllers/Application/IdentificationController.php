@@ -127,60 +127,85 @@ class IdentificationController extends Controller
         }
     }
 
+
     /**
-     * Saving user identity data
+     * Submit User KYC
      *
      * @OA\Post(
-     *     path="/user-identity",
-     *     summary="Saving user identity data",
-     *     description="Saving user identity data",
+     *     path="/user-identify",
+     *     description="Upload KYC",
      *     tags={"User | KYC"},
      *
      *     security={{
-     *         "default": {
+     *         "passport": {
      *             "ManagerRead",
      *             "User",
      *             "ManagerWrite"
      *         }
      *     }},
-     *
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/KYC")
+     *         @OA\JsonContent(
+     *             type="object",
+     *
+     *             @OA\Property(
+     *                 property="id_number",
+     *                 type="string",
+     *                 description="Identification Number",
+     *                 required={"false"},
+     *                 example="xxxxxxxxxxxx"
+     *             ),
+     *             @OA\Property(
+     *                 property="document_number",
+     *                 type="string",
+     *                 description="Document Number",
+     *                 required={"false"},
+     *                 example="FG1452635"
+     *             ),
+     *             @OA\Property(
+     *                 property="document_type",
+     *                 type="integer",
+     *                 description="Type of the Document uploaded: Passport(1), ID CARD(2), DRIVER LICENSE (3), PERMIT(4)",
+     *                 required={"true"},
+     *                 example="1"
+     *             ),
+     *             @OA\Property(
+     *                 property="document_front",
+     *                 type="string",
+     *                 description="Uploaded document in base64",
+     *                 required={"true"},
+     *                 example=""
+     *             ),
+     *             @OA\Property(
+     *                 property="document_back",
+     *                 type="string",
+     *                 description="Uploaded document back view in base64",
+     *                 required={"false"},
+     *                 example=""
+     *             ),
+     *         )
      *     ),
+     *
      *     @OA\Response(
      *         response="200",
-     *         description="User identity saved successfully"
-     *     ),
-     *     @OA\Response(
-     *         response="201",
-     *         description="User created"
+     *         description="KYC submitted",
+     *         @OA\JsonContent(ref="#/components/schemas/OkResponse")
      *     ),
      *     @OA\Response(
      *         response="400",
-     *         description="Invalid request"
-     *     ),
-     *     @OA\Response(
-     *         response="401",
-     *         description="Unauthorized"
-     *     ),
-     *     @OA\Response(
-     *         response="404",
-     *         description="Not Found"
-     *     ),
-     *     @OA\Response(
-     *         response="422",
-     *         description="Validation failed"
+     *         description="Validator Error",
+     *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
      *     ),
      *     @OA\Response(
      *         response="500",
-     *         description="Unknown error"
+     *         description="Server error",
+     *         @OA\JsonContent(ref="#/components/schemas/DangerResponse")
      *     )
      * )
      *
      * @param Request $request
      *
-     * @return mixed
+     * @return JsonResponse
      */
     public function store(Request $request): mixed
     {
@@ -246,8 +271,8 @@ class IdentificationController extends Controller
         }
         catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'warning',
-                'title' => 'User data identification',
+                'type' => 'danger',
+                'title' => 'User Identification',
                 'message' => $e->getMessage(),
             ], 500);
         }

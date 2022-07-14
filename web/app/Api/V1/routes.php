@@ -42,6 +42,17 @@ $router->group([
             $router->post('/update/recovery', "CreateUserIDController@updateRecoveryQuestion");
 
             /**
+             * User Login
+             */
+            $router->group([
+                'prefix' => 'login',
+            ], function ($router) {
+                $router->post('/', "LoginController@login");
+                $router->post('/verify-otp', "LoginController@verifyOTP");
+                $router->post('/refresh-token', "LoginController@refreshToken");
+            });
+
+            /**
              * Admin access token verification
              */
             $router->post('/verify-access-token', "AdminTokenController");
@@ -78,10 +89,10 @@ $router->group([
      */
     $router->group([
         'namespace' => 'Application',
-        // 'middleware' => [
-        //     'checkUser',
-        //     'auth:api'
-        // ]
+        'middleware' => [
+            //'checkUser',
+            'auth:api'
+        ]
     ], function ($router) {
 
         /**
@@ -91,9 +102,9 @@ $router->group([
         $router->group([
             'prefix'=>'2fa'
         ], function($router){
-            $router->get('/','TwoFASecurityController@show2faForm');
-            $router->post('/generateSecret','TwoFASecurityController@generate2faSecret');
+            $router->get('/generateSecret','TwoFASecurityController@generate2faSecret');
             $router->post('/enable2fa','TwoFASecurityController@enable2fa');
+            $router->post('/verify','TwoFASecurityController@verify2fa');
             $router->post('/disable2fa','TwoFASecurityController@disable2fa');
         });
 
@@ -119,7 +130,6 @@ $router->group([
              * User Agreement
              */
             $router->patch('/agreement', "AgreementController");
-
         });
 
         /**
@@ -170,11 +180,11 @@ $router->group([
         'prefix' => 'admin',
         'namespace' => 'Admin',
         'middleware' => [
-            'checkUser',
-            'checkAdmin'
+            // 'checkUser',
+            // 'checkAdmin',
+            'auth:api'
         ]
     ], function ($router) {
-
         /**
          * KYC Management
          *
@@ -194,6 +204,7 @@ $router->group([
             $router->get('/', 'UserController@index');
             $router->post('/', 'UserController@store');
             $router->post('add', 'UserController@addUser');
+            $router->post('details', 'UserController@usersDetails');
             $router->get('/{id:[a-fA-F0-9\-]{36}}', 'UserController@show');
             $router->delete('/{id:[a-fA-F0-9\-]{36}}', 'UserController@destroy');
 
@@ -230,5 +241,6 @@ $router->group([
         'namespace' => 'Webhooks'
     ], function ($router) {
         $router->post('identify/{object}', 'IdentifyWebhookController');
+        $router->post('identities', 'IdentitiesWebhookController');
     });
 });
