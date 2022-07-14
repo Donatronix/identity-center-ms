@@ -113,7 +113,7 @@ class AdminTokenController extends Controller
      */
     public function __invoke(Request $request): JsonResponse
     {
-        //validate input date
+        //validate input data
         $validator = Validator::make($request->all(), [
             'access_code'=>['required', 'string']
         ]);

@@ -2,9 +2,6 @@
 
 namespace App\Api\V1\Controllers;
 
-use App\Exceptions\SMSGatewayException;
-use Exception;
-use Illuminate\Support\Str;
 use Laravel\Lumen\Routing\Controller as BaseController;
 use App\Traits\ResponseTrait;
 

@@ -190,16 +190,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     const STATUS_ACTIVE = 1;
     const STATUS_BANNED = 2;
 
-//    /**
-//     * User statuses constant
-//     */
-//    const STATUS_STEP_1 = 1;
-//    const STATUS_STEP_2 = 2;
-//    const STATUS_STEP_3 = 3;
-//    const STATUS_STEP_4 = 4;
-//    const STATUS_ACTIVE = 5;
-//    const STATUS_INACTIVE = 6;
-
     /**
      * User document types array
      *
@@ -222,15 +212,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         self::STATUS_ACTIVE,
         self::STATUS_BANNED
     ];
-
-//    public static array $statuses = [
-//        self::STATUS_STEP_1,
-//        self::STATUS_STEP_2,
-//        self::STATUS_STEP_3,
-//        self::STATUS_STEP_4,
-//        self::STATUS_ACTIVE,
-//        self::STATUS_INACTIVE,
-//    ];
 
     /**
      * User Category OR Roles
@@ -445,7 +426,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         ];
     }
 
-     /**
+    /**
      * Validation rules for admin new user
      *
      * @return array

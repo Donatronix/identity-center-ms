@@ -18,14 +18,8 @@ services:
       - PUBSUB_RECEIVER=Local.IdentityCentreMS
     volumes:
       - ./web:/var/www/html:rw
+#      - ./logs:/var/log/nginx:rw
 #     - ./xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini:rw
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6380:6379"
-    networks:
-      - ugg.network
 
 networks:
   ugg.network:

@@ -8,12 +8,14 @@ use Sumra\SDK\Traits\UuidTrait;
 class TwoFactorSecurity extends Model
 {
     use UuidTrait;
+    protected $fillable = [
+        'user_id',
+        'secret',
+        'status'
+    ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-    protected $fillable = [
-        'user_id'
-    ];
 }

@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Spatie\Permission\Models\Role;
 use App\Traits\TokenHandler;
 
@@ -90,6 +91,11 @@ class CreateUserIDController extends Controller
      *                 example="success"
      *             ),
      *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="Create new user"
+     *             ),
+     *             @OA\Property(
      *                 property="message",
      *                 type="string",
      *                 example="SMS verification code sent to +4492838989290"
@@ -132,7 +138,7 @@ class CreateUserIDController extends Controller
      *             @OA\Property(
      *                 property="title",
      *                 type="string",
-     *                 example="Create new user account One-Step 2.0"
+     *                 example="Create new user"
      *             ),
      *             @OA\Property(
      *                 property="message",
@@ -157,18 +163,19 @@ class CreateUserIDController extends Controller
      */
     public function createAccount(Request $request, SendVerifyToken $sendOTP): JsonResponse
     {
-        //validate input date
-        $input = $request->all();
-
-        $validator = Validator::make($input, VerifyStepInfo::rules());
+        $validator = Validator::make($request->all(), VerifyStepInfo::rules());
 
         if ($validator->fails()) {
             return response()->jsonApi([
                 'type' => 'danger',
+                'title' => 'Create new user',
                 'message' => "Input validator errors. Try again.",
                 "data" => null
             ], 400);
         }
+        
+        //validate input date
+        $input = $validator->validated();
 
         //Receiver token
         $sendto = $this->getTokenReceiver($input);
@@ -184,6 +191,8 @@ class CreateUserIDController extends Controller
             if ($userExist) {
                 // Create verification token (OTP - One Time Password)
                 $otpToken = VerifyStepInfo::generateOTP(7);
+                $data['otpToken'] = $otpToken;
+                
 
                 //Generate token expiry time in minutes
                 $validity = VerifyStepInfo::tokenValidity(30);
@@ -194,17 +203,12 @@ class CreateUserIDController extends Controller
                 $user->phone = $input['phone'];
                 $user->save();
 
-                /**
-                 * Add Client Role to User
-                 *
-                 */
+                //Add Client Role to User
                 $role = Role::firstOrCreate([
                     'name' => USER::INVESTOR_USER
                 ]);
-                $user->roles()->sync($role->id);
 
-                // Generate authentication access token
-                // $data['token'] = $user->createToken($user->username)->accessToken;
+                $user->roles()->sync($role->id);
 
                 //Other response data array
                 $data['channel'] = $input['channel'];
@@ -236,6 +240,7 @@ class CreateUserIDController extends Controller
                 //Show response
                 return response()->jsonApi([
                     'type' => 'success',
+                    'title' => 'Create new user',
                     'message' => "{$channel} verification code sent to {$sendto}.",
                     "data" => $data
                 ], 200);
@@ -243,6 +248,7 @@ class CreateUserIDController extends Controller
             } else {
                 return response()->jsonApi([
                     'type' => 'danger',
+                    'title' => 'Create new user',
                     'message' => "{$sendto} is already taken/verified by another user. Try again.",
                     "data" => null
                 ], 400);
@@ -250,6 +256,7 @@ class CreateUserIDController extends Controller
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
+                'title' => 'Create new user',
                 'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again.",
                 "data" => $e->getMessage()
             ], 400);
@@ -501,7 +508,7 @@ class CreateUserIDController extends Controller
     }
 
     /**
-     * Create new user for One-Step 2.0
+     * Update new user personal info for One-Step 2.0
      *
      * @OA\Post(
      *     path="/user-account/v2/update",
@@ -569,6 +576,11 @@ class CreateUserIDController extends Controller
      *                 example="success"
      *             ),
      *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="New user personal info"
+     *             ),
+     *             @OA\Property(
      *                 property="message",
      *                 type="string",
      *                 example="User personal data updated"
@@ -586,6 +598,11 @@ class CreateUserIDController extends Controller
      *                 property="type",
      *                 type="string",
      *                 example="danger"
+     *             ),
+     *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="New user personal info"
      *             ),
      *             @OA\Property(
      *                 property="message",
@@ -611,6 +628,7 @@ class CreateUserIDController extends Controller
         if ($validator->fails()) {
             return response()->jsonApi([
                 'type' => 'danger',
+                'title'=>'New user personal info',
                 'message' => "Input validator errors. Try again.",
                 "data" => null
             ], 400);
@@ -639,14 +657,14 @@ class CreateUserIDController extends Controller
                 // Return response
                 return response()->jsonApi([
                     'type' => 'success',
-                    'title' => "Update user account step 3",
+                    'title' => "New user personal info",
                     'message' => 'User account was successful updated',
                     'data' => ['username' => $input['username']]
                 ], 200);
             } else {
                 return response()->jsonApi([
                     'type' => 'danger',
-                    'title' => "Update user account step 1",
+                    'title' => "New user personal info",
                     'message' => 'User account was NOT  updated',
                     'data' => null
                 ], 400);
@@ -655,8 +673,9 @@ class CreateUserIDController extends Controller
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
-                'title' => "Update user account",
-                'message' => $e->getMessage()
+                'title' => "New user personal info",
+                'message' => $e->getMessage(),
+                'data' => null
             ], 400);
         }
     }
@@ -725,6 +744,11 @@ class CreateUserIDController extends Controller
      *                 example="danger"
      *             ),
      *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="New user recovery questions"
+     *             ),
+     *             @OA\Property(
      *                 property="message",
      *                 type="string",
      *                 example="Create new user account step 1"
@@ -748,6 +772,11 @@ class CreateUserIDController extends Controller
      *                 property="type",
      *                 type="string",
      *                 example="danger"
+     *             ),
+     *             @OA\Property(
+     *                 property="title",
+     *                 type="string",
+     *                 example="New user recovery questions"
      *             ),
      *             @OA\Property(
      *                 property="message",
@@ -779,6 +808,7 @@ class CreateUserIDController extends Controller
         if ($validator->fails()) {
             return response()->jsonApi([
                 'type' => 'danger',
+                'title'=> 'New user recovery questions',
                 'message' => "Input validator errors. Try again.",
                 "data" => null
             ], 400);
@@ -791,40 +821,49 @@ class CreateUserIDController extends Controller
             //Does the user account exist?
             if ($userQuery->exists()) {
                 //get the user ID
-                $userId = $userQuery->first()->id;
+                $user = $userQuery->first();
+                $userId = $user->id;
 
-                //Save recovery question
-                $question = new RecoveryQuestion;
-                $question->user_id = $userId;
-                $question->answer_one = $input['answer1'];
-                $question->answer_two = $input['answer2'];
-                $question->answer_three = $input['answer3'];
+                RecoveryQuestion::firstOrCreate([
+                    'user_id' => $userId,
+                    'answer_one' => $input['answer1'],
+                    'answer_two' => $input['answer2'],
+                    'answer_three' => $input['answer3']
+                ]);
 
-                if ($question->save()) {
-                    // Return response
-                    return response()->jsonApi([
-                        'type' => 'success',
-                        'message' => 'User account security questions was successful saved',
-                        'data' => ['username' => $input['username']]
-                    ], 200);
-                } else {
-                    return response()->jsonApi([
-                        'type' => 'danger',
-                        'message' => 'User account security questions was NOT  saved',
-                        'data' => null
-                    ], 400);
-                }
+                // Generate user access token
+                $token = $user->createToken($user->username)->accessToken;
+
+                
+                return response()->jsonApi([
+                    'type' => 'success',
+                    'title'=> 'New user recovery questions',
+                    'message' => 'User account security questions was successful saved',
+                    'data' => [
+                            'username' => $input['username'],
+                            'access_token' => $token
+                        ]
+                ], 200);
             } else {
                 return response()->jsonApi([
                     'type' => 'danger',
+                    'title'=> 'New user recovery questions',
                     'message' => 'User account was not found!',
-                    'data' => null
+                    'data' => $input
                 ], 404);
             }
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
+                'title'=> 'New user recovery questions',
                 'message' => $e->getMessage(),
+                'data' => $input
+            ], 400);
+        }catch (ModelNotFoundException $ex) {
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title'=> 'New user recovery questions',
+                'message' => $ex->getMessage(),
                 'data' => $input
             ], 400);
         }

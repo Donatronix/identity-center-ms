@@ -42,6 +42,17 @@ $router->group([
             $router->post('/update/recovery', "CreateUserIDController@updateRecoveryQuestion");
 
             /**
+             * User Login
+             */
+            $router->group([
+                'prefix' => 'login',
+            ], function ($router) {
+                $router->post('/', "LoginController@login");
+                $router->post('/verify-otp', "LoginController@verifyOTP");
+                $router->post('/refresh-token', "LoginController@refreshToken");
+            });
+
+            /**
              * Admin access token verification
              */
             $router->post('/verify-access-token', "AdminTokenController");
@@ -91,9 +102,9 @@ $router->group([
         $router->group([
             'prefix'=>'2fa'
         ], function($router){
-            $router->get('/','TwoFASecurityController@show2faForm');
-            $router->post('/generateSecret','TwoFASecurityController@generate2faSecret');
+            $router->get('/generateSecret','TwoFASecurityController@generate2faSecret');
             $router->post('/enable2fa','TwoFASecurityController@enable2fa');
+            $router->post('/verify','TwoFASecurityController@verify2fa');
             $router->post('/disable2fa','TwoFASecurityController@disable2fa');
         });
 
@@ -174,7 +185,6 @@ $router->group([
             'auth:api'
         ]
     ], function ($router) {
-
         /**
          * KYC Management
          *
@@ -231,5 +241,6 @@ $router->group([
         'namespace' => 'Webhooks'
     ], function ($router) {
         $router->post('identify/{object}', 'IdentifyWebhookController');
+        $router->post('identities', 'IdentitiesWebhookController');
     });
 });

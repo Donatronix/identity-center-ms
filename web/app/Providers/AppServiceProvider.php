@@ -12,7 +12,7 @@ use Laravel\Passport\Client;
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
+     * Bootstrap any application services.
      *
      * @return void
      */
