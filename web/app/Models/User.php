@@ -176,31 +176,11 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     use UuidTrait;
 
     /**
-     * Document Types constants
-     */
-    const DOCUMENT_TYPES_PASSPORT = 1;
-    const DOCUMENT_TYPES_ID_CARD = 2;
-    const DOCUMENT_TYPES_DRIVERS_LICENSE = 3;
-    const DOCUMENT_TYPES_RESIDENCE_PERMIT = 4;
-
-    /**
      * Statuses of users
      */
     const STATUS_INACTIVE = 0;
     const STATUS_ACTIVE = 1;
     const STATUS_BANNED = 2;
-
-    /**
-     * User document types array
-     *
-     * @var int[]
-     */
-    public static array $document_types = [
-        1 => self::DOCUMENT_TYPES_PASSPORT,
-        2 => self::DOCUMENT_TYPES_ID_CARD,
-        3 => self::DOCUMENT_TYPES_DRIVERS_LICENSE,
-        4 => self::DOCUMENT_TYPES_RESIDENCE_PERMIT
-    ];
 
     /**
      * Array statuses of users
@@ -255,12 +235,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'address_line2',
         'address_city',
         'address_zip',
-
-        'id_number',
-        'document_number',
-        'document_country',
-        'document_type',
-        'document_file',
 
         'subscribed_to_announcement',
         'is_agreement',
@@ -496,13 +470,13 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     }
 
     /**
-     * One User has many Identification relation
+     * One User has many KYC relation
      *
      * @return HasMany
      */
-    public function identifications(): HasMany
+    public function kycs(): HasMany
     {
-        return $this->hasMany(Identification::class);
+        return $this->hasMany(KYC::class);
     }
 
     public function loginSecurity()
