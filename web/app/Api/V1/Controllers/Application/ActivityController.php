@@ -33,13 +33,7 @@ class ActivityController extends Controller
      *     description="Getting activity detail by platform",
      *     tags={"Activities"},
      *
-     *     security={{
-     *         "default": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *         name="limit",
@@ -145,13 +139,8 @@ class ActivityController extends Controller
      *     description="Save a new activity",
      *     tags={"Activities"},
      *
-     *     security={{
-     *         "default": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/Activity")
@@ -259,13 +248,8 @@ class ActivityController extends Controller
      *     description="Delete activity",
      *     tags={"Activities"},
      *
-     *     security={{
-     *         "default": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",

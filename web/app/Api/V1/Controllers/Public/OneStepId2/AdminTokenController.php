@@ -24,13 +24,6 @@ class AdminTokenController extends Controller
      *     description="Verify admin access token for One-Step 2.0",
      *     tags={"OneStep 2.0 | Admin Access Token"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
-     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -151,7 +144,7 @@ class AdminTokenController extends Controller
                 'message' => "Access code NOT verified.",
                 "data" => null
             ], 400);
-            
+
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',

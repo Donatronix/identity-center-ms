@@ -29,13 +29,6 @@ class CreateUserIDController extends Controller
      *     description="Verify phone number and handler to create new user for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
-     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -194,7 +187,7 @@ class CreateUserIDController extends Controller
 
                 //Generate token expiry time in minutes
                 $validity = VerifyStepInfo::tokenValidity(30);
-                
+
                 // For Testing purpose
                 if (app()->environment('local', 'staging')) {
                     $data['otpToken'] = $otpToken;
@@ -269,13 +262,6 @@ class CreateUserIDController extends Controller
      *     summary="Resend OTP for One-Step 2.0",
      *     description="Resend OTP to create new user for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account"},
-     *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -396,13 +382,6 @@ class CreateUserIDController extends Controller
      *     description="Verify phone number or handler to create new user for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
-     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -514,12 +493,6 @@ class CreateUserIDController extends Controller
      *     description="Update new user for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -686,13 +659,6 @@ class CreateUserIDController extends Controller
      *     summary="Update new user recovery questions",
      *     description="Update new user recovery questions for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account"},
-     *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
      *
      *     @OA\RequestBody(
      *         required=true,

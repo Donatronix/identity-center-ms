@@ -23,13 +23,7 @@ class KYCController extends Controller
      *     description="Get list of KYC",
      *     tags={"Admin | KYC"},
      *
-     *     security={{
-     *         "default": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *         name="limit",
@@ -73,13 +67,7 @@ class KYCController extends Controller
      *     description="Response to KYC",
      *     tags={"Admin | KYC"},
      *
-     *     security={{
-     *         "default": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *         name="id",

@@ -36,14 +36,8 @@ class UserController extends Controller
      *     description="Get all users list in system",
      *     tags={"Admin | Users"},
      *
-     *     security={{
-     *         "default": {
-     *             "AdminRead",
-     *             "AdminWrite",
-     *             "ManagerRead",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
+     *
      *     @OA\Parameter(
      *         name="type",
      *         in="query",
@@ -223,13 +217,7 @@ class UserController extends Controller
      *     description="Save a new user data",
      *     tags={"Admin | Users"},
      *
-     *     security={{
-     *         "passport": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -451,13 +439,7 @@ class UserController extends Controller
      *     description="Get detail info about user",
      *     tags={"Admin | Users"},
      *
-     *     security={{
-     *         "passport": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *         name="id",
@@ -532,13 +514,7 @@ class UserController extends Controller
      *     description="Update user data",
      *     tags={"Admin | Users"},
      *
-     *     security={{
-     *         "passport": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *         name="id",
@@ -720,13 +696,7 @@ class UserController extends Controller
      *     description="Delete user from database",
      *     tags={"Admin | Users"},
      *
-     *     security={{
-     *         "default": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *         name="id",
@@ -836,13 +806,7 @@ class UserController extends Controller
      *     description="Create new user",
      *     tags={"Admin | Users"},
      *
-     *     security={{
-     *         "passport": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *         name="token",
@@ -918,13 +882,7 @@ class UserController extends Controller
      *     description="Create new user",
      *     tags={"Admin | Users"},
      *
-     *     security={{
-     *         "passport": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *         name="email",
@@ -1013,13 +971,8 @@ class UserController extends Controller
      *     description="Add a new User",
      *     tags={"Admin | Users"},
      *
-     *     security={{
-     *         "passport": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -1162,13 +1115,8 @@ class UserController extends Controller
      *     description="Get details of users",
      *     tags={"Admin | Users"},
      *
-     *     security={{
-     *         "passport": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(

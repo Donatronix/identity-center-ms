@@ -30,12 +30,7 @@ class TwoFASecurityController extends Controller
      *     description="Generate the 2Fa secret",
      *     tags={"2fa"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Response(
      *         response="200",
@@ -109,13 +104,8 @@ class TwoFASecurityController extends Controller
      *     description="enable the 2Fa security",
      *     tags={"2fa"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
-     * 
+     *     security={{ "bearerAuth": {} }},
+     *
      *      @OA\RequestBody(
      *            @OA\JsonContent(
      *                type="object",
@@ -211,13 +201,8 @@ class TwoFASecurityController extends Controller
      *     description="Verify 2fa code",
      *     tags={"2fa"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
-     * 
+     *     security={{ "bearerAuth": {} }},
+     *
      *      @OA\RequestBody(
      *            @OA\JsonContent(
      *                type="object",
@@ -313,13 +298,8 @@ class TwoFASecurityController extends Controller
      *     description="disable the 2Fa security",
      *     tags={"2fa"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
-     * 
+     *     security={{ "bearerAuth": {} }},
+     *
      *      @OA\RequestBody(
      *            @OA\JsonContent(
      *                type="object",
