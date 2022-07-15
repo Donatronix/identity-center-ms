@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Identification;
+use App\Models\KYC;
 use App\Models\User;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -168,7 +168,7 @@ class IdentityVerification
         $vendorData = json_decode($payload['verification']['vendorData']);
 
         // Save Veriff data
-        Identification::create([
+        KYC::create([
             'session_id' => $payload['verification']['id'],
             'user_id' => $vendorData->user_id,
             'status' => $payload['verification']['code'],

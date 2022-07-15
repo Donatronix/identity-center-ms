@@ -83,8 +83,6 @@ $app->middleware([
 
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
-    'checkUser' => \Sumra\SDK\Middleware\CheckUserMiddleware::class,
-    'checkAdmin' => \Sumra\SDK\Middleware\CheckAdminMiddleware::class,
     'permission' => Spatie\Permission\Middlewares\PermissionMiddleware::class,
     'role'       => Spatie\Permission\Middlewares\RoleMiddleware::class,
 ]);

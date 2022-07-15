@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\KYC;
 use Illuminate\Database\Seeder;
 
-class IdentificationSeeder extends Seeder
+class KYCsTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -13,6 +14,6 @@ class IdentificationSeeder extends Seeder
      */
     public function run()
     {
-        //
+        KYC::factory()->count(10)->create();
     }
 }

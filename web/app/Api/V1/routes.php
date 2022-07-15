@@ -90,11 +90,9 @@ $router->group([
     $router->group([
         'namespace' => 'Application',
         'middleware' => [
-            //'checkUser',
-            'auth:api'
+            //'auth:api'
         ]
     ], function ($router) {
-
         /**
          * 2Fa Security
          */
@@ -150,8 +148,8 @@ $router->group([
         $router->group([
             'prefix' => 'user-identify',
         ], function ($router) {
-            $router->post('/', 'IdentificationController@store');
-            $router->post('/start', 'IdentificationController@identifyStart');
+            $router->post('/upload', 'KYCController@store');
+            $router->post('/start', 'KYCController@identifyStart');
         });
 
         /**
@@ -180,18 +178,17 @@ $router->group([
         'prefix' => 'admin',
         'namespace' => 'Admin',
         'middleware' => [
-            // 'checkUser',
-            // 'checkAdmin',
             'auth:api'
         ]
     ], function ($router) {
         /**
          * KYC Management
-         *
          */
-        $router->group(['prefix' => 'kyc'], function ($router) {
-            $router->get('/', 'IdentificationController@index');
-            $router->put('{id}', 'IdentificationController@updateKYC');
+        $router->group([
+            'prefix' => 'kyc'
+        ], function ($router) {
+            $router->get('/', 'KYCController@index');
+            $router->put('/{id}', 'KYCController@updateKYC');
         });
 
         /**

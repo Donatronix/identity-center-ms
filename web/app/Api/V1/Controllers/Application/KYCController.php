@@ -3,22 +3,21 @@
 namespace App\Api\V1\Controllers\Application;
 
 use App\Http\Controllers\Controller;
+use App\Models\KYC;
 use App\Models\User;
 use App\Services\IdentityVerification;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
-use App\Models\KYC;
 
 /**
- * Class IdentificationController
+ * Class KYCController
  *
  * @package App\Api\V1\Controllers\User
  */
-class IdentificationController extends Controller
+class KYCController extends Controller
 {
-
     /**
      * Initialize identity verification session
      *
@@ -27,7 +26,7 @@ class IdentificationController extends Controller
      *     summary="Initialize identity verification session",
      *     description="Initialize identity verification session",
      *     description="Document type (1 = PASSPORT, 2 = ID_CARD, 3 = DRIVERS_LICENSE, 4 = RESIDENCE_PERMIT)",
-     *     tags={"User Identity"},
+     *     tags={"User | KYC"},
      *
      *     security={{
      *         "passport": {
@@ -127,13 +126,13 @@ class IdentificationController extends Controller
         }
     }
 
-
     /**
-     * Submit User KYC
+     * Upload documents for users KYC
      *
      * @OA\Post(
-     *     path="/user-identify",
-     *     description="Upload KYC",
+     *     path="/user-identify/upload",
+     *     summary="Upload documents for users KYC",
+     *     description="Upload documents for users KYC",
      *     tags={"User | KYC"},
      *
      *     security={{
@@ -143,47 +142,10 @@ class IdentificationController extends Controller
      *             "ManagerWrite"
      *         }
      *     }},
+     *
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="id_number",
-     *                 type="string",
-     *                 description="Identification Number",
-     *                 required={"false"},
-     *                 example="xxxxxxxxxxxx"
-     *             ),
-     *             @OA\Property(
-     *                 property="document_number",
-     *                 type="string",
-     *                 description="Document Number",
-     *                 required={"false"},
-     *                 example="FG1452635"
-     *             ),
-     *             @OA\Property(
-     *                 property="document_type",
-     *                 type="integer",
-     *                 description="Type of the Document uploaded: Passport(1), ID CARD(2), DRIVER LICENSE (3), PERMIT(4)",
-     *                 required={"true"},
-     *                 example="1"
-     *             ),
-     *             @OA\Property(
-     *                 property="document_front",
-     *                 type="string",
-     *                 description="Uploaded document in base64",
-     *                 required={"true"},
-     *                 example=""
-     *             ),
-     *             @OA\Property(
-     *                 property="document_back",
-     *                 type="string",
-     *                 description="Uploaded document back view in base64",
-     *                 required={"false"},
-     *                 example=""
-     *             ),
-     *         )
+     *         @OA\JsonContent(ref="#/components/schemas/UserKYC")
      *     ),
      *
      *     @OA\Response(
@@ -211,15 +173,13 @@ class IdentificationController extends Controller
     {
         // Validate input
         try {
-            $this->validate(
-                $request, KYC::validationRules());
-        }
-        catch (ValidationException $e) {
+            $this->validate($request, KYC::validationRules());
+        } catch (ValidationException $e) {
             return response()->jsonApi([
                 'type' => 'warning',
-                'title' => 'User data identification',
-                'message' => "Validation error",
-                'data' => $e->getMessage()
+                'title' => 'User KYC identification',
+                'message' => "Validation error: " . $e->getMessage(),
+                'data' => null
             ], 400);
         }
 
@@ -263,17 +223,19 @@ class IdentificationController extends Controller
             $data['user_id'] = Auth::user()->id;
 
             $kyc = KYC::create($data);
+
             return response()->jsonApi([
                 'type' => 'success',
-                'title' => 'User Identity',
+                'title' => 'User KYC identification',
                 'message' => "User identity submitted successfully",
+                'data' => null
             ], 200);
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
-                'title' => 'User Identification',
+                'title' => 'User KYC identification',
                 'message' => $e->getMessage(),
+                'data' => null
             ], 500);
         }
     }
