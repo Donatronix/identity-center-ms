@@ -53,16 +53,24 @@ class KYCController extends Controller
      */
     public function index(Request $request)
     {
-        $limit = $request->limit ?? 20;
-        $kycs = KYC::latest()
-            ->where('status', KYC::STATUS_PENDING)->paginate($limit);
+        try{
+            $kycs = KYC::latest()
+                ->where('status', KYC::STATUS_PENDING)
+                ->paginate($request->get('limit', config('settings.pagination_limit')));
 
-        return response()->json([
-            'type' => 'success',
-            'title' => 'Get KYC',
-            'message' => 'Pending Submitted KYCs',
-            'data' => $kycs
-        ], 200);
+            return response()->jsonApi([
+                'type' => 'success',
+                'title' => 'Get list of user KYC requests',
+                'message' => 'Pending Submitted KYCs',
+                'data' => $kycs
+            ]);
+        }catch (Exception $e){
+            return response()->jsonApi([
+                'type' => 'warning',
+                'title' => 'Get list of user KYC requests',
+                'message' => $e->getMessage(),
+            ], 404);
+        }
     }
 
     /**
@@ -116,7 +124,7 @@ class KYCController extends Controller
      *
      * @return Response
      */
-    public function updateKYC(Request $request, $id)
+    public function update(Request $request, $id)
     {
         try {
             $this->validate($request, [
@@ -141,30 +149,19 @@ class KYCController extends Controller
             } catch (Throwable $th) {
             }
 
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'success',
                 'title' => 'KYC Response',
                 'message' => 'KYC Response sent',
                 'data' => $kyc,
             ], 200);
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'KYC Response',
                 'message' => $e->getMessage(),
             ], 500);
         }
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return Response
-     */
-    public function store(Request $request)
-    {
-        //
     }
 
     /**
@@ -174,18 +171,6 @@ class KYCController extends Controller
      * @return Response
      */
     public function show(Identification $identification)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param Identification $identification
-     * @return Response
-     */
-    public function update(Request $request, Identification $identification)
     {
         //
     }

@@ -3,7 +3,7 @@
 namespace App\Api\V1\Controllers;
 
 use Laravel\Lumen\Routing\Controller as BaseController;
-use App\Traits\ResponseTrait;
+use Sumra\SDK\Traits\ResponseTrait;
 
 /**
  * @OA\Info(

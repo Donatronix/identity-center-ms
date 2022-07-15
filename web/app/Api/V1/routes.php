@@ -90,7 +90,7 @@ $router->group([
     $router->group([
         'namespace' => 'Application',
         'middleware' => [
-            //'auth:api'
+            'auth:api'
         ]
     ], function ($router) {
         /**
@@ -188,7 +188,7 @@ $router->group([
             'prefix' => 'kyc'
         ], function ($router) {
             $router->get('/', 'KYCController@index');
-            $router->put('/{id}', 'KYCController@updateKYC');
+            $router->put('/{id}', 'KYCController@update');
         });
 
         /**

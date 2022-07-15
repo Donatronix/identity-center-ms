@@ -131,7 +131,7 @@ class AuthController extends Controller
             ], 200);
         }
         catch (\Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'Login',
                 'message' => $e->getMessage(),
@@ -242,7 +242,7 @@ class AuthController extends Controller
             ], 200);
         }
         catch (\Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'Login',
                 'message' => $e->getMessage(),

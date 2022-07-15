@@ -4,6 +4,7 @@ namespace App\Api\V1\Controllers\Admin;
 
 use App\Api\V1\Controllers\Controller;
 use App\Models\User;
+use Auth;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -18,7 +19,6 @@ use PubSub;
 use Spatie\Permission\Models\Role;
 use Sumra\SDK\JsonApiResponse;
 use Throwable;
-use Auth;
 
 /**
  * Class UserController
@@ -156,12 +156,10 @@ class UserController extends Controller
      *         response="400",
      *         description="Invalid request"
      *     ),
-     *
      *     @OA\Response(
      *         response="404",
      *         description="Not found"
      *     ),
-     *
      *     @OA\Response(
      *         response="500",
      *         description="Unknown error"
@@ -177,20 +175,18 @@ class UserController extends Controller
         try {
             /**
              * User Category OR Role
-             *
              */
             $type = $request->type;
             if (!$type || strtolower($type) == 'all') {
                 $users = User::paginate($request->get('limit', config('settings.pagination_limit')));
-            }
-            else {
-
+            } else {
                 /**
                  *
                  */
                 if (!in_array(ucfirst($request->type), User::$types)) {
-                    throw new \Exception("User Type not allowed", 400);
+                    throw new Exception("User Type not allowed", 400);
                 }
+
                 Role::firstOrCreate(['name' => $request->type]);
 
                 $users = User::role($type)
@@ -771,24 +767,15 @@ class UserController extends Controller
      */
     public function destroy(mixed $id): mixed
     {
-        // Read user model
-        $user = $this->getObject($id);
-        if ($user instanceof JsonApiResponse) {
-            return $user;
-        }
-
         // Try to delete user
         try {
             $user = User::findOrFail($id);
             $user->delete();
 
-            $users = User::paginate(config('settings.pagination_limit'));
-
             return response()->jsonApi([
                 'type' => 'success',
                 'title' => "Delete of user",
                 'message' => 'User is successfully deleted',
-                'data' => $users->toArray(),
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
@@ -1145,7 +1132,7 @@ class UserController extends Controller
             if (isset($user))
                 $user->delete();
 
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'Add user account',
                 'message' => $e->getMessage(),
@@ -1220,9 +1207,8 @@ class UserController extends Controller
                 'message' => "Information fetched successfully!",
                 'data' => $users
             ], 200);
-        }
-        catch (Exception $e) {
-            return response()->json([
+        } catch (Exception $e) {
+            return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'Users Details',
                 'message' => $e->getMessage(),
