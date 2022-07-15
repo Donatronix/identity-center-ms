@@ -58,7 +58,7 @@ class LoginController extends Controller
      *             )
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *          response="200",
      *          description="Success",
@@ -194,7 +194,7 @@ class LoginController extends Controller
                 ], 200);
 
             }
- 
+
             //Show response
             return response()->jsonApi([
                 'type' => 'danger',
@@ -202,7 +202,7 @@ class LoginController extends Controller
                 'message' => "User does NOT exist. Try again.",
                 "data" => null
             ], 400);
-            
+
         }catch (Exception $e) {
             return response()->json([
                 'type' => 'danger',
@@ -248,7 +248,7 @@ class LoginController extends Controller
      *             )
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *          response="200",
      *          description="Success",
@@ -286,7 +286,7 @@ class LoginController extends Controller
      *                     type="string",
      *                     example="jhjdhd9JJHJjh96klnvv878lLH7G34Jjh98"
      *                 )
-     *                 
+     *
      *             )
      *         )
      *     ),
@@ -359,7 +359,7 @@ class LoginController extends Controller
 
                 //Create user access token
                 $data['token'] = $user->createToken($input['username'])->accessToken;
-                $data['user'] = $user->username;
+                $data['user'] = $user;
 
                 //Delete login OTP
                 $userQuery->delete();
@@ -391,7 +391,7 @@ class LoginController extends Controller
 
     /**
      * Refresh expired Token
-     * 
+     *
      * @OA\Post(
      *     path="/user-account/v2/login/refresh-token",
      *     summary="Refresh Token",

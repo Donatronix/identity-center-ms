@@ -173,7 +173,7 @@ class CreateUserIDController extends Controller
                 "data" => null
             ], 400);
         }
-        
+
         //validate input date
         $input = $validator->validated();
 
@@ -191,11 +191,14 @@ class CreateUserIDController extends Controller
             if ($userExist) {
                 // Create verification token (OTP - One Time Password)
                 $otpToken = VerifyStepInfo::generateOTP(7);
-                $data['otpToken'] = $otpToken;
-                
 
                 //Generate token expiry time in minutes
                 $validity = VerifyStepInfo::tokenValidity(30);
+                
+                // For Testing purpose
+                if (app()->environment('local', 'staging')) {
+                    $data['otpToken'] = $otpToken;
+                }
 
                 //Create user Account
                 $user = new User;
@@ -214,11 +217,6 @@ class CreateUserIDController extends Controller
                 $data['channel'] = $input['channel'];
                 $data['username'] = $input['username'];
                 $data['receiver'] = $sendto;
-
-                // For Testing purpose
-                if (app()->environment('local', 'staging')) {
-                    $data['code'] = $otpToken;
-                }
 
                 // save verification token
                 VerifyStepInfo::create([
@@ -834,7 +832,7 @@ class CreateUserIDController extends Controller
                 // Generate user access token
                 $token = $user->createToken($user->username)->accessToken;
 
-                
+
                 return response()->jsonApi([
                     'type' => 'success',
                     'title'=> 'New user recovery questions',
