@@ -111,7 +111,7 @@ class ActivityController extends Controller
             $activities = $this->model
                 ->where("user_id", $this->user_id)
                 ->orderBy($request->get('sort-by', 'created_at'), $request->get('sort-order', 'desc'))
-                ->paginate($request->get('limit', 20));
+                ->paginate($request->get('limit', config('settings.pagination_limit')));
 
             // Return response
             return response()->jsonApi([

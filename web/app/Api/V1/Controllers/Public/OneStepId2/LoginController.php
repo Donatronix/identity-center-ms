@@ -200,7 +200,7 @@ class LoginController extends Controller
             ], 400);
 
         }catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'User login',
                 'message' => $e->getMessage(),
@@ -369,7 +369,7 @@ class LoginController extends Controller
             ], 400);
         }
         catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'Verify user login',
                 'message' => $e->getMessage(),
