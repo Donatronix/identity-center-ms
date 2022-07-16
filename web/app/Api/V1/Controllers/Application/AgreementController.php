@@ -107,10 +107,8 @@ class AgreementController extends Controller
             ], 200);
         } catch (ValidationException $e) {
             return response()->jsonApi([
-                'type' => 'warning',
                 'title' => 'User agreement',
-                'message' => "Validation error: " . $e->getMessage(),
-                'data' => null
+                'message' => "Validation error: " . $e->getMessage()
             ], 422);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
