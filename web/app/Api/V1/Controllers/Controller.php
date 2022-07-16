@@ -3,7 +3,6 @@
 namespace App\Api\V1\Controllers;
 
 use Laravel\Lumen\Routing\Controller as BaseController;
-use Sumra\SDK\Traits\ResponseTrait;
 
 /**
  * @OA\Info(
@@ -181,6 +180,4 @@ use Sumra\SDK\Traits\ResponseTrait;
  *
  * @package App\Api\V1\Controllers
  */
-class Controller extends BaseController {
-    use ResponseTrait;
-}
+class Controller extends BaseController {}

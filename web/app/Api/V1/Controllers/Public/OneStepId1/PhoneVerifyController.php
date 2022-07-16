@@ -161,11 +161,9 @@ class PhoneVerifyController extends Controller
 
         } catch (ValidationException $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'Send phone',
                 'message' => "Validation error: " . $e->getMessage(),
-                'data' => null
-            ], 400);
+            ], 422);
         } catch (ModelNotFoundException $e) {
             //pass
             //New user

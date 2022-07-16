@@ -3,7 +3,6 @@
 namespace App\Api\V1\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Identification;
 use App\Models\KYC;
 use App\Models\User;
 use Exception;
@@ -53,14 +52,12 @@ class KYCController extends Controller
                 ->paginate($request->get('limit', config('settings.pagination_limit')));
 
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => 'Get list of user KYC requests',
                 'message' => 'Pending Submitted KYCs',
                 'data' => $kycs
             ]);
         }catch (Exception $e){
             return response()->jsonApi([
-                'type' => 'warning',
                 'title' => 'Get list of user KYC requests',
                 'message' => $e->getMessage(),
             ], 404);
@@ -98,7 +95,7 @@ class KYCController extends Controller
      *                 type="string",
      *                 description="KYC Status APPROVED OR REJECTED",
      *                 example="APPROVED"
-     *             ),
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -138,11 +135,10 @@ class KYCController extends Controller
             }
 
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => 'KYC Response',
                 'message' => 'KYC Response sent',
                 'data' => $kyc,
-            ], 200);
+            ]);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',

@@ -83,10 +83,8 @@ class KYCController extends Controller
 
         if (!$user) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Get user",
-                'message' => "User with id #{$user->id} not found!",
-                'data' => '',
+                'message' => "User with id #{$user->id} not found!"
             ], 404);
         }
 
@@ -103,14 +101,12 @@ class KYCController extends Controller
         // Return response to client
         if ($data->status === 'success') {
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => 'Start KYC verification',
                 'message' => "Session started successfully",
                 'data' => $data->verification
-            ], 200);
+            ]);
         } else {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'Start KYC verification',
                 'message' => $data->message,
                 'data' => [
@@ -142,7 +138,7 @@ class KYCController extends Controller
      *         @OA\JsonContent(ref="#/components/schemas/OkResponse")
      *     ),
      *     @OA\Response(
-     *         response="400",
+     *         response="422",
      *         description="Validator Error",
      *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
      *     ),
@@ -164,11 +160,9 @@ class KYCController extends Controller
             $this->validate($request, KYC::validationRules());
         } catch (ValidationException $e) {
             return response()->jsonApi([
-                'type' => 'warning',
                 'title' => 'User KYC identification',
-                'message' => "Validation error: " . $e->getMessage(),
-                'data' => null
-            ], 400);
+                'message' => "Validation error: " . $e->getMessage()
+            ], 422);
         }
 
         // Try to save received document data
@@ -205,25 +199,20 @@ class KYCController extends Controller
 
             /**
              * Save KYC info
-             *
              */
             $data = $request->all();
             $data['user_id'] = Auth::user()->id;
 
-            $kyc = KYC::create($data);
+            KYC::create($data);
 
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => 'User KYC identification',
                 'message' => "User identity submitted successfully",
-                'data' => null
-            ], 200);
+            ]);
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'User KYC identification',
-                'message' => $e->getMessage(),
-                'data' => null
+                'message' => $e->getMessage()
             ], 500);
         }
     }
