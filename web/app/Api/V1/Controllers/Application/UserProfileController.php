@@ -494,11 +494,9 @@ class UserProfileController extends Controller
             ], 200);
         } catch (ValidationException $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'User profile update',
                 'message' => "Validation error: " . $e->getMessage(),
-                'data' => null
-            ], 400);
+            ], 422);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'type' => 'danger',
