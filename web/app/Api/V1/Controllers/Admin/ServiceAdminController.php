@@ -23,13 +23,7 @@ class ServiceAdminController extends Controller
      *     description="Add new admin",
      *     tags={"Admin | Microservice Admins"},
      *
-     *     security={{
-     *          "default" :{
-     *              "ManagerRead",
-     *              "Admin",
-     *              "ManagerWrite"
-     *          },
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -180,13 +174,7 @@ class ServiceAdminController extends Controller
      *     description="Update admin",
      *     tags={"Admin | Microservice Admins"},
      *
-     *     security={{
-     *          "default" :{
-     *              "ManagerRead",
-     *              "Admin",
-     *              "ManagerWrite"
-     *          },
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -338,13 +326,7 @@ class ServiceAdminController extends Controller
      *     description="Remove admin",
      *     tags={"Admin | Microservice Admins"},
      *
-     *     security={{
-     *          "default" :{
-     *              "ManagerRead",
-     *              "Admin",
-     *              "ManagerWrite"
-     *          }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *         name="user_id",

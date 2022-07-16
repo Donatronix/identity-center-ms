@@ -24,13 +24,6 @@ class UserInfoRecoveryController extends Controller
      *     description="Receive user account recovery info for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account Recovery"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
-     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -230,13 +223,6 @@ class UserInfoRecoveryController extends Controller
      *     description="Verify phone number or handler to recover user account for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account Recovery"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
-     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -336,13 +322,6 @@ class UserInfoRecoveryController extends Controller
      *     summary="Get user account recovery questions",
      *     description="Verify user account recovery questions for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account Recovery"},
-     *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -480,13 +459,6 @@ class UserInfoRecoveryController extends Controller
      *     summary="User account recovered ID",
      *     description="Send user account recovered ID for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account Recovery"},
-     *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
      *
      *     @OA\RequestBody(
      *         required=true,

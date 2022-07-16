@@ -39,13 +39,7 @@ class UserProfileController extends Controller
      *     description="Saving user person detail",
      *     tags={"User Profile"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -143,12 +137,7 @@ class UserProfileController extends Controller
      *     description="Get current user profile data",
      *     tags={"User Profile"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Response(
      *          response="201",
@@ -299,12 +288,9 @@ class UserProfileController extends Controller
      *     summary="update user",
      *     description="update user",
      *     tags={"User Profile"},
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *
+     *     security={{ "bearerAuth": {} }},
+     *
      *     @OA\Parameter(
      *          description="ID of User",
      *          in="path",
@@ -461,7 +447,7 @@ class UserProfileController extends Controller
         try {
             //validate input data
             $validator = Validator::make($request->all(), User::profileValidationRules((int)$id));
-    
+
             if ($validator->fails()) {
                 return response()->jsonApi([
                     'type' => 'danger',
@@ -493,7 +479,7 @@ class UserProfileController extends Controller
                 ], 'mail');
             }
 
- 
+
 
             // Send notification email
             $subject = 'Change Username';
@@ -538,12 +524,7 @@ class UserProfileController extends Controller
      *     description="Validate the verification code and update phone number of the current user",
      *     tags={"User Profile"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *          required=true,
@@ -668,12 +649,7 @@ class UserProfileController extends Controller
      *     description="Change user profile password for One-Step 2.0",
      *     tags={"User Profile"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -820,12 +796,7 @@ class UserProfileController extends Controller
      *     description="Validate the verification code and update the current user's email",
      *     tags={"User Profile"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *          required=true,
@@ -948,13 +919,7 @@ class UserProfileController extends Controller
      *     description="resend user email",
      *     tags={"User Profile"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *          name="email",
@@ -1008,12 +973,7 @@ class UserProfileController extends Controller
      *     description="Validate the new phone number that the current user whats to use",
      *     tags={"User Profile"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *          required=true,
@@ -1114,12 +1074,7 @@ class UserProfileController extends Controller
      *     description="Validate the new email that the current user whats to use, and send verification code",
      *     tags={"User Profile"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *          required=true,

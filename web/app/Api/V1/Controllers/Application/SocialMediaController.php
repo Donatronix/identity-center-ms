@@ -24,12 +24,7 @@ class SocialMediaController extends Controller
      *     description="Create social media provider redirect URL",
      *     tags={"Social Media Connect"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -114,12 +109,7 @@ class SocialMediaController extends Controller
      *     description="Process social media provider callback",
      *     tags={"Social Media Connect"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *          name="provider",
@@ -203,12 +193,7 @@ class SocialMediaController extends Controller
      *     description="Connect user to WhatsApp social media",
      *     tags={"Social Media Connect"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Response(
      *          response="200",
@@ -286,12 +271,7 @@ class SocialMediaController extends Controller
      *     description="Retrieve social media connections",
      *     tags={"Social Media Connect"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Response(
      *          response="200",

@@ -28,13 +28,7 @@ class KYCController extends Controller
      *     description="Document type (1 = PASSPORT, 2 = ID_CARD, 3 = DRIVERS_LICENSE, 4 = RESIDENCE_PERMIT)",
      *     tags={"User | KYC"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -135,13 +129,7 @@ class KYCController extends Controller
      *     description="Upload documents for users KYC",
      *     tags={"User | KYC"},
      *
-     *     security={{
-     *         "passport": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *         required=true,

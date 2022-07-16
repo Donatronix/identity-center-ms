@@ -29,13 +29,6 @@ class CreateUserIDController extends Controller
      *     description="Verify phone number and handler to create new user for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
-     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -173,7 +166,7 @@ class CreateUserIDController extends Controller
                 "data" => null
             ], 400);
         }
-        
+
         //validate input date
         $input = $validator->validated();
 
@@ -191,11 +184,14 @@ class CreateUserIDController extends Controller
             if ($userExist) {
                 // Create verification token (OTP - One Time Password)
                 $otpToken = VerifyStepInfo::generateOTP(7);
-                $data['otpToken'] = $otpToken;
-                
 
                 //Generate token expiry time in minutes
                 $validity = VerifyStepInfo::tokenValidity(30);
+
+                // For Testing purpose
+                if (app()->environment('local', 'staging')) {
+                    $data['otpToken'] = $otpToken;
+                }
 
                 //Create user Account
                 $user = new User;
@@ -214,11 +210,6 @@ class CreateUserIDController extends Controller
                 $data['channel'] = $input['channel'];
                 $data['username'] = $input['username'];
                 $data['receiver'] = $sendto;
-
-                // For Testing purpose
-                if (app()->environment('local', 'staging')) {
-                    $data['code'] = $otpToken;
-                }
 
                 // save verification token
                 VerifyStepInfo::create([
@@ -271,13 +262,6 @@ class CreateUserIDController extends Controller
      *     summary="Resend OTP for One-Step 2.0",
      *     description="Resend OTP to create new user for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account"},
-     *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -398,13 +382,6 @@ class CreateUserIDController extends Controller
      *     description="Verify phone number or handler to create new user for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
-     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -516,12 +493,6 @@ class CreateUserIDController extends Controller
      *     description="Update new user for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -689,13 +660,6 @@ class CreateUserIDController extends Controller
      *     description="Update new user recovery questions for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
-     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -834,7 +798,7 @@ class CreateUserIDController extends Controller
                 // Generate user access token
                 $token = $user->createToken($user->username)->accessToken;
 
-                
+
                 return response()->jsonApi([
                     'type' => 'success',
                     'title'=> 'New user recovery questions',
