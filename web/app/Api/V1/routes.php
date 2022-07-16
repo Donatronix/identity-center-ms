@@ -103,6 +103,7 @@ $router->group([
         ], function ($router) {
             $router->post('/', 'UserProfileController@store');
             $router->get('/me', "UserProfileController@show");
+            $router->get('/role', "UserProfileController@getRole");
             $router->patch('/{id:[a-fA-F0-9\-]{36}}', 'UserProfileController@update');
 
             $router->put('/update/phone', 'UserProfileController@updatePhone');

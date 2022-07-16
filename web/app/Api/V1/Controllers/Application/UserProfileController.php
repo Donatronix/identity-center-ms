@@ -1186,4 +1186,42 @@ class UserProfileController extends Controller
             ], 404);
         }
     }
+
+
+    /**
+     * Get User Role(s)
+     *
+     * @OA\Get(
+     *     path="/user-profile/role",
+     *     description="Get Role for auth user",
+     *     tags={"User Profile"},
+     *
+     *     security={{ "bearerAuth": {} }},
+     *
+     *     @OA\Response(
+     *         response="200",
+     *         description="User Role",
+     *         @OA\JsonContent(ref="#/components/schemas/OkResponse")
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Unauthorized",
+     *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
+     *     ),
+     * )
+     *
+     * @return JsonResponse
+     */
+    public function getRole(Request $request)
+    {
+        $roles = Auth::user()->roles;
+        $data = [
+            'type' => 'success',
+            'title' => 'Get Role',
+            'message' => 'User Roles',
+            'data' => $roles
+        ];
+
+        return response()->json($data, 200);
+    }
 }
