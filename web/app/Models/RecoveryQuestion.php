@@ -3,9 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Sumra\SDK\Traits\UuidTrait;
+
 
 class RecoveryQuestion extends Model
 {
+    use HasFactory;
+    use UuidTrait;
+    
     protected $table = 'recovery_questions';
     
     protected $fillable = [
