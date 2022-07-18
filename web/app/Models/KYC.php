@@ -61,6 +61,7 @@ use Sumra\SDK\Traits\UuidTrait;
  *     ),
  * )
  */
+
 class KYC extends Model
 {
     use HasFactory;

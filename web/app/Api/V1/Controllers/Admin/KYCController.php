@@ -46,17 +46,35 @@ class KYCController extends Controller
      */
     public function index(Request $request)
     {
-        try{
-            $kycs = KYC::latest()
-                ->where('status', KYC::STATUS_PENDING)
-                ->paginate($request->get('limit', config('settings.pagination_limit')));
+        try {
+            $status = $request->status ?? 'pending';
+            $statuses = KYC::$statuses;
+            $statuses[] = 'all';
+
+            if (!in_array($status, $statuses)) {
+                return response()->jsonApi([
+                    'title' => 'Get KYC',
+                    'message' => 'KYC status is not supported',
+                ], 400);
+            }
+
+            if (strtolower($status) == 'all') {
+                $kycs = KYC::latest()
+                    ->paginate($request->get('limit', config('settings.pagination_limit')));
+            }
+            else {
+                $kycs = KYC::latest()
+                    ->where('status', $status)
+                    ->paginate($request->get('limit', config('settings.pagination_limit')));
+            }
 
             return response()->jsonApi([
                 'title' => 'Get list of user KYC requests',
-                'message' => 'Pending Submitted KYCs',
-                'data' => $kycs
+                'message' => ucfirst($status) . ' Submitted KYCs',
+                'data' => $kycs->toArray()
             ]);
-        }catch (Exception $e){
+        }
+        catch (Exception $e){
             return response()->jsonApi([
                 'title' => 'Get list of user KYC requests',
                 'message' => $e->getMessage(),

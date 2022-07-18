@@ -156,12 +156,13 @@ class LoginController extends Controller
             //Get user query
             $userQuery = User::where('username', $input['username']);
 
-            if($userQuery->exists()){
+            if($userQuery->exists()) {
+                
                 //Get user
                 $user = $userQuery->first();
 
                 // Create verification token (OTP)
-                $otpToken = VerifyStepInfo::generateOTP(7);
+                $otpToken = VerifyStepInfo::generateOTP(6);
                 $validity = VerifyStepInfo::tokenValidity(30);
 
                 $sendto = $user->phone;
