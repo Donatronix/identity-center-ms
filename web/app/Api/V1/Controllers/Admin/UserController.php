@@ -1119,16 +1119,24 @@ class UserController extends Controller
      *     ),
      *     @OA\Response(
      *         response="200",
-     *         description="Details fetched"
+     *         description="Details Fetched",
+     *         @OA\JsonContent(ref="#/components/schemas/OkResponse")
      *     ),
      *     @OA\Response(
-     *         response="404",
-     *         description="Not found"
+     *         response="401",
+     *         description="Unauthorized",
+     *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Validation Error",
+     *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
      *     ),
      *     @OA\Response(
      *         response="500",
-     *         description="Unknown error"
-     *     )
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/DangerResponse")
+     *     ),
      * )
      *
      * @param Request $request
@@ -1142,6 +1150,7 @@ class UserController extends Controller
                 'users' => 'required|array',
             ]);
 
+            $users = [];
             foreach ($request->users as $key => $user) {
                 $user = User::find($user);
                 if ($user) {
