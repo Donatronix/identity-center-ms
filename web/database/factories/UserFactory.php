@@ -50,15 +50,6 @@ class UserFactory extends Factory
             'address_city' => $this->faker->city(),
             'address_zip' => $this->faker->postcode(),
 
-            /**
-             * User document
-             */
-            'id_number' => '',
-            'document_number' => '',
-            'document_country' => $this->faker->countryCode(),
-            'document_type' => Arr::random(User::$document_types),
-            'document_file' => '',
-
             'status' => User::STATUS_INACTIVE,
         ];
     }

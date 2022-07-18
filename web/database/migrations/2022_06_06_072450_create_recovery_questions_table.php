@@ -14,7 +14,11 @@ class CreateRecoveryQuestionsTable extends Migration
     public function up()
     {
         Schema::create('recovery_questions', function (Blueprint $table) {
+<<<<<<< HEAD
             $table->uuid('id')->primary();
+=======
+            $table->bigIncrements('id');
+>>>>>>> d240cab9d06bdd1710d0b1e9ac7e19177149f60f
             $table->uuid('user_id')->unique();
             $table->string('question_one')->default('What is my middle name');
             $table->string('answer_one');

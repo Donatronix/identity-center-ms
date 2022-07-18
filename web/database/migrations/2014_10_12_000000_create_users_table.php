@@ -40,15 +40,6 @@ class CreateUsersTable extends Migration
             $table->string('address_line2', 100)->nullable();
 
             /**
-             * User identity document info
-             */
-            $table->string('id_number')->nullable(); // National identification number
-            $table->string('document_number')->nullable();  // Document number
-            $table->string('document_country', 3)->nullable(); // ISO-2- String Country that issued the document
-            $table->tinyInteger('document_type')->default(0);  // Document type
-            $table->mediumText('document_file')->nullable();  // Document file
-
-            /**
              * SECURITY
              */
             $table->string('password', 60)->nullable();

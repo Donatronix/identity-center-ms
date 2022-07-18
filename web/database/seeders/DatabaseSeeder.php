@@ -16,22 +16,23 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            ClientsSeeder::class,
+            //ClientsSeeder::class,
+            BotsTableSeeder::class,
+            RoleSeeder::class,
         ]);
 
         // Seeds for local and staging
         if (App::environment(['local', 'staging'])) {
             $this->call([
                 UsersTableSeeder::class,
+                KYCsTableSeeder::class
             ]);
         }
 
         // Seeds for production
         if (App::environment('production')) {
-            $this->call([
-                BotsTableSeeder::class,
-                RoleSeeder::class,
-            ]);
+//            $this->call([
+//            ]);
         }
     }
 }

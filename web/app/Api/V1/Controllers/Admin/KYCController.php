@@ -3,7 +3,6 @@
 namespace App\Api\V1\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Identification;
 use App\Models\KYC;
 use App\Models\User;
 use Exception;
@@ -13,7 +12,7 @@ use Illuminate\Http\Response;
 use PubSub;
 use Throwable;
 
-class IdentificationController extends Controller
+class KYCController extends Controller
 {
     /**
      * Display a listing of Pending KYC
@@ -23,13 +22,7 @@ class IdentificationController extends Controller
      *     description="Get list of KYC",
      *     tags={"Admin | KYC"},
      *
-     *     security={{
-     *         "default": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *         name="limit",
@@ -53,16 +46,22 @@ class IdentificationController extends Controller
      */
     public function index(Request $request)
     {
-        $limit = $request->limit ?? 20;
-        $kycs = KYC::latest()
-            ->where('status', KYC::STATUS_PENDING)->paginate($limit);
+        try{
+            $kycs = KYC::latest()
+                ->where('status', KYC::STATUS_PENDING)
+                ->paginate($request->get('limit', config('settings.pagination_limit')));
 
-        return response()->json([
-            'type' => 'success',
-            'title' => 'Get KYC',
-            'message' => 'Pending Submitted KYCs',
-            'data' => $kycs
-        ], 200);
+            return response()->jsonApi([
+                'title' => 'Get list of user KYC requests',
+                'message' => 'Pending Submitted KYCs',
+                'data' => $kycs
+            ]);
+        }catch (Exception $e){
+            return response()->jsonApi([
+                'title' => 'Get list of user KYC requests',
+                'message' => $e->getMessage(),
+            ], 404);
+        }
     }
 
     /**
@@ -73,13 +72,7 @@ class IdentificationController extends Controller
      *     description="Response to KYC",
      *     tags={"Admin | KYC"},
      *
-     *     security={{
-     *         "default": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *         name="id",
@@ -102,7 +95,7 @@ class IdentificationController extends Controller
      *                 type="string",
      *                 description="KYC Status APPROVED OR REJECTED",
      *                 example="APPROVED"
-     *             ),
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -116,7 +109,7 @@ class IdentificationController extends Controller
      *
      * @return Response
      */
-    public function updateKYC(Request $request, $id)
+    public function update(Request $request, $id)
     {
         try {
             $this->validate($request, [
@@ -141,30 +134,18 @@ class IdentificationController extends Controller
             } catch (Throwable $th) {
             }
 
-            return response()->json([
-                'type' => 'success',
+            return response()->jsonApi([
                 'title' => 'KYC Response',
                 'message' => 'KYC Response sent',
                 'data' => $kyc,
-            ], 200);
+            ]);
         } catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'KYC Response',
                 'message' => $e->getMessage(),
             ], 500);
         }
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return Response
-     */
-    public function store(Request $request)
-    {
-        //
     }
 
     /**
@@ -174,18 +155,6 @@ class IdentificationController extends Controller
      * @return Response
      */
     public function show(Identification $identification)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param Identification $identification
-     * @return Response
-     */
-    public function update(Request $request, Identification $identification)
     {
         //
     }

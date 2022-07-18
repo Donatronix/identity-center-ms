@@ -24,13 +24,6 @@ class LoginController extends Controller
      *     description="User login for One-Step 2.0",
      *     tags={"OneStep 2.0 | User Account Login"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
-     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -58,7 +51,7 @@ class LoginController extends Controller
      *             )
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *          response="200",
      *          description="Success",
@@ -142,7 +135,7 @@ class LoginController extends Controller
             $validator = Validator::make($request->all(), [
                 'channel' => 'required|string',
                 'handler' => 'required|string',
-                'username' => 'required|exists:users,username'
+                'username' => 'required|string'
             ]);
 
             if ($validator->fails()) {
@@ -156,6 +149,9 @@ class LoginController extends Controller
 
             //Get validated input
             $input = $validator->validated();
+            if (strpos($input['username'], '@')) {
+                $input['username'] = explode('@', $input['username'])[0];
+            }
 
             //Get user query
             $userQuery = User::where('username', $input['username']);
@@ -194,7 +190,7 @@ class LoginController extends Controller
                 ], 200);
 
             }
- 
+
             //Show response
             return response()->jsonApi([
                 'type' => 'danger',
@@ -202,9 +198,9 @@ class LoginController extends Controller
                 'message' => "User does NOT exist. Try again.",
                 "data" => null
             ], 400);
-            
+
         }catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'User login',
                 'message' => $e->getMessage(),
@@ -220,13 +216,6 @@ class LoginController extends Controller
      *     path="/user-account/v2/login/verify-otp",
      *     description="Verify user login",
      *     tags={"OneStep 2.0 | User Account Login"},
-     *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -248,7 +237,7 @@ class LoginController extends Controller
      *             )
      *         )
      *     ),
-     * 
+     *
      *     @OA\Response(
      *          response="200",
      *          description="Success",
@@ -286,7 +275,7 @@ class LoginController extends Controller
      *                     type="string",
      *                     example="jhjdhd9JJHJjh96klnvv878lLH7G34Jjh98"
      *                 )
-     *                 
+     *
      *             )
      *         )
      *     ),
@@ -359,7 +348,7 @@ class LoginController extends Controller
 
                 //Create user access token
                 $data['token'] = $user->createToken($input['username'])->accessToken;
-                $data['user'] = $user->username;
+                $data['user'] = $user;
 
                 //Delete login OTP
                 $userQuery->delete();
@@ -380,7 +369,7 @@ class LoginController extends Controller
             ], 400);
         }
         catch (Exception $e) {
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'Verify user login',
                 'message' => $e->getMessage(),
@@ -391,7 +380,7 @@ class LoginController extends Controller
 
     /**
      * Refresh expired Token
-     * 
+     *
      * @OA\Post(
      *     path="/user-account/v2/login/refresh-token",
      *     summary="Refresh Token",

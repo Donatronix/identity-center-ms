@@ -39,13 +39,7 @@ class UserProfileController extends Controller
      *     description="Saving user person detail",
      *     tags={"User Profile"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -92,7 +86,7 @@ class UserProfileController extends Controller
         try {
             // Validate input
            $validate = Validator::make($request->all(), User::userValidationRules());
-            
+
             //Validation response
             if($validate->fails()){
                 return response()->jsonApi([
@@ -143,12 +137,7 @@ class UserProfileController extends Controller
      *     description="Get current user profile data",
      *     tags={"User Profile"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Response(
      *          response="201",
@@ -264,7 +253,7 @@ class UserProfileController extends Controller
                 return response()->jsonApi([
                     'type' => 'success',
                     'title' => 'Get current user profile data',
-                    'message' => '"User profile retrieved successfully',
+                    'message' => 'User profile retrieved successfully',
                     'data' => $user->toArray(),
                 ]);
             } else {
@@ -299,12 +288,9 @@ class UserProfileController extends Controller
      *     summary="update user",
      *     description="update user",
      *     tags={"User Profile"},
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *
+     *     security={{ "bearerAuth": {} }},
+     *
      *     @OA\Parameter(
      *          description="ID of User",
      *          in="path",
@@ -461,7 +447,7 @@ class UserProfileController extends Controller
         try {
             //validate input data
             $validator = Validator::make($request->all(), User::profileValidationRules((int)$id));
-    
+
             if ($validator->fails()) {
                 return response()->jsonApi([
                     'type' => 'danger',
@@ -493,7 +479,7 @@ class UserProfileController extends Controller
                 ], 'mail');
             }
 
- 
+
 
             // Send notification email
             $subject = 'Change Username';
@@ -508,11 +494,9 @@ class UserProfileController extends Controller
             ], 200);
         } catch (ValidationException $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'User profile update',
                 'message' => "Validation error: " . $e->getMessage(),
-                'data' => null
-            ], 400);
+            ], 422);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'type' => 'danger',
@@ -538,12 +522,7 @@ class UserProfileController extends Controller
      *     description="Validate the verification code and update phone number of the current user",
      *     tags={"User Profile"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *          required=true,
@@ -651,7 +630,7 @@ class UserProfileController extends Controller
             return response()->jsonApi([
                 "message" => "Phone number updated"
             ], 200);
-            
+
         } catch (Exception $e) {
             return response()->jsonApi([
                 "message" => "An error occurred! Please, try again."
@@ -668,12 +647,7 @@ class UserProfileController extends Controller
      *     description="Change user profile password for One-Step 2.0",
      *     tags={"User Profile"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -820,12 +794,7 @@ class UserProfileController extends Controller
      *     description="Validate the verification code and update the current user's email",
      *     tags={"User Profile"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *          required=true,
@@ -948,13 +917,7 @@ class UserProfileController extends Controller
      *     description="resend user email",
      *     tags={"User Profile"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *          name="email",
@@ -1008,12 +971,7 @@ class UserProfileController extends Controller
      *     description="Validate the new phone number that the current user whats to use",
      *     tags={"User Profile"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *          required=true,
@@ -1114,12 +1072,7 @@ class UserProfileController extends Controller
      *     description="Validate the new email that the current user whats to use, and send verification code",
      *     tags={"User Profile"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *          required=true,
@@ -1229,6 +1182,123 @@ class UserProfileController extends Controller
                 'message' => "User with id #{$id} not found: {$e->getMessage()}",
                 'data' => ''
             ], 404);
+        }
+    }
+
+
+    /**
+     * Get User Role(s)
+     *
+     * @OA\Get(
+     *     path="/user-profile/role",
+     *     description="Get Role for auth user",
+     *     tags={"User Profile"},
+     *
+     *     security={{ "bearerAuth": {} }},
+     *
+     *     @OA\Response(
+     *         response="200",
+     *         description="User Role",
+     *         @OA\JsonContent(ref="#/components/schemas/OkResponse")
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Unauthorized",
+     *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
+     *     ),
+     * )
+     *
+     * @return JsonResponse
+     */
+    public function getRole(Request $request)
+    {
+        $roles = Auth::user()->roles;
+        $data = [
+            'type' => 'success',
+            'title' => 'Get Role',
+            'message' => 'User Roles',
+            'data' => $roles
+        ];
+
+        return response()->jsonApi($data, 200);
+    }
+
+
+    /**
+     * Details of Users
+     *
+     * @OA\Post(
+     *     path="/user-profile/details",
+     *     description="Get details of users",
+     *     tags={"User Profile"},
+     *
+     *     security={{ "bearerAuth": {} }},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="users",
+     *                 type="array",
+     *                 description="Array of user IDs",
+     *                 required={"true"},
+     *                 @OA\Items()
+     *             ),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Details Fetched",
+     *         @OA\JsonContent(ref="#/components/schemas/OkResponse")
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Unauthorized",
+     *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Validation Error",
+     *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/DangerResponse")
+     *     ),
+     * )
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function usersDetails(Request $request)
+    {
+        try {
+            $this->validate($request, [
+                'users' => 'required|array',
+            ]);
+
+            foreach ($request->users as $key => $user) {
+                $user = User::find($user);
+                if ($user) {
+                    $users[] = $user;
+                }
+            }
+
+            return response()->jsonApi([
+                'type' => 'success',
+                'title' => 'Users Details',
+                'message' => "Information fetched successfully!",
+                'data' => $users
+            ], 200);
+        } catch (Exception $e) {
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title' => 'Users Details',
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 }

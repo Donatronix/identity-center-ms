@@ -4,6 +4,7 @@ namespace App\Api\V1\Controllers\Admin;
 
 use App\Api\V1\Controllers\Controller;
 use App\Models\User;
+use Auth;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -35,18 +36,12 @@ class UserController extends Controller
      *     description="Get all users list in system",
      *     tags={"Admin | Users"},
      *
-     *     security={{
-     *         "default": {
-     *             "AdminRead",
-     *             "AdminWrite",
-     *             "ManagerRead",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
+     *
      *     @OA\Parameter(
      *         name="type",
      *         in="query",
-     *         description="Category of Users to get: Staff, Admin, Super, Investor",
+     *         description="Category of Users to get: Admin, Super, Investor",
      *         @OA\Schema(
      *             type="All"
      *         )
@@ -155,12 +150,10 @@ class UserController extends Controller
      *         response="400",
      *         description="Invalid request"
      *     ),
-     *
      *     @OA\Response(
      *         response="404",
      *         description="Not found"
      *     ),
-     *
      *     @OA\Response(
      *         response="500",
      *         description="Unknown error"
@@ -176,20 +169,18 @@ class UserController extends Controller
         try {
             /**
              * User Category OR Role
-             *
              */
             $type = $request->type;
             if (!$type || strtolower($type) == 'all') {
                 $users = User::paginate($request->get('limit', config('settings.pagination_limit')));
-            }
-            else {
-
+            } else {
                 /**
                  *
                  */
                 if (!in_array(ucfirst($request->type), User::$types)) {
-                    throw new \Exception("User Type not allowed", 400);
+                    throw new Exception("User Type not allowed", 400);
                 }
+
                 Role::firstOrCreate(['name' => $request->type]);
 
                 $users = User::role($type)
@@ -222,13 +213,7 @@ class UserController extends Controller
      *     description="Save a new user data",
      *     tags={"Admin | Users"},
      *
-     *     security={{
-     *         "passport": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -450,13 +435,7 @@ class UserController extends Controller
      *     description="Get detail info about user",
      *     tags={"Admin | Users"},
      *
-     *     security={{
-     *         "passport": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *         name="id",
@@ -531,13 +510,7 @@ class UserController extends Controller
      *     description="Update user data",
      *     tags={"Admin | Users"},
      *
-     *     security={{
-     *         "passport": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *         name="id",
@@ -719,13 +692,7 @@ class UserController extends Controller
      *     description="Delete user from database",
      *     tags={"Admin | Users"},
      *
-     *     security={{
-     *         "default": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *         name="id",
@@ -770,24 +737,15 @@ class UserController extends Controller
      */
     public function destroy(mixed $id): mixed
     {
-        // Read user model
-        $user = $this->getObject($id);
-        if ($user instanceof JsonApiResponse) {
-            return $user;
-        }
-
         // Try to delete user
         try {
             $user = User::findOrFail($id);
             $user->delete();
 
-            $users = User::paginate(config('settings.pagination_limit'));
-
             return response()->jsonApi([
                 'type' => 'success',
                 'title' => "Delete of user",
                 'message' => 'User is successfully deleted',
-                'data' => $users->toArray(),
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
@@ -835,13 +793,7 @@ class UserController extends Controller
      *     description="Create new user",
      *     tags={"Admin | Users"},
      *
-     *     security={{
-     *         "passport": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *         name="token",
@@ -917,13 +869,7 @@ class UserController extends Controller
      *     description="Create new user",
      *     tags={"Admin | Users"},
      *
-     *     security={{
-     *         "passport": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *         name="email",
@@ -1012,13 +958,8 @@ class UserController extends Controller
      *     description="Add a new User",
      *     tags={"Admin | Users"},
      *
-     *     security={{
-     *         "passport": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -1062,7 +1003,7 @@ class UserController extends Controller
      *             @OA\Property(
      *                 property="user_type",
      *                 type="string",
-     *                 description="User Type: Client, Admin, Super",
+     *                 description="User Type: Investor, Admin, Super",
      *                 required={"true"},
      *                 example="Super"
      *             )
@@ -1095,7 +1036,7 @@ class UserController extends Controller
                 'password' => 'required|string|min:6',
                 'email' => 'required|email|unique:users,email',
                 'username' => 'required|string|unique:users,username',
-                'user_type' => 'required|in:Client,Admin,Super'
+                'user_type' => 'required|in:Investor,Admin,Super'
             ]);
 
             //
@@ -1144,9 +1085,89 @@ class UserController extends Controller
             if (isset($user))
                 $user->delete();
 
-            return response()->json([
+            return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'Add user account',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+    /**
+     * Admin Details of Users
+     *
+     * @OA\Post(
+     *     path="/admin/users/details",
+     *     description="Get details of users",
+     *     tags={"Admin | Users"},
+     *
+     *     security={{ "bearerAuth": {} }},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="users",
+     *                 type="array",
+     *                 description="Array of user IDs",
+     *                 required={"true"},
+     *                 @OA\Items()
+     *             ),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Details Fetched",
+     *         @OA\JsonContent(ref="#/components/schemas/OkResponse")
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Unauthorized",
+     *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Validation Error",
+     *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Server Error",
+     *         @OA\JsonContent(ref="#/components/schemas/DangerResponse")
+     *     ),
+     * )
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function usersDetails(Request $request)
+    {
+        try {
+            $this->validate($request, [
+                'users' => 'required|array',
+            ]);
+
+            $users = [];
+            foreach ($request->users as $key => $user) {
+                $user = User::find($user);
+                if ($user) {
+                    $users[] = $user;
+                }
+            }
+
+            return response()->jsonApi([
+                'type' => 'success',
+                'title' => 'Users Details',
+                'message' => "Information fetched successfully!",
+                'data' => $users
+            ], 200);
+        } catch (Exception $e) {
+            return response()->jsonApi([
+                'type' => 'danger',
+                'title' => 'Users Details',
                 'message' => $e->getMessage(),
             ], 500);
         }

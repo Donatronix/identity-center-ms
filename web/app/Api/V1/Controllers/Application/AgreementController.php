@@ -27,13 +27,7 @@ class AgreementController extends Controller
      *     description="Saving the user's acceptance of the agreement",
      *     tags={"Users | Agreement"},
      *
-     *     security={{
-     *         "default": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -88,7 +82,7 @@ class AgreementController extends Controller
             $validate = Validator::make($input, [
                             'is_agreement'=>'required|boolean'
                         ]);
-            
+
             //Validation response
             if($validate->fails()){
                 return response()->jsonApi([
@@ -98,7 +92,7 @@ class AgreementController extends Controller
                     'data' => null
                 ], 400);
             }
-            
+
             // Find exist user
             $user = User::findOrFail(Auth::user()->id);
             $user->fill($input);
@@ -113,10 +107,8 @@ class AgreementController extends Controller
             ], 200);
         } catch (ValidationException $e) {
             return response()->jsonApi([
-                'type' => 'warning',
                 'title' => 'User agreement',
-                'message' => "Validation error: " . $e->getMessage(),
-                'data' => null
+                'message' => "Validation error: " . $e->getMessage()
             ], 422);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([

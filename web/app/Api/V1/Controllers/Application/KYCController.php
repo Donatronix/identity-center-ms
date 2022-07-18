@@ -3,22 +3,21 @@
 namespace App\Api\V1\Controllers\Application;
 
 use App\Http\Controllers\Controller;
+use App\Models\KYC;
 use App\Models\User;
 use App\Services\IdentityVerification;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
-use App\Models\KYC;
 
 /**
- * Class IdentificationController
+ * Class KYCController
  *
  * @package App\Api\V1\Controllers\User
  */
-class IdentificationController extends Controller
+class KYCController extends Controller
 {
-
     /**
      * Initialize identity verification session
      *
@@ -27,15 +26,9 @@ class IdentificationController extends Controller
      *     summary="Initialize identity verification session",
      *     description="Initialize identity verification session",
      *     description="Document type (1 = PASSPORT, 2 = ID_CARD, 3 = DRIVERS_LICENSE, 4 = RESIDENCE_PERMIT)",
-     *     tags={"User Identity"},
+     *     tags={"User | KYC"},
      *
-     *     security={{
-     *         "passport": {
-     *             "User",
-     *             "ManagerRead",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -90,10 +83,8 @@ class IdentificationController extends Controller
 
         if (!$user) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Get user",
-                'message' => "User with id #{$user->id} not found!",
-                'data' => '',
+                'message' => "User with id #{$user->id} not found!"
             ], 404);
         }
 
@@ -110,14 +101,12 @@ class IdentificationController extends Controller
         // Return response to client
         if ($data->status === 'success') {
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => 'Start KYC verification',
                 'message' => "Session started successfully",
                 'data' => $data->verification
-            ], 200);
+            ]);
         } else {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'Start KYC verification',
                 'message' => $data->message,
                 'data' => [
@@ -128,74 +117,52 @@ class IdentificationController extends Controller
     }
 
     /**
-     * Saving user identity data
+     * Upload documents for users KYC
      *
      * @OA\Post(
-     *     path="/user-identity",
-     *     summary="Saving user identity data",
-     *     description="Saving user identity data",
+     *     path="/user-identify/upload",
+     *     summary="Upload documents for users KYC",
+     *     description="Upload documents for users KYC",
      *     tags={"User | KYC"},
      *
-     *     security={{
-     *         "default": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/KYC")
+     *         @OA\JsonContent(ref="#/components/schemas/UserKYC")
      *     ),
+     *
      *     @OA\Response(
      *         response="200",
-     *         description="User identity saved successfully"
-     *     ),
-     *     @OA\Response(
-     *         response="201",
-     *         description="User created"
-     *     ),
-     *     @OA\Response(
-     *         response="400",
-     *         description="Invalid request"
-     *     ),
-     *     @OA\Response(
-     *         response="401",
-     *         description="Unauthorized"
-     *     ),
-     *     @OA\Response(
-     *         response="404",
-     *         description="Not Found"
+     *         description="KYC submitted",
+     *         @OA\JsonContent(ref="#/components/schemas/OkResponse")
      *     ),
      *     @OA\Response(
      *         response="422",
-     *         description="Validation failed"
+     *         description="Validator Error",
+     *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
      *     ),
      *     @OA\Response(
      *         response="500",
-     *         description="Unknown error"
+     *         description="Server error",
+     *         @OA\JsonContent(ref="#/components/schemas/DangerResponse")
      *     )
      * )
      *
      * @param Request $request
      *
-     * @return mixed
+     * @return JsonResponse
      */
     public function store(Request $request): mixed
     {
         // Validate input
         try {
-            $this->validate(
-                $request, KYC::validationRules());
-        }
-        catch (ValidationException $e) {
+            $this->validate($request, KYC::validationRules());
+        } catch (ValidationException $e) {
             return response()->jsonApi([
-                'type' => 'warning',
-                'title' => 'User data identification',
-                'message' => "Validation error",
-                'data' => $e->getMessage()
-            ], 400);
+                'title' => 'User KYC identification',
+                'message' => "Validation error: " . $e->getMessage()
+            ], 422);
         }
 
         // Try to save received document data
@@ -232,23 +199,20 @@ class IdentificationController extends Controller
 
             /**
              * Save KYC info
-             *
              */
             $data = $request->all();
             $data['user_id'] = Auth::user()->id;
 
-            $kyc = KYC::create($data);
+            KYC::create($data);
+
             return response()->jsonApi([
-                'type' => 'success',
-                'title' => 'User Identity',
+                'title' => 'User KYC identification',
                 'message' => "User identity submitted successfully",
-            ], 200);
-        }
-        catch (Exception $e) {
+            ]);
+        } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'warning',
-                'title' => 'User data identification',
-                'message' => $e->getMessage(),
+                'title' => 'User KYC identification',
+                'message' => $e->getMessage()
             ], 500);
         }
     }

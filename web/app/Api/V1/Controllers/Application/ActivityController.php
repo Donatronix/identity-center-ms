@@ -33,13 +33,7 @@ class ActivityController extends Controller
      *     description="Getting activity detail by platform",
      *     tags={"Activities"},
      *
-     *     security={{
-     *         "default": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
      *
      *     @OA\Parameter(
      *         name="limit",
@@ -117,7 +111,7 @@ class ActivityController extends Controller
             $activities = $this->model
                 ->where("user_id", $this->user_id)
                 ->orderBy($request->get('sort-by', 'created_at'), $request->get('sort-order', 'desc'))
-                ->paginate($request->get('limit', 20));
+                ->paginate($request->get('limit', config('settings.pagination_limit')));
 
             // Return response
             return response()->jsonApi([
@@ -145,13 +139,8 @@ class ActivityController extends Controller
      *     description="Save a new activity",
      *     tags={"Activities"},
      *
-     *     security={{
-     *         "default": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/Activity")
@@ -259,13 +248,8 @@ class ActivityController extends Controller
      *     description="Delete activity",
      *     tags={"Activities"},
      *
-     *     security={{
-     *         "default": {
-     *             "ManagerRead",
-     *             "User",
-     *             "ManagerWrite"
-     *         }
-     *     }},
+     *     security={{ "bearerAuth": {} }},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
