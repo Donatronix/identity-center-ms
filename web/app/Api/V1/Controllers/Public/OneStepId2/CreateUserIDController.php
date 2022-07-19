@@ -183,7 +183,7 @@ class CreateUserIDController extends Controller
 
             if ($userExist) {
                 // Create verification token (OTP - One Time Password)
-                $otpToken = VerifyStepInfo::generateOTP(7);
+                $otpToken = VerifyStepInfo::generateOTP(6);
 
                 //Generate token expiry time in minutes
                 $validity = VerifyStepInfo::tokenValidity(30);
@@ -340,7 +340,7 @@ class CreateUserIDController extends Controller
 
         try {
             // Create verification token (OTP - One Time Password)
-            $token = VerifyStepInfo::generateOTP(7);
+            $token = VerifyStepInfo::generateOTP(6);
 
             //Generate token expiry time in minutes
             $validity = VerifyStepInfo::tokenValidity(30);
