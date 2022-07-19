@@ -1,6 +1,7 @@
 <?php
 
-require_once(base_path('app') . '/helpers/setpath.php');
+use Sumra\SDK\Helpers\Helper;
+
 return [
     'api' => [
         /*
@@ -17,28 +18,28 @@ return [
         | Route for accessing api documentation interface
         |--------------------------------------------------------------------------
          */
-        'api' => setPath('/docs'),
+        'api' => Helper::setApiUrlPath('docs'),
 
         /*
         |--------------------------------------------------------------------------
         | Route for accessing parsed swagger annotations.
         |--------------------------------------------------------------------------
          */
-        'docs' => setPath('docs/export'),
+        'docs' => Helper::setApiUrlPath('docs/export'),
 
         /*
         |--------------------------------------------------------------------------
         | Route for Oauth2 authentication callback.
         |--------------------------------------------------------------------------
         */
-        'oauth2_callback' => setPath('docs/oauth2-callback'),
+        'oauth2_callback' => Helper::setApiUrlPath('docs/oauth2-callback'),
 
         /*
         |--------------------------------------------------------------------------
         | Route for serving assets
         |--------------------------------------------------------------------------
         */
-        'assets' => setPath('docs/ui-assets'),
+        'assets' => Helper::setApiUrlPath('docs/ui-assets'),
 
         /*
         |--------------------------------------------------------------------------
@@ -200,7 +201,7 @@ return [
         'SWAGGER_TITLE' => config('app.name'),
         'SWAGGER_DESCRIPTION' => config('app.name') . (env('APP_API_VERSION', 'latest') !== null ? ', Version ' . env('APP_API_VERSION', 'latest') : ''),
         'SWAGGER_VERSION' => env('APP_API_VERSION', ''),
-        'SWAGGER_CONST_HOST' => env('SWAGGER_CONST_HOST', config('app.url') . setPath()),
+        'SWAGGER_CONST_HOST' => env('SWAGGER_CONST_HOST', config('app.url') . Helper::setApiUrlPath()),
         'SWAGGER_SUPPORT_EMAILS' => "support@" . env('APP_PLATFORM') . '.com'
     ],
 ];
