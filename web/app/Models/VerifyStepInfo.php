@@ -4,10 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Sumra\SDK\Traits\UuidTrait;
+
 
 class VerifyStepInfo extends Model
 {
-    
+    use HasFactory;
+    use UuidTrait;
+
     protected $table = 'verify_step_infos';
     
     protected $fillable = [
