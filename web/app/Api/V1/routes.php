@@ -168,9 +168,9 @@ $router->group([
     $router->group([
         'prefix' => 'admin',
         'namespace' => 'Admin',
-        // 'middleware' => [
-        //     'auth:api'
-        // ]
+        'middleware' => [
+            'auth:api'
+        ]
     ], function ($router) {
         /**
          * KYC Management
