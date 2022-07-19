@@ -115,7 +115,7 @@ $app->register(Spatie\Permission\PermissionServiceProvider::class);
 /**
  * Pubsub - RabbitMQ
  */
-$app->configure('queues');
+$app->configure('queue');
 $app->register(VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider::class);
 if (!class_exists('App')) {
     class_alias(\Illuminate\Support\Facades\App::class, 'App');
