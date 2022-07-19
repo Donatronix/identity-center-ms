@@ -168,9 +168,9 @@ $router->group([
     $router->group([
         'prefix' => 'admin',
         'namespace' => 'Admin',
-        'middleware' => [
-            'auth:api'
-        ]
+        // 'middleware' => [
+        //     'auth:api'
+        // ]
     ], function ($router) {
         /**
          * KYC Management
@@ -204,6 +204,16 @@ $router->group([
             $router->delete('/{id:[a-fA-F0-9\-]{36}}', 'UserController@destroy');
             $router->post('/verify', 'UserController@verify');
             $router->post('/verify/send', 'UserController@verifyEmail');
+            
+            /**
+             * Count the number of users
+             */
+            $router->group([
+                'prefix' => 'count',
+            ], function () use ($router) {
+                $router->get('/all', 'StatisticsController@totalUsers');
+                $router->get('/new', 'StatisticsController@totalNewUsers');
+            });
         });
 
         /**
