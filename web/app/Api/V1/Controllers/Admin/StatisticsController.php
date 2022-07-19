@@ -69,13 +69,23 @@ class StatisticsController extends Controller
         try {
             $userCount = User::whereIn('status', [0,1,2])->count();
 
+            
+            if(!empty($userCount) && $userCount!=null){
+                // Return response
+                return response()->jsonApi([
+                    'type' => 'success',
+                    'title' => 'Users Count',
+                    'message' => 'Total count of users retrieved successfully',
+                    'data' => $userCount
+                ], 200);
+            }
             // Return response
             return response()->jsonApi([
-                'type' => 'success',
+                'type' => 'danger',
                 'title' => 'Users Count',
-                'message' => 'Total count of users retrieved successfully',
-                'data' => $userCount
-            ], 200);
+                'message' => 'Total count of users NOT found.',
+                'data' => null
+            ], 404);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
@@ -130,13 +140,21 @@ class StatisticsController extends Controller
                               ->whereMonth('created_at', date('m'))
                               ->count();
 
+            if(!empty($userCount) && $userCount!=null){
+                return response()->jsonApi([
+                    'type' => 'success',
+                    'title' => 'Users Count',
+                    'message' => 'Total count of users retrieved successfully',
+                    'data' => $userCount
+                ], 200);
+            }
             // Return response
             return response()->jsonApi([
-                'type' => 'success',
+                'type' => 'danger',
                 'title' => 'Users Count',
-                'message' => 'Total count of users retrieved successfully',
-                'data' => $userCount
-            ], 200);
+                'message' => 'Total count of users NOT found.',
+                'data' => null
+            ], 404);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
