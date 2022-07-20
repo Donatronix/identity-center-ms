@@ -15,6 +15,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
@@ -108,7 +109,7 @@ class UserProfileController extends Controller
             unset($personData['address']);
 
             $user->fill($personData);
-            $user->status = User::STATUS_STEP_2;
+            //$user->status = User::STATUS_STEP_2;
             $user->save();
 
             // Return response to client
@@ -317,22 +318,11 @@ class UserProfileController extends Controller
      *                  description="User Last name",
      *              ),
      *              @OA\Property(
-     *                 property="username",
-     *                 type="string",
-     *                 description="User username for user profile update",
-     *                 example="john.kiels"
-     *             ),
-     *              @OA\Property(
      *                 property="email",
      *                 type="string",
      *                 description="User email for user profile update",
      *                 example="johnkiels@ultainfinity.com"
      *             ),
-     *              @OA\Property(
-     *                  property="phone",
-     *                  type="string",
-     *                  description="Phone number",
-     *              ),
      *              @OA\Property(
      *                  property="birthday",
      *                  type="string",
@@ -453,57 +443,65 @@ class UserProfileController extends Controller
                     'type' => 'danger',
                     'title' => "Update user info",
                     'message' => "Input validator errors. Try again.",
-                    "data" => null
+                    "data" => $validator->errors()
                 ], 400);
             }
 
             // Get User object
             $user = User::findOrFail($id);
 
+
+            DB::beginTransaction();
+
             // Update data and save
             $inputData = $validator->validated();
             $user->fill($inputData);
             $user->save();
 
-
             if (!empty($request->email)) {
+
                 $user->status = User::STATUS_ACTIVE;
                 $user->verify_token = Str::random(32);
-
-                PubSub::transaction(function () use ($user) {
-                    $user->save();
-                })->publish('sendVerificationEmail', [
+                PubSub::publish('sendVerificationEmail', [
                     'email' => $user->email,
                     'display_name' => $user->display_name,
                     'verify_token' => $user->verify_token,
                 ], 'mail');
             }
 
+            if ($request->username) {
+                // Send notification email
+                $subject = 'Change Username';
+                $message = 'Your username has been updated successfully.';
+                $sendEmail = new SendEmailNotify();
+                $sendEmail->dispatchEmail($user->email, $subject, $message);
+            }
 
-
-            // Send notification email
-            $subject = 'Change Username';
-            $message = 'Your username has been updated successfully.';
-            $sendEmail = new SendEmailNotify();
-            $sendEmail->dispatchEmail($to['email'], $subject, $message);
+            DB::commit();
 
             //Show response
             return response()->jsonApi([
                 'type' => 'success',
-                'message' => "Email update was successful."
+                'message' => "Account update was successful."
             ], 200);
-        } catch (ValidationException $e) {
+        }
+        catch (ValidationException $e) {
+            DB::rollback();
             return response()->jsonApi([
                 'title' => 'User profile update',
                 'message' => "Validation error: " . $e->getMessage(),
             ], 422);
-        } catch (ModelNotFoundException $e) {
+        }
+        catch (ModelNotFoundException $e) {
+            DB::rollback();
             return response()->jsonApi([
                 'type' => 'danger',
                 'message' => 'User profile does NOT exist' . $e->getMessage(),
                 "data" => null
             ], 400);
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
+            DB::rollback();
             return response()->jsonApi([
                 'type' => 'danger',
                 'title' => 'User profile update',

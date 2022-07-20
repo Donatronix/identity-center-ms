@@ -298,15 +298,13 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
             'first_name' => 'sometimes|string|min:2|max:60',
             'last_name' => 'sometimes|string|min:2|max:60',
 
-            'username' => 'required|string',
-            'email' => "sometimes|email|unique:users,email" . ($id ? ",{$id}" : ''),
-            'email' => 'required|string|email',
-            'phone' => "sometimes|regex:/\+?\d{7,16}/i|unique:users,phone" . ($id ? ",{$id}" : ''),
-            'birthday' => 'sometimes|nullable|date_format:d-m-Y',
+            'username' => 'sometimes|string|unique:users,username',
+            'email' => "sometimes|email|unique:users,email",
+            'phone' => "sometimes|regex:/\+?\d{7,16}/i|unique:users,phone",
+            'birthday' => 'sometimes|nullable|date_format:Y-m-d',
             'subscribed_to_announcement' => 'sometimes|boolean',
 
             'locale' => 'sometimes|string',
-
 
             'address_country' => 'required|string|min:2|max:3',
             'address_line1' => 'required|string|max:150',
@@ -410,7 +408,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         return [
             'first_name' => 'required|string',
             'last_name' => 'required|string',
-            'email' => 'required|string',
+            'email' => 'required|email',
             'phone' => 'required|string',
             'username' => 'required|string',
             'birthday' => 'required|date_format:Y-m-d',
