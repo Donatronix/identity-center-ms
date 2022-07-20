@@ -596,45 +596,65 @@ class UserProfileController extends Controller
      */
     public function updatePhone(Request $request): JsonApiResponse
     {
-        $rules = [
-            'phone' => [
-                'required',
-                'regex:/\+?\d{7,16}/i',
-                "unique:users,phone",
-            ],
-            'verification_code' => [
-                'required',
-                'regex:/\d{6}/i',
-                function ($attribute, $value, $fail) {
-                    $user = User::first(Auth::user()->id);
-                    if (!Hash::check($value, $user->verification_code)) {
-                        $fail('The verification code is invalid.');
-                    }
-                },
-            ],
-        ];
-
-        $validationMessages = [
-            'verification_code.regex' => 'The verification code is invalid',
-        ];
-
-        $this->validate($request, $rules, $validationMessages);
-
+        
         try {
-            $user = User::first(Auth::user()->id);
-            $user->phone = $request->get('phone', null);
-            $user->verification_code = null;
-            if (!$user->save()) {
-                throw new Exception();
-            }
-            return response()->jsonApi([
-                "message" => "Phone number updated"
-            ], 200);
+            $validate = Validator::make($request->all(), [
+                'phone' => [
+                    'required',
+                    'string',
+                    'unique:users,phone',
+                ],
+                'verification_code' => [
+                    'required',
+                    'string'
+                ],
+            ]);
 
+            if($validate->fails()){
+                return response()->jsonApi([
+                    "type" => "warning",
+                    "title" => "Update User Phone Number",
+                    "message" => "Validator error occured.",
+                    "data" => null
+                ], 404);
+            }
+
+            $input = $validate->validated();
+
+            $userQuery = User::where([
+                'id'=>Auth::user()->id, 
+                'verification_code'=>$input['verification_code']
+            ]);
+
+            if($userQuery->exists()){
+                $userQuery->update([
+                    'phone' => $input['phone'],
+                    'verification_code' => null
+                ]);
+
+                return response()->jsonApi([
+                    "type" => "success",
+                    "title" => "Update User Phone Number",
+                    "message" => "Phone number updated successfully.",
+                    "data" => [
+                        'email' => $input['phone']
+                    ]
+                ], 200);
+            }
+            
+            return response()->jsonApi([
+                "type" => "danger",
+                "title" => "Update User Phone Number",
+                "message" => "Invalid verificaton code.",
+                "data" => null
+            ], 400);
         } catch (Exception $e) {
             return response()->jsonApi([
-                "message" => "An error occurred! Please, try again."
-            ], 500);
+                "type" => "danger",
+                "title" => "Update User Phone Number",
+                "message" => "Unable to update user phone number",
+                "data" => $e->getMessage()
+            ], 400);
         }
     }
 
@@ -804,11 +824,13 @@ class UserProfileController extends Controller
      *                  property="email",
      *                  type="string",
      *                  description="Email of the user",
+     *                  example="ultafinity@gmail.com"
      *              ),
      *              @OA\Property(
      *                  property="verification_code",
      *                  type="string",
      *                  description="verification code previously send",
+     *                  example="eUgsRd"
      *              )
      *
      *          )
@@ -869,42 +891,57 @@ class UserProfileController extends Controller
      */
     public function updateMyEmail(Request $request): JsonApiResponse
     {
-        $rules = [
-            'phone' => [
-                'required',
-                'email',
-                "unique:users,email",
-            ],
-            'verification_code' => [
-                'required',
-                'regex:/\d{6}/i',
-                function ($attribute, $value, $fail) {
-                    $user = User::first(Auth::user()->id);
-                    if (!Hash::check($value, $user->verification_code)) {
-                        $fail('The verification code is invalid.');
-                    }
-                },
-            ],
-        ];
-
-        $validationMessages = [
-            'verification_code.regex' => 'The verification code is invalid',
-        ];
-        $this->validate($request, $rules, $validationMessages);
-
         try {
-            $user = User::first(Auth::user()->id);
-            $user->email = $request->email;
-            $user->verification_code = null;
+            $validate = Validator::make($request->all(), [
+                'email' => 'required|email',
+                'verification_code' => 'required|string',
+            ]);
 
-            if (!$user->save()) {
-                throw new Exception();
+            if($validate->fails()){
+                return response()->jsonApi([
+                    "type" => "warning",
+                    "title" => "Update User Email",
+                    "message" => "Validator error occured.",
+                    "data" => null
+                ], 404);
             }
-            return response()->jsonApi(["message" => "Email updated"], 200);
 
+            $input = $validate->validated();
+
+            $userQuery = User::where([
+                'id'=>Auth::user()->id, 
+                'verification_code'=>$input['verification_code']
+            ]);
+
+            if($userQuery->exists()){
+                $userQuery->update([
+                    'email' => $input['email'],
+                    'verification_code' => null
+                ]);
+
+                return response()->jsonApi([
+                    "type" => "success",
+                    "title" => "Update User Email",
+                    "message" => "Email updated successfully.",
+                    "data" => [
+                        'email' => $input['email']
+                    ]
+                ], 200);
+            }
+            
+            return response()->jsonApi([
+                "type" => "danger",
+                "title" => "Update User Email",
+                "message" => "Invalid verificaton code.",
+                "data" => null
+            ], 400);
         } catch (Exception $e) {
-
-            return response()->jsonApi(["message" => "An error occurred! Please, try again."], 500);
+            return response()->jsonApi([
+                "type" => "danger",
+                "title" => "Update User Email",
+                "message" => "Unable to update user email",
+                "data" => $e->getMessage()
+            ], 400);
         }
     }
 
@@ -1030,21 +1067,38 @@ class UserProfileController extends Controller
      */
     public function validateEditPhoneNumber(Request $request): JsonApiResponse
     {
-        $this->validate($request, [
-            'phone' => [
-                'required',
-                'regex:/\+?\d{7,16}/i',
-                "unique:users,phone",
-            ],
-        ]);
-
+        
         try {
+            $validate = Validator::make($request->all(), [
+                'phone' => [
+                    'required',
+                    'regex:/\+?\d{7,16}/i',
+                    "unique:users,phone",
+                ],
+            ]);
+    
+            if($validate->fails()){
+                return response()->jsonApi([
+                    "type" => "warning",
+                    "title" => "Verify Phone Edit",
+                    "message" => "Validator error occured.",
+                    "data" => null
+                ], 404);
+            }
+    
+            $input = $validate->validated();
+    
             $verificationCode = Str::random(6);
-            $user = User::first(Auth::user()->id);
-            $user->verification_code = Hash::make($verificationCode);
-
+            $user = User::find(Auth::user()->id);
+            $user->verification_code = $verificationCode;
+    
             if (!$user->save()) {
-                throw new Exception();
+                return response()->jsonApi([
+                    "type" => "danger",
+                    "title" => "Verify Phone Edit",
+                    "message" => "A 6-digit code FAILED to send.",
+                    "data" => null
+                ], 400);
             }
 
             // Should send SMS to the user's new phone number, contaiing the verification code
@@ -1054,12 +1108,30 @@ class UserProfileController extends Controller
             ]);
 
             if (!$response->ok()) {
-                throw new Exception();
+                return response()->jsonApi([
+                    "type" => "danger",
+                    "title" => "Verify Phone Edit",
+                    "message" => "A 6-digit code FAILED to send.",
+                    "data" => null
+                ], 400);
             }
-
-            return response()->jsonApi(["message" => "A 6-digit code has been sent to your phone number"], 200);
+            
+            return response()->jsonApi([
+                "type" => "success",
+                "title" => "Verify Phone Edit",
+                "message" => "A 6-digit code has been sent to your phone",
+                "data" => [
+                    'email'=>$input['phone'],
+                    'code'=>$verificationCode
+                ]
+            ], 400);
         } catch (Exception $e) {
-            return response()->jsonApi(["message" => "An error occurred! Please, try again."], 500);
+            return response()->jsonApi([
+                "type" => "danger",
+                "title" => "Verify Email Edit",
+                "message" => "Unable to send 6-digit code.",
+                "data" => $e->getMessage()
+            ], 400);
         }
     }
 
@@ -1132,36 +1204,70 @@ class UserProfileController extends Controller
      */
     public function validateEditEmail(Request $request): JsonApiResponse
     {
-        $this->validate($request, [
-            'email' => [
-                'required',
-                'email',
-                "unique:users,email",
-            ],
-        ]);
-
         try {
-            $verificationCode = Str::random(6);
-            $user = User::first(Auth::user()->id);
-            $user->verification_code = Hash::make($verificationCode);
+            $validate = Validator::make($request->all(), [
+                'email' => [
+                    'required',
+                    'email',
+                    "unique:users,email",
+                ],
+            ]);
+
+            if($validate->fails()){
+                return response()->jsonApi([
+                    "type" => "warning",
+                    "title" => "Verify Email Edit",
+                    "message" => "Validator error occured.",
+                    "data" => null
+                ], 404);
+            }
+
+            $input = $validate->validated();
+
+            $vericode  = Str::random(6);
+            $user = User::find(Auth::user()->id);
+            $user->verification_code = $vericode;
 
             if (!$user->save()) {
-                throw new Exception();
+                return response()->jsonApi([
+                    "type" => "danger",
+                    "title" => "Verify Email Edit",
+                    "message" => "A 6-digit code FAILED to send.",
+                    "data" => null
+                ], 400);
             }
 
             // Should send SMS to the user's new email contaiing the verification code
             $response = Http::post('[COMMUNICATIONS_MS_URL]/messages/email/send-message', [
                 'to' => $request->email,
-                'message' => 'Your verification code is: ' . $verificationCode,
+                'message' => 'Your verification code is: ' . $vericode,
             ]);
 
             if (!$response->ok()) {
-                throw new Exception();
+                return response()->jsonApi([
+                    "type" => "danger",
+                    "title" => "Verify Email Edit",
+                    "message" => "A 6-digit code FAILED to send.",
+                    "data" => null
+                ], 400);
             }
-
-            return response()->jsonApi(["message" => "A 6-digit code has been sent to your email"], 200);
+            
+            return response()->jsonApi([
+                "type" => "success",
+                "title" => "Verify Email Edit",
+                "message" => "A 6-digit code has been sent to your email",
+                "data" => [
+                    'email'=>$input['email'],
+                    'code'=>$vericode
+                ]
+            ], 400);
         } catch (Exception $e) {
-            return response()->jsonApi(["message" => "An error occurred! Please, try again."], 500);
+            return response()->jsonApi([
+                "type" => "danger",
+                "title" => "Verify Email Edit",
+                "message" => "Unable to send 6-digit code.",
+                "data" => $e->getMessage()
+            ], 400);
         }
     }
 
@@ -1184,7 +1290,6 @@ class UserProfileController extends Controller
             ], 404);
         }
     }
-
 
     /**
      * Get User Role(s)
@@ -1222,7 +1327,6 @@ class UserProfileController extends Controller
 
         return response()->jsonApi($data, 200);
     }
-
 
     /**
      * Details of Users
