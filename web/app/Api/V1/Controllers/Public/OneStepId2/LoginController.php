@@ -157,7 +157,7 @@ class LoginController extends Controller
             $userQuery = User::where('username', $input['username']);
 
             if($userQuery->exists()) {
-                
+
                 //Get user
                 $user = $userQuery->first();
 
