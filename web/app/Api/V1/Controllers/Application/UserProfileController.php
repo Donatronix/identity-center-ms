@@ -20,7 +20,9 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
 use Sumra\SDK\Services\JsonApiResponse;
-use Sumra\SDK\Services\PubSub;
+//use Sumra\SDK\Services\PubSub;
+use Sumra\SDK\Facades\PubSub;
+//use PubSub;
 
 /**
  * Class UserProfileController
@@ -594,7 +596,7 @@ class UserProfileController extends Controller
      */
     public function updatePhone(Request $request): JsonApiResponse
     {
-        
+
         try {
             $validate = Validator::make($request->all(), [
                 'phone' => [
@@ -620,7 +622,7 @@ class UserProfileController extends Controller
             $input = $validate->validated();
 
             $userQuery = User::where([
-                'id'=>Auth::user()->id, 
+                'id'=>Auth::user()->id,
                 'verification_code'=>$input['verification_code']
             ]);
 
@@ -639,7 +641,7 @@ class UserProfileController extends Controller
                     ]
                 ], 200);
             }
-            
+
             return response()->jsonApi([
                 "type" => "danger",
                 "title" => "Update User Phone Number",
@@ -907,7 +909,7 @@ class UserProfileController extends Controller
             $input = $validate->validated();
 
             $userQuery = User::where([
-                'id'=>Auth::user()->id, 
+                'id'=>Auth::user()->id,
                 'verification_code'=>$input['verification_code']
             ]);
 
@@ -926,7 +928,7 @@ class UserProfileController extends Controller
                     ]
                 ], 200);
             }
-            
+
             return response()->jsonApi([
                 "type" => "danger",
                 "title" => "Update User Email",
@@ -1065,7 +1067,7 @@ class UserProfileController extends Controller
      */
     public function validateEditPhoneNumber(Request $request): JsonApiResponse
     {
-        
+
         try {
             $validate = Validator::make($request->all(), [
                 'phone' => [
@@ -1074,7 +1076,7 @@ class UserProfileController extends Controller
                     "unique:users,phone",
                 ],
             ]);
-    
+
             if($validate->fails()){
                 return response()->jsonApi([
                     "type" => "warning",
@@ -1083,13 +1085,13 @@ class UserProfileController extends Controller
                     "data" => null
                 ], 404);
             }
-    
+
             $input = $validate->validated();
-    
+
             $verificationCode = Str::random(6);
             $user = User::find(Auth::user()->id);
             $user->verification_code = $verificationCode;
-    
+
             if (!$user->save()) {
                 return response()->jsonApi([
                     "type" => "danger",
@@ -1113,7 +1115,7 @@ class UserProfileController extends Controller
                     "data" => null
                 ], 400);
             }
-            
+
             return response()->jsonApi([
                 "type" => "success",
                 "title" => "Verify Phone Edit",
@@ -1249,7 +1251,7 @@ class UserProfileController extends Controller
                     "data" => null
                 ], 400);
             }
-            
+
             return response()->jsonApi([
                 "type" => "success",
                 "title" => "Verify Email Edit",
