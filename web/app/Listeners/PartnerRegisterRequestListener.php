@@ -36,7 +36,7 @@ class PartnerRegisterRequestListener
 
             $user->save();
 
-            PubSub::publish('partnerRegisterResponse', $user, config('settings.pubsub_receiver.gmet_partners'));
+            PubSub::publish('partnerRegisterResponse', $user, config('settings.pubsub_receiver.gmet'));
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
         }

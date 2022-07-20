@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Validator;
-use Sumra\SDK\JsonApiResponse;
+use Sumra\SDK\Services\JsonApiResponse;
 
 class ActivityController extends Controller
 {

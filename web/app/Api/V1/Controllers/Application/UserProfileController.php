@@ -19,8 +19,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
-use Sumra\SDK\JsonApiResponse;
-use Sumra\SDK\PubSub;
+use Sumra\SDK\Services\JsonApiResponse;
+use Sumra\SDK\Services\PubSub;
 
 /**
  * Class UserProfileController
@@ -462,8 +462,7 @@ class UserProfileController extends Controller
 
                 $user->status = User::STATUS_ACTIVE;
                 $user->verify_token = Str::random(32);
-                $pub = new PubSub();
-                $pub->publish('sendVerificationEmail', [
+                PubSub::publish('sendVerificationEmail', [
                     'email' => $user->email,
                     'display_name' => $user->display_name,
                     'verify_token' => $user->verify_token,

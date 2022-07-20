@@ -14,6 +14,8 @@ class VerifyStepInfo extends Model
     use UuidTrait;
 
     protected $table = 'verify_step_infos';
+
+    protected $primaryKey = 'id';
     
     protected $fillable = [
         "username",
