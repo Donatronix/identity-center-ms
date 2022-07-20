@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use PubSub;
 use Spatie\Permission\Models\Role;
-use Sumra\SDK\JsonApiResponse;
+use Sumra\SDK\Services\JsonApiResponse;
 use Throwable;
 
 /**
@@ -69,7 +69,7 @@ class StatisticsController extends Controller
         try {
             $userCount = User::whereIn('status', [0,1,2])->count();
 
-            
+
             if(!empty($userCount) && $userCount!=null){
                 // Return response
                 return response()->jsonApi([

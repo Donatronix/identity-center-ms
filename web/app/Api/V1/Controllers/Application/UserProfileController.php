@@ -18,8 +18,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
-use Sumra\SDK\JsonApiResponse;
-use Sumra\SDK\PubSub;
+use Sumra\SDK\Services\JsonApiResponse;
+use Sumra\SDK\Services\PubSub;
 
 /**
  * Class UserProfileController
