@@ -15,6 +15,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Spatie\Permission\Models\Role;
 use App\Traits\TokenHandler;
+use Sumra\SDK\Facades\PubSub;
 
 class CreateUserIDController extends Controller
 {
@@ -226,11 +227,10 @@ class CreateUserIDController extends Controller
                 //Send referral code to Referral MS
                 PubSub::transaction(function () {
                 })->publish(
-                    'NewUserRegisteredListener', 
-                    $refData, 
+                    'NewUserRegisteredListener',
+                    $refData,
                     'new-user-registered'
                 );
-                
 
                 //Other response data array
                 $data['channel'] = $input['channel'];
