@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *     schema="Activity",
  *
  *     @OA\Property(
- *         property="product_id",
+ *         property="title",
  *         type="string",
  *         description="Title of activity",
  *         example="Password Update"

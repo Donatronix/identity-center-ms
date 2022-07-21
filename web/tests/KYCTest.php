@@ -1,5 +1,7 @@
 <?php
+
 namespace Tests;
+
 use Laravel\Lumen\Testing\DatabaseMigrations;
 use Laravel\Lumen\Testing\DatabaseTransactions;
 use App\Models\User;
@@ -49,10 +51,8 @@ class KYCTest extends TestCase
             'portrait' => 'base64://png:sjfjjsjf',
             'document_front' => 'base64://jpeg:sjjsjfjjsfjjsjfjsfjs'
         ])->seeStatusCode(200)->seeJsonStructure([
-            'data' => [
-                'message',
-                'title'
-            ]
+            'message',
+            'title'
         ]);
     }
 }
