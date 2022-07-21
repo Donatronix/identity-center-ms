@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\VerifyStepInfo;
 use App\Services\SendVerifyToken;
 use Exception;
+use PubSub;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
