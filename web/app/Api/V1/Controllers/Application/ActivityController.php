@@ -29,8 +29,8 @@ class ActivityController extends Controller
      *
      * @OA\Get(
      *     path="/activities",
-     *     summary="Getting activity detail by platform",
-     *     description="Getting activity detail by platform",
+     *     summary="Getting activity detail",
+     *     description="Getting activity detail",
      *     tags={"Activities"},
      *
      *     security={{ "bearerAuth": {} }},
