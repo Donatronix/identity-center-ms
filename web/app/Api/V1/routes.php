@@ -195,6 +195,7 @@ $router->group([
             $router->post('details', 'UserController@usersDetails');
             $router->get('/{id:[a-fA-F0-9\-]{36}}', 'UserController@show');
             $router->delete('/{id:[a-fA-F0-9\-]{36}}', 'UserController@destroy');
+            $router->post('/referred', 'UserController@createReferredUser');
 
             $router->get('/', 'UserController@index');
             $router->post('/', 'UserController@store');
