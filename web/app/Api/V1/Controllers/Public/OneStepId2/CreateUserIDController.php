@@ -67,6 +67,13 @@ class CreateUserIDController extends Controller
      *                 description="OneStep user account verification handler.",
      *                 required={"true"},
      *                 example="@ultainfinity"
+     *             ),
+     *             @OA\Property(
+     *                 property="referral_code",
+     *                 type="string",
+     *                 description="Referral code for user account",
+     *                 required={"false"},
+     *                 example="1827oGRL"
      *             )
      *         )
      *     ),
@@ -205,6 +212,25 @@ class CreateUserIDController extends Controller
                 ]);
 
                 $user->roles()->sync($role->id);
+
+                if(in_array('referral_code', $input)){
+                    $refData = [
+                        'user' => $user->toArray(),
+                        // 'application_id' => $input['application_id'],
+                        'referral_code' => $input['referral_code']
+                    ];
+                }else{
+                    $refData = ['user' => $user->toArray()];
+                }
+
+                //Send referral code to Referral MS
+                PubSub::transaction(function () {
+                })->publish(
+                    'NewUserRegisteredListener', 
+                    $refData, 
+                    'new-user-registered'
+                );
+                
 
                 //Other response data array
                 $data['channel'] = $input['channel'];

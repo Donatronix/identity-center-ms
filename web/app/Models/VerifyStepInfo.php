@@ -55,7 +55,8 @@ class VerifyStepInfo extends Model
      */
     public static function rules():array
     {
-        return [
+       return [
+            'referral_code' => 'string|nullable|max:8|min:8',
             'username'=>'required|string',
             'channel'=>'required|string',
             'phone'=>'nullable|string|max:20',
