@@ -29,6 +29,12 @@ class AdminTokenController extends Controller
      *         @OA\JsonContent(
      *             type="object",
      *             @OA\Property(
+     *                 property="username",
+     *                 type="string",
+     *                 description="Admin username",
+     *                 example="ihor"
+     *             ),
+     *             @OA\Property(
      *                 property="access_code",
      *                 type="string",
      *                 description="Admin access code verification",
@@ -108,7 +114,8 @@ class AdminTokenController extends Controller
     {
         //validate input data
         $validator = Validator::make($request->all(), [
-            'access_code'=>['required', 'string']
+            'access_code'=>['required', 'string'],
+            'username' => 'required|string|exists:users,username'
         ]);
 
         if ($validator->fails()) {
@@ -116,8 +123,8 @@ class AdminTokenController extends Controller
                 'type' => 'danger',
                 'title' => "Admin access code verification.",
                 'message' => "Input validator errors. Try again.",
-                "data" => null
-            ], 400);
+                "data" => $validator->errors()
+            ], 422);
         }
 
         try {
@@ -125,17 +132,23 @@ class AdminTokenController extends Controller
             $input = $validator->validated();
 
             // Check whether user already exist
-            $tokenQuery = User::where(['access_code' => $input['access_code']]);
+            $tokenQuery = User::where([
+                'access_code' => $input['access_code'],
+                'username' => $input['username']
+            ]);
 
             if ($tokenQuery->exists()) {
+
+                $data['user'] = $tokenQuery->first();
+                $data['token'] = $user->createToken($input['username'])->accessToken;
+
                 //Show response
                 return response()->jsonApi([
                     'type' => 'success',
                     'title' => "Admin access code verification.",
                     'message' => "Access code verified successfully",
-                    "data" => null
+                    "data" => $data
                 ], 200);
-
             }
 
             return response()->jsonApi([
