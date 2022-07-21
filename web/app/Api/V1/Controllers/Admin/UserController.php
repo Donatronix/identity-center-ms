@@ -1003,7 +1003,7 @@ class UserController extends Controller
      *             @OA\Property(
      *                 property="user_type",
      *                 type="string",
-     *                 description="User Type: Investor, Admin, Super",
+     *                 description="User Type:Admin, Super",
      *                 required={"true"},
      *                 example="Super"
      *             )
@@ -1036,7 +1036,7 @@ class UserController extends Controller
                 'password' => 'required|string|min:6',
                 'email' => 'required|email|unique:users,email',
                 'username' => 'required|string|unique:users,username',
-                'user_type' => 'required|in:Investor,Admin,Super'
+                'user_type' => 'required|in:Admin,Super'
             ]);
 
             //
@@ -1057,6 +1057,7 @@ class UserController extends Controller
              */
             $input['verify_token'] = Str::random(32);
             $input['password'] = Hash::make($input['password']);
+            $input['access_code'] = Str::random(8);
 
             $user = User::create($input);
             $user->roles()->sync($role->id);

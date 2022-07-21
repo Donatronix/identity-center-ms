@@ -48,7 +48,14 @@ class LoginController extends Controller
      *                 description="Account verification handler.",
      *                 required={"true"},
      *                 example="@ultainfinity"
-     *             )
+     *             ),
+     *             @OA\Property(
+     *                 property="isAdmin",
+     *                 type="boolean",
+     *                 description="Login as Admin",
+     *                 required={"false"},
+     *                 example="false"
+     *             ),
      *         )
      *     ),
      *
@@ -135,7 +142,8 @@ class LoginController extends Controller
             $validator = Validator::make($request->all(), [
                 'channel' => 'required|string',
                 'handler' => 'required|string',
-                'username' => 'required|string'
+                'username' => 'required|string',
+                'isAdmin' => 'boolean'
             ]);
 
             if ($validator->fails()) {
@@ -160,6 +168,19 @@ class LoginController extends Controller
 
                 //Get user
                 $user = $userQuery->first();
+
+                /**
+                 * Login As
+                 *
+                 */
+                if(isset($input['isAdmin']) && $input['isAdmin']) {
+                    if (!$user->hasRole('Admin') || !$user->hasRole('Super')) {
+                        return response()->jsonApi([
+                            'title' => 'Login',
+                            'message' => "Permission denied",
+                        ], 400);
+                    }
+                }
 
                 // Create verification token (OTP)
                 $otpToken = VerifyStepInfo::generateOTP(6);
@@ -235,7 +256,7 @@ class LoginController extends Controller
      *                 description="User login OTP",
      *                 required={"true"},
      *                 example="9284756"
-     *             )
+     *             ),
      *         )
      *     ),
      *
