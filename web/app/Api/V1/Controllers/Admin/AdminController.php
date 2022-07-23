@@ -719,4 +719,94 @@ class AdminController extends Controller
             ], 404);
         }
     }
+
+    /**
+     *  Display a listing of services
+     *
+     * @OA\Get(
+     *     path="/admin/administrators",
+     *     description="Get all services",
+     *     tags={"Admin | Administrators"},
+     *
+     *     security={{
+     *          "default" :{
+     *              "ManagerRead",
+     *              "Admin",
+     *              "ManagerWrite"
+     *          },
+     *     }},
+     *
+     *     @OA\Parameter(
+     *         name="role",
+     *         in="query",
+     *         description="Administrator role",
+     *         @OA\Schema(
+     *             type="string"
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response="200",
+     *         description="Output data",
+     *
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 description="Administrator parameter list",
+     *             ),
+     *         ),
+     *     ),
+     *
+     *     @OA\Response(
+     *          response="401",
+     *          description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Invalid request"
+     *     ),
+     *
+     *     @OA\Response(
+     *          response="404",
+     *          description="Not found",
+     *          @OA\JsonContent(
+     *              type="object",
+     *          ),
+     *     ),
+     *
+     *     @OA\Response(
+     *         response="500",
+     *         description="Unknown error"
+     *     ),
+     * )
+     *
+     * @param Request $request
+     *
+     * @return mixed
+     */
+    public function getServices(Request $request): mixed
+    {
+        try {
+
+            $admin = new AdminManager();
+
+            return response()->jsonApi([
+                'title' => 'Operation was success',
+                'message' => 'The data was displayed successfully',
+                'data' => $admin->getServices(),
+            ], 200);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->jsonApi([
+                'title' => "Not operation",
+                'message' => "Error showing all transactions",
+            ], 404);
+        } catch (Throwable $e) {
+            return response()->jsonApi([
+                'title' => "Operation failed",
+                'message' => $e->getMessage(),
+            ], 404);
+        }
+    }
 }
