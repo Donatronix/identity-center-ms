@@ -243,8 +243,10 @@ class UserProfileController extends Controller
 
                 // Fetch user profile
                 $user = $builder->select(
+                    'id',
                     'first_name',
                     'last_name',
+                    'phone',
                     'email',
                     'address_country',
                     'locale'

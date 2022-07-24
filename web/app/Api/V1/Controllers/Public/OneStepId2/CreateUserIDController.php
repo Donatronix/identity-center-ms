@@ -225,13 +225,12 @@ class CreateUserIDController extends Controller
                 }
 
                 //Send referral code to Referral MS
-                PubSub::transaction(function () {
-                })->publish(
-                    'NewUserRegisteredListener', 
-                    $refData, 
+                PubSub::publish(
+                    'NewUserRegisteredListener',
+                    $refData,
                     'new-user-registered'
                 );
-                
+
 
                 //Other response data array
                 $data['channel'] = $input['channel'];

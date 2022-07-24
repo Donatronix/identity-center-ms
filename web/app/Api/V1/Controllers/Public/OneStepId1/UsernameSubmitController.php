@@ -177,8 +177,7 @@ class UsernameSubmitController extends Controller
                 $user->password = Hash::make(config('settings.password'));
                 $user->save();
 
-                PubSub::transaction(function () {
-                })->publish('NewUserRegisteredListener', [
+                PubSub::publish('NewUserRegisteredListener', [
                     'user' => $user->toArray(),
                 ], 'new-user-registered');
 
