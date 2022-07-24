@@ -7,7 +7,7 @@ use Laravel\Lumen\Testing\DatabaseTransactions;
 use App\Models\Activity;
 use App\Models\User;
 
-class ActivityTest extends TestCase
+class ActivitiesTest extends TestCase
 {
     /**
      * Test get all activities.
