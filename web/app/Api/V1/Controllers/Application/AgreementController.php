@@ -25,7 +25,7 @@ class AgreementController extends Controller
      *     path="/user-profile/agreement",
      *     summary="Saving the user's acceptance of the agreement",
      *     description="Saving the user's acceptance of the agreement",
-     *     tags={"Users | Agreement"},
+     *     tags={"Application | User Profile | Agreement"},
      *
      *     security={{ "bearerAuth": {} }},
      *

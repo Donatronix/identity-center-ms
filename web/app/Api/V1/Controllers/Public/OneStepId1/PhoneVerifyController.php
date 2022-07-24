@@ -20,10 +20,10 @@ class PhoneVerifyController extends Controller
      * Verify phone and send sms
      *
      * @OA\Post(
-     *     path="/user-account/v1/auth/send-phone",
+     *     path="/user-account/v1/send-phone",
      *     summary="Verify phone and send sms",
      *     description="Verify phone and send sms",
-     *     tags={"OneStep 1.0 | Auth"},
+     *     tags={"OneStep 1.0"},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -135,7 +135,6 @@ class PhoneVerifyController extends Controller
             // user already exists
             if ($user->status == User::STATUS_BANNED) {
                 return response()->jsonApi([
-                    "type" => "danger",
                     "phone_exists" => true,
                     "user_status" => $user->status,
                     "message" => "This user has been banned from this platform."
@@ -143,19 +142,15 @@ class PhoneVerifyController extends Controller
 
             } elseif ($user->status == User::STATUS_INACTIVE) {
                 return response()->jsonApi([
-                    "code" => 200,
                     "message" => "This user already exists. Required send verification code",
                     "phone_exists" => true,
                     "user_status" => $user->status,
-                    "type" => "success",
                 ], 200);
             } elseif ($user->status == User::STATUS_ACTIVE) {
                 return response()->jsonApi([
-                    "code" => 200,
                     "message" => "This user already exists.",
                     "phone_exists" => true,
                     "user_status" => $user->status,
-                    "type" => "success",
                 ], 200);
             }
 
@@ -193,7 +188,6 @@ class PhoneVerifyController extends Controller
 
             // Return response
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => "Create new user. Step 1",
                 'message' => 'User was successful created',
                 'sid' => $sid,
@@ -203,7 +197,6 @@ class PhoneVerifyController extends Controller
         } catch (Exception $e) {
             if ($e instanceof SMSGatewayException) {
                 return response()->jsonApi([
-                    'type' => 'danger',
                     'title' => "Create new user. Step 1",
                     'message' => "Unable to send sms to phone Number.",
                 ], 400);
@@ -211,7 +204,6 @@ class PhoneVerifyController extends Controller
                 DB::rollBack();
 
                 return response()->jsonApi([
-                    'type' => 'danger',
                     'title' => "Create new user. Step 1",
                     'message' => "Unable to create user.",
                 ], 400);

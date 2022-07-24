@@ -20,7 +20,6 @@ class TwoFASecurityController extends Controller
         $this->app_name = "ULTAINFINITY WEALTH LAUNCHPAD";
     }
 
-
     /**
      * Generate a 2Fa Secret
      *
@@ -28,7 +27,7 @@ class TwoFASecurityController extends Controller
      *     path="/2fa/generateSecret",
      *     summary="generate the 2Fa Secret",
      *     description="Generate the 2Fa secret",
-     *     tags={"2fa"},
+     *     tags={"Application | 2FA"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -102,7 +101,7 @@ class TwoFASecurityController extends Controller
      *     path="/2fa/enable2fa",
      *     summary="enable the 2Fa security",
      *     description="enable the 2Fa security",
-     *     tags={"2fa"},
+     *     tags={"Application | 2FA"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -199,7 +198,7 @@ class TwoFASecurityController extends Controller
      *     path="/2fa/verify",
      *     summary="Verify 2fa code",
      *     description="Verify 2fa code",
-     *     tags={"2fa"},
+     *     tags={"Application | 2FA"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -296,7 +295,7 @@ class TwoFASecurityController extends Controller
      *     path="/2fa/disable2fa",
      *     summary="disable the 2Fa security",
      *     description="disable the 2Fa security",
-     *     tags={"2fa"},
+     *     tags={"Application | 2FA"},
      *
      *     security={{ "bearerAuth": {} }},
      *

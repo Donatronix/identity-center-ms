@@ -22,7 +22,7 @@ class SocialMediaController extends Controller
      *     path="/user-profile/redirect",
      *     summary="Create provider redirect URL",
      *     description="Create social media provider redirect URL",
-     *     tags={"Social Media Connect"},
+     *     tags={"Application | Social Media Connect"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -107,7 +107,7 @@ class SocialMediaController extends Controller
      *     path="/user-profile/{provider}/callback",
      *     summary="Process provider callback",
      *     description="Process social media provider callback",
-     *     tags={"Social Media Connect"},
+     *     tags={"Application | Social Media Connect"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -191,7 +191,7 @@ class SocialMediaController extends Controller
      *     path="/user-profile/whatsapp/connect",
      *     summary="Connect user to WhatsApp",
      *     description="Connect user to WhatsApp social media",
-     *     tags={"Social Media Connect"},
+     *     tags={"Application | Social Media Connect"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -269,7 +269,7 @@ class SocialMediaController extends Controller
      *     path="/user-profile/social/connections",
      *     summary="Retrieve social media connections",
      *     description="Retrieve social media connections",
-     *     tags={"Social Media Connect"},
+     *     tags={"Application | Social Media Connect"},
      *
      *     security={{ "bearerAuth": {} }},
      *

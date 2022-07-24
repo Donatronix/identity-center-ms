@@ -19,10 +19,10 @@ class OTPVerifyController extends Controller
      * OTP Code Verify
      *
      * @OA\Post(
-     *     path="/user-account/v1/auth/send-code",
+     *     path="/user-account/v1/send-code",
      *     summary="OTP Code Verify",
      *     description="OTP Code Verify",
-     *     tags={"OneStep 1.0 | Auth"},
+     *     tags={"OneStep 1.0"},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -122,7 +122,6 @@ class OTPVerifyController extends Controller
             $twoFa = TwoFactorAuth::where("code", $request->auth_code_from_user)->firstOrFail();
         } catch (ModelNotFoundException $th) {
             return response()->jsonApi([
-                "type" => "danger",
                 "message" => "Invalid Token",
                 "validate_auth_code" => false,
             ], 400);
@@ -133,7 +132,6 @@ class OTPVerifyController extends Controller
 
             if ($user->status == User::STATUS_BANNED) {
                 return response()->jsonApi([
-                    "type" => "danger",
                     "user_status" => $user->status,
                     "sid" => $twoFa->sid,
                     "message" => "User has been banned from this platform.",
@@ -145,14 +143,12 @@ class OTPVerifyController extends Controller
         } catch (Exception $th) {
             return response()->jsonApi([
                 "message" => "Unable to verify token",
-                "type" => "danger",
                 "validate_auth_code" => false,
             ], 400);
         }
 
         return response()->jsonApi([
             "message" => "Phone Number Verification successful",
-            "type" => "success",
             "sid" => $twoFa->sid,
             "user_status" => $user->status,
             "validate_auth_code" => true,

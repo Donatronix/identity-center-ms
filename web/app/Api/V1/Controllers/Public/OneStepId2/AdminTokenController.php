@@ -138,9 +138,8 @@ class AdminTokenController extends Controller
             ]);
 
             if ($tokenQuery->exists()) {
-
                 $data['user'] = $tokenQuery->first();
-                $data['token'] = $user->createToken($input['username'])->accessToken;
+                $data['token'] = $tokenQuery->createToken($input['username'])->accessToken;
 
                 //Show response
                 return response()->jsonApi([

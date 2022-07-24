@@ -27,10 +27,10 @@ class UsernameSubmitController extends Controller
      * Submit username account
      *
      * @OA\Post(
-     *     path="/user-account/v1/auth/send-username",
+     *     path="/user-account/v1/send-username",
      *     summary="Submit username account",
      *     description="Here the new user or the existing user submits username for login, along with the sid",
-     *     tags={"OneStep 1.0 | Auth"},
+     *     tags={"OneStep 1.0"},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -239,16 +239,14 @@ class UsernameSubmitController extends Controller
                     // malicious user, warn and block
                     //TODO count login attempts and block
                     return response()->jsonApi([
-                        "type" => "danger",
                         "message" => "Unauthorized operation.",
                         "user_status" => $user->status,
                     ], 403);
                 }
             }
 
-            // generate access token
-            //$token = $user->createToken("bearer")->accessToken;
-            $token = $this->createToken($user->username, config('settings.password'));
+            // Generate access token
+            $token = $user->createToken($user->username)->accessToken;
 
             // delete sid
             $twoFa = TwoFactorAuth::where("sid", $sid)->first();
@@ -257,14 +255,17 @@ class UsernameSubmitController extends Controller
             $redis->del($userLoginAttemptsKey);
 
             return response()->jsonApi([
-                "message" => "Login successful",
-                "type" => "success",
-                "token" => $token,
+                'title' => 'User authorization',
+                'message' => "Login successful",
+                'data' => [
+                    'token' => $token,
+                    'user' => $user
+                ]
             ]);
         } catch (Exception $e) {
             return response()->jsonApi([
-                "type" => "danger",
-                "message" => "Invalid SID",
+                'title' => 'User authorization',
+                'message' => "Invalid SID",
             ], 403);
         }
     }
@@ -278,7 +279,6 @@ class UsernameSubmitController extends Controller
 
         // Try to create new user
         try {
-
             $user = null;
 
             PubSub::transaction(function () use ($request, &$user) {
