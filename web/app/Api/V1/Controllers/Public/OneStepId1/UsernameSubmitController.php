@@ -162,7 +162,6 @@ class UsernameSubmitController extends Controller
         $usernameExists = User::where("username", $request->username)->exists();
         if ($usernameExists) {
             return response()->jsonApi([
-                "type" => "danger",
                 "message" => "Username already exists.",
                 "user_status" => $user->status,
                 "phone_exist" => true,
@@ -177,15 +176,20 @@ class UsernameSubmitController extends Controller
                 $user->password = Hash::make(config('settings.password'));
                 $user->save();
 
-                PubSub::publish('NewUserRegisteredListener', [
+                // Join new user to referral programm
+                PubSub::publish('NewUserRegistered', [
                     'user' => $user->toArray(),
-                ], 'new-user-registered');
+                ], config('pubsub.queue.referrals'));
+
+                // Subscribing new user to Subscription service
+                PubSub::publish('NewUserRegistered', [
+                    'user' => $user->toArray(),
+                ], config('pubsub.queue.subscriptions'));
 
                 //throw $th;
                 $user->assignRole('client');
             } catch (Exception $th) {
                 return response()->jsonApi([
-                    "type" => "danger",
                     "message" => "Unable to save username.",
                 ], 400);
             }
@@ -283,18 +287,16 @@ class UsernameSubmitController extends Controller
                 ]));
             })->publish('NewUserRegistered', [
                 'user' => $user?->toArray(),
-            ], 'new_user');
+            ], config('pubsub.queue.referrals'));
 
             // Return response
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => "Create new user. Step 1",
                 'message' => 'User was successful created',
                 'data' => $user,
             ], 201);
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Create new user. Step 1",
                 'message' => $e->getMessage(),
             ], 400);

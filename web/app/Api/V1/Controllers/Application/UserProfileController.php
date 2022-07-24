@@ -461,14 +461,14 @@ class UserProfileController extends Controller
             $user->save();
 
             if (!empty($request->email)) {
-
                 $user->status = User::STATUS_ACTIVE;
                 $user->verify_token = Str::random(32);
+
                 PubSub::publish('sendVerificationEmail', [
                     'email' => $user->email,
                     'display_name' => $user->display_name,
                     'verify_token' => $user->verify_token,
-                ], 'mail');
+                ], config('pubsub.queue.communications'));
             }
 
             if ($request->username) {
@@ -994,7 +994,7 @@ class UserProfileController extends Controller
             'email' => $user->email,
             'display_name' => $user->display_name,
             'verify_token' => $user->verify_token,
-        ], 'mail');
+        ], config('pubsub.queue.communications'));
 
         return response()->jsonApi(["email sent"], 200);
     }

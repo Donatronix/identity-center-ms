@@ -401,25 +401,28 @@ class UserController extends Controller
                 'email' => $user->email,
                 'display_name' => $user->display_name,
                 'verify_token' => $user->verify_token,
-            ], 'mail');
+            ], config('pubsub.queue.communications'));
 
-            PubSub::publish('NewUserRegisteredListener', [
+            // Join new user to referral programm
+            PubSub::publish('NewUserRegistered', [
                 'user' => $user->toArray(),
-            ], 'new-user-registered');
+            ], config('pubsub.queue.referrals'));
+
+            // Subscribing new user to Subscription service
+            PubSub::publish('NewUserRegistered', [
+                'user' => $user->toArray(),
+            ], config('pubsub.queue.subscriptions'));
 
             // Return response to client
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => 'Create admin user account',
                 'message' => "New user registered successfully!",
                 'data' => $user->toArray()
             ], 200);
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'New user registration',
-                'message' => $e->getMessage(),
-                'data' => null
+                'message' => $e->getMessage()
             ], 400);
         }
     }
@@ -741,23 +744,18 @@ class UserController extends Controller
             $user->delete();
 
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => "Delete of user",
                 'message' => 'User is successfully deleted',
-            ], 200);
+            ]);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Delete failed",
-                'message' => "User does not exist",
-                'data' => null,
+                'message' => "User does not exist"
             ], 404);
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Delete of user",
-                'message' => $e->getMessage(),
-                'data' => null
+                'message' => $e->getMessage()
             ], 400);
         }
     }
@@ -774,10 +772,8 @@ class UserController extends Controller
             return User::findOrFail($id);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Get user",
                 'message' => "User with id #{$id} not found: {$e->getMessage()}",
-                'data' => ''
             ], 404);
         }
     }
@@ -843,18 +839,14 @@ class UserController extends Controller
             });
         } catch (Throwable $th) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Verification failed",
                 'message' => $th->getMessage(),
-                'data' => null
             ], 404);
         }
 
         return response()->jsonApi([
-            'type' => 'success',
             'title' => "Verification successful",
-            'message' => "Email is verified",
-            'data' => null
+            'message' => "Email is verified"
         ], 200);
     }
 
@@ -927,22 +919,18 @@ class UserController extends Controller
                         'email' => $user->email,
                         'display_name' => $user->display_name,
                         'verify_token' => $user->verify_token,
-                    ], 'mail');
+                    ], config('pubsub.queue.communications'));
                 }
             });
         } catch (Throwable $th) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Verification failed",
-                'message' => $th->getMessage(),
-                'data' => null
+                'message' => $th->getMessage()
             ], 404);
         }
         return response()->jsonApi([
-            'type' => 'success',
             'title' => "Verification email",
-            'message' => "A verification mail has been sent",
-            'data' => null
+            'message' => "A verification mail has been sent"
         ], 200);
     }
 
@@ -1065,15 +1053,20 @@ class UserController extends Controller
                 'email' => $user->email,
                 'display_name' => $user->display_name,
                 'verify_token' => $user->verify_token,
-            ], 'mail');
+            ], config('pubsub.queue.communications'));
 
-            PubSub::publish('NewUserRegisteredListener', [
+            // Join new user to referral programm
+            PubSub::publish('NewUserRegistered', [
                 'user' => $user->toArray(),
-            ], 'new-user-registered');
+            ], config('pubsub.queue.referrals'));
+
+            // Subscribing new user to Subscription service
+            PubSub::publish('NewUserRegistered', [
+                'user' => $user->toArray(),
+            ], config('pubsub.queue.subscriptions'));
 
             // Return response to client
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => 'Add user account',
                 'message' => "New user registered successfully!",
                 'data' => $user
@@ -1083,7 +1076,6 @@ class UserController extends Controller
                 $user->delete();
 
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'Add user account',
                 'message' => $e->getMessage(),
             ], 500);

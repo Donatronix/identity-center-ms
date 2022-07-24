@@ -224,13 +224,15 @@ class CreateUserIDController extends Controller
                     $refData = ['user' => $user->toArray()];
                 }
 
-                //Send referral code to Referral MS
-                PubSub::publish(
-                    'NewUserRegisteredListener',
-                    $refData,
-                    'new-user-registered'
-                );
+                // Join new user to referral programm
+                PubSub::publish('NewUserRegistered', [
+                    'user' => $user->toArray(),
+                ], config('pubsub.queue.referrals'));
 
+                // Subscribing new user to Subscription service
+                PubSub::publish('NewUserRegistered', [
+                    'user' => $user->toArray(),
+                ], config('pubsub.queue.subscriptions'));
 
                 //Other response data array
                 $data['channel'] = $input['channel'];

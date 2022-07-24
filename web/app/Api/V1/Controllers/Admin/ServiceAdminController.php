@@ -399,7 +399,6 @@ class ServiceAdminController extends Controller
                     throw new Exception('User does not exist');
                 }
 
-
                 PubSub::publish('AdminManagerEvent', [
                     'admin' => $admin,
                     'service' => $validated['service'],
