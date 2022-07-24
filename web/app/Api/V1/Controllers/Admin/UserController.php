@@ -397,15 +397,13 @@ class UserController extends Controller
 
             $user = User::create($input);
 
-            PubSub::transaction(function () {
-            })->publish('sendVerificationEmail', [
+            PubSub::publish('sendVerificationEmail', [
                 'email' => $user->email,
                 'display_name' => $user->display_name,
                 'verify_token' => $user->verify_token,
             ], 'mail');
 
-            PubSub::transaction(function () {
-            })->publish('NewUserRegisteredListener', [
+            PubSub::publish('NewUserRegisteredListener', [
                 'user' => $user->toArray(),
             ], 'new-user-registered');
 
@@ -925,9 +923,7 @@ class UserController extends Controller
                 ]);
 
                 if ($password_reset) {
-                    PubSub::transaction(function () {
-
-                    })->publish('sendVerificationEmail', [
+                    PubSub::publish('sendVerificationEmail', [
                         'email' => $user->email,
                         'display_name' => $user->display_name,
                         'verify_token' => $user->verify_token,

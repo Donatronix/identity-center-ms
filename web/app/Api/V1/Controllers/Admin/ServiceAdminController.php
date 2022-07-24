@@ -281,9 +281,7 @@ class ServiceAdminController extends Controller
                     // ]);
 
                     //send message
-                    PubSub::transaction(function () {
-                    })
-                        ->publish('AdminManagerEvent', [
+                    PubSub::publish('AdminManagerEvent', [
                             'admin' => $admin,
                             'role' => $validated['role'],
                             'service' => $validated['service'],
@@ -402,9 +400,7 @@ class ServiceAdminController extends Controller
                 }
 
 
-                PubSub::transaction(function () {
-
-                })->publish('AdminManagerEvent', [
+                PubSub::publish('AdminManagerEvent', [
                     'admin' => $admin,
                     'service' => $validated['service'],
                     'action' => 'delete',
