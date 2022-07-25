@@ -370,7 +370,7 @@ class LoginController extends Controller
 
                 //Create user access token
                 $data['token'] = $user->createToken($input['username'])->accessToken;
-                $data['user'] = $user;
+                $data['user'] = $this->prepRole($user);
 
                 //Delete login OTP
                 $userQuery->delete();
@@ -526,5 +526,14 @@ class LoginController extends Controller
                 "data" => null
             ], 400);
         }
+    }
+
+    private function prepRole($user)
+    {
+        $role = $user->getRoleNames()[0];
+        $user = $user->toArray();
+        unset($user['roles']);
+        $user['role'] = $role;
+        return $user;
     }
 }
