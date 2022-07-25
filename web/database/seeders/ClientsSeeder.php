@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Client;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -24,9 +25,7 @@ class ClientsSeeder extends Seeder
                 'redirect' => 'http://localhost',
                 'personal_access_client' => 1,
                 'password_client' => 1,
-                'revoked' => 0,
-                'created_at' => date('Y-m-d h:i:s'),
-                'updated_at' => date('Y-m-d h:i:s')
+                'revoked' => 0
             ],
             [
                 'name' => 'Identity Centre API Microservice Personal Access Client',
@@ -35,23 +34,15 @@ class ClientsSeeder extends Seeder
                 'redirect' => 'http://localhost',
                 'personal_access_client' => 1,
                 'password_client' => 1,
-                'revoked' => 0,
-                'created_at' => date('Y-m-d h:i:s'),
-                'updated_at' => date('Y-m-d h:i:s')
+                'revoked' => 0
             ]
         ];
 
         foreach ($lists as $list) {
-            DB::table('oauth_clients')->insert($list);
-
-            $client_id = DB::table('oauth_clients')
-                ->where('secret', $list['secret'])
-                ->value('id');
+            $client = Client::create($list);
 
             DB::table('oauth_personal_access_clients')->insert([
-                'client_id' => $client_id,
-                'created_at' => date('Y-m-d h:i:s'),
-                'updated_at' => date('Y-m-d h:i:s')
+                'client_id' => $client->id
             ]);
         }
     }
