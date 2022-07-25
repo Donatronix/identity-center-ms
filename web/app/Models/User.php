@@ -273,19 +273,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         });
     }
 
-    public static function getBySid($sid)
-    {
-        try {
-            $twoFa = TwoFactorAuth::where("sid", $sid)->firstOrFail();
-            $user = $twoFa->user;
-
-            return $user;
-            //code...
-        } catch (ModelNotFoundException $e) {
-            throw $e;
-        }
-    }
-
     /**
      * Rules to validate personal data
      *

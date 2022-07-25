@@ -31,7 +31,7 @@ class ActivityController extends Controller
      *     path="/activities",
      *     summary="Getting activity detail",
      *     description="Getting activity detail",
-     *     tags={"Activities"},
+     *     tags={"Application | User Activities"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -115,17 +115,14 @@ class ActivityController extends Controller
 
             // Return response
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => "Activities list",
                 'message' => 'List of activities successfully received',
                 'data' => $activities->toArray()
             ], 200);
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Activities list",
                 'message' => $e->getMessage(),
-                'data' => null
             ], 400);
         }
     }
@@ -137,7 +134,7 @@ class ActivityController extends Controller
      *     path="/activities",
      *     summary="Save a new activity",
      *     description="Save a new activity",
-     *     tags={"Activities"},
+     *     tags={"Application | User Activities"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -187,6 +184,7 @@ class ActivityController extends Controller
             "title" => "required|string",
             "description" => "required|string",
         ]);
+
         if ($validator->fails()) {
             throw new Exception($validator->errors()->first());
         }
@@ -204,17 +202,14 @@ class ActivityController extends Controller
 
             // Return response to client
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => 'New activity registration',
                 'message' => "Activity successfully added",
                 'data' => $activity->toArray()
-            ], 200);
+            ]);
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'New activity registration',
                 'message' => $e->getMessage(),
-                'data' => null
             ], 400);
         }
     }
@@ -231,10 +226,8 @@ class ActivityController extends Controller
             return $this->model::findOrFail($id);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Get activity",
                 'message' => "Activity with id #{$id} not found: {$e->getMessage()}",
-                'data' => ''
             ], 404);
         }
     }
@@ -246,7 +239,7 @@ class ActivityController extends Controller
      *     path="/activities/{id}",
      *     summary="Delete activity",
      *     description="Delete activity",
-     *     tags={"Activities"},
+     *     tags={"Application | User Activities"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -299,17 +292,13 @@ class ActivityController extends Controller
             $activity->delete();
 
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => "Deleted activity",
-                'message' => 'activity is successfully deleted',
-                'data' => null
+                'message' => 'activity is successfully deleted'
             ], 200);
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Delete of activity",
-                'message' => $e->getMessage(),
-                'data' => null
+                'message' => $e->getMessage()
             ], 400);
         }
     }

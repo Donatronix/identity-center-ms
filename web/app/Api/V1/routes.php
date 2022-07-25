@@ -19,7 +19,7 @@ $router->group([
          * OneStep 1.0
          */
         $router->group([
-            'prefix' => 'user-account/v1/auth',
+            'prefix' => 'user-account/v1',
             "namespace" => "OneStepId1",
         ], function ($router) {
             $router->post('/send-phone', "PhoneVerifyController");
@@ -85,7 +85,6 @@ $router->group([
         /**
          * 2Fa Security
          */
-
         $router->group([
             'prefix'=>'2fa'
         ], function($router){
@@ -142,11 +141,6 @@ $router->group([
             $router->post('/upload', 'KYCController@store');
             $router->post('/start', 'KYCController@identifyStart');
         });
-
-        /**
-         * Auth - refresh token
-         */
-        $router->post('/auth/refresh-token', 'AuthController@refresh');
 
         /**
          * Activities

@@ -3,10 +3,7 @@
 namespace App\Api\V1\Controllers\Public\OneStepId2;
 
 use App\Api\V1\Controllers\Controller;
-use App\Models\RecoveryQuestion;
 use App\Models\User;
-use App\Models\VerifyStepInfo;
-use App\Services\SendVerifyToken;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -114,13 +111,12 @@ class AdminTokenController extends Controller
     {
         //validate input data
         $validator = Validator::make($request->all(), [
-            'access_code'=>['required', 'string'],
+            'access_code' => ['required', 'string'],
             'username' => 'required|string|exists:users,username'
         ]);
 
         if ($validator->fails()) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Admin access code verification.",
                 'message' => "Input validator errors. Try again.",
                 "data" => $validator->errors()
@@ -138,34 +134,27 @@ class AdminTokenController extends Controller
             ]);
 
             if ($tokenQuery->exists()) {
-
                 $data['user'] = $tokenQuery->first();
-                $data['token'] = $user->createToken($input['username'])->accessToken;
+                $data['token'] = $tokenQuery->createToken($input['username'])->accessToken;
 
                 //Show response
                 return response()->jsonApi([
-                    'type' => 'success',
                     'title' => "Admin access code verification.",
                     'message' => "Access code verified successfully",
                     "data" => $data
-                ], 200);
+                ]);
             }
 
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Admin access code verification.",
-                'message' => "Access code NOT verified.",
-                "data" => null
+                'message' => "Access code NOT verified."
             ], 400);
-
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Admin access code verification.",
                 'message' => "Unable to verify access code. Try again.",
                 "data" => $e->getMessage()
             ], 400);
         }
     }
-
 }

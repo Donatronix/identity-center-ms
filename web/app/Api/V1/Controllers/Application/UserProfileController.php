@@ -38,7 +38,7 @@ class UserProfileController extends Controller
      *     path="/user-profile",
      *     summary="Saving user person detail",
      *     description="Saving user person detail",
-     *     tags={"User Profile"},
+     *     tags={"Application | User Profile"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -136,7 +136,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/me",
      *     summary="Get current user profile data",
      *     description="Get current user profile data",
-     *     tags={"User Profile"},
+     *     tags={"Application | User Profile"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -254,31 +254,26 @@ class UserProfileController extends Controller
 
                 // Return response
                 return response()->jsonApi([
-                    'type' => 'success',
                     'title' => 'Get current user profile data',
                     'message' => 'User profile retrieved successfully',
                     'data' => $user->toArray(),
                 ]);
             } else {
                 return response()->jsonApi([
-                    'type' => 'danger',
+                    'title' => 'Get current user profile data',
                     'message' => "User profile does NOT exist.",
-                    "data" => null
                 ], 400);
             }
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'Get current user profile data',
                 'message' => "Unable to retrieve user profile.",
                 "data" => $e->getMessage()
             ], 400);
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'Get current user profile data',
                 'message' => $e->getMessage(),
-                'data' => []
             ], 404);
         }
     }
@@ -290,7 +285,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/{id}",
      *     summary="update user",
      *     description="update user",
-     *     tags={"User Profile"},
+     *     tags={"Application | User Profile"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -520,7 +515,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/update/phone",
      *     summary="Update current user's phone number",
      *     description="Validate the verification code and update phone number of the current user",
-     *     tags={"User Profile"},
+     *     tags={"Application | User Profile"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -665,7 +660,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/update/password",
      *     summary="Change user password",
      *     description="Change user profile password for One-Step 2.0",
-     *     tags={"User Profile"},
+     *     tags={"Application | User Profile"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -812,7 +807,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/update-email",
      *     summary="Update current user's email",
      *     description="Validate the verification code and update the current user's email",
-     *     tags={"User Profile"},
+     *     tags={"Application | User Profile"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -952,7 +947,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/verify-email-send",
      *     summary="Verify user email",
      *     description="resend user email",
-     *     tags={"User Profile"},
+     *     tags={"Application | User Profile"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -1006,7 +1001,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/validate-edit-phone",
      *     summary="Validate the new user phone number",
      *     description="Validate the new phone number that the current user whats to use",
-     *     tags={"User Profile"},
+     *     tags={"Application | User Profile"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -1142,7 +1137,7 @@ class UserProfileController extends Controller
      *     path="/user-profile/validate-edit-email",
      *     summary="Validate the new user email",
      *     description="Validate the new email that the current user whats to use, and send verification code",
-     *     tags={"User Profile"},
+     *     tags={"Application | User Profile"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -1297,7 +1292,7 @@ class UserProfileController extends Controller
      * @OA\Get(
      *     path="/user-profile/role",
      *     description="Get Role for auth user",
-     *     tags={"User Profile"},
+     *     tags={"Application | User Profile"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -1334,7 +1329,7 @@ class UserProfileController extends Controller
      * @OA\Post(
      *     path="/user-profile/details",
      *     description="Get details of users",
-     *     tags={"User Profile"},
+     *     tags={"Application | User Profile"},
      *
      *     security={{ "bearerAuth": {} }},
      *

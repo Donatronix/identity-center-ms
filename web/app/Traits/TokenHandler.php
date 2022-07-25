@@ -21,6 +21,7 @@ trait TokenHandler
         ]);
 
         $res = app()->handle($req);
+
         return json_decode($res->getContent());
     }
 
