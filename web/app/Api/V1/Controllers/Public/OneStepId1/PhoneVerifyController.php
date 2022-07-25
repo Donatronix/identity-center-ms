@@ -181,7 +181,7 @@ class PhoneVerifyController extends Controller
             $twoFa = TwoFactorAuth::create([
                 "sid" => $sid,
                 "user_id" => $user->id,
-                "code" => $token,
+                "auth_code" => $token,
             ]);
             // Send the code to the user
             DB::commit();

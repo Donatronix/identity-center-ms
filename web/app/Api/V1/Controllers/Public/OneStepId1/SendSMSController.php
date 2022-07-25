@@ -149,7 +149,7 @@ class SendSMSController extends Controller
             $twoFa = TwoFactorAuth::create([
                 "sid" => $sid,
                 "user_id" => $user->id,
-                "code" => $token
+                "auth_code" => $token
             ]);
 
             // Return response

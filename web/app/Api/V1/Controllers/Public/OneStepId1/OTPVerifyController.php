@@ -119,7 +119,7 @@ class OTPVerifyController extends Controller
         ]);
 
         try {
-            $twoFa = TwoFactorAuth::where("code", $request->auth_code_from_user)->firstOrFail();
+            $twoFa = TwoFactorAuth::where("auth_code", $request->auth_code_from_user)->firstOrFail();
         } catch (ModelNotFoundException $th) {
             return response()->jsonApi([
                 "message" => "Invalid Token",
