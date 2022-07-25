@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Exceptions\SMSGatewayException;
 use GuzzleHttp\Exception\ConnectException;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
 
 class SendVerifyToken
 {
@@ -18,7 +17,7 @@ class SendVerifyToken
         try {
             $response = Http::withHeaders($headers)
                              ->post($url, $params);
-        } catch (Excection $e) {
+        } catch (SMSGatewayException $e) {
             return false;
         } catch (ConnectException $e) {
             return false;
@@ -44,10 +43,9 @@ class SendVerifyToken
      */
     public function requestUrl(string $instance): string
     {
-        $host = env('MESSENGER_BASE_URL');
-        $version = env('MESSENGER_VERSION');
+        $host = config('settings.api.communications');
 
-        return "{$host}/{$version}/messages/{$instance}/send-message";
+        return "{$host}/messages/{$instance}/send-message";
     }
 
     public function getHeaders()
@@ -58,5 +56,4 @@ class SendVerifyToken
             'Access-Control-Allow-Origin' => '*',
         ];
     }
-
 }

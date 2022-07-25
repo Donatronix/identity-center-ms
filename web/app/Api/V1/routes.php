@@ -209,7 +209,7 @@ $router->group([
                 $router->get('/new', 'StatisticsController@totalNewUsers');
             });
 
-           
+
         });
 
         /**
@@ -221,11 +221,11 @@ $router->group([
         ], function () use ($router) {
             $router->get('/', 'ServiceAdminController@index');
             $router->post('/', 'ServiceAdminController@store');
-//                $router->get('/{id}', 'ServiceAdminController@show');
             $router->put('/{id}', 'ServiceAdminController@update');
             $router->delete('/{id}', 'ServiceAdminController@destroy');
             $router->patch('/{id}', 'ServiceAdminController@updateRole');
             $router->patch('/remove/{id}', 'ServiceAdminController@removeRole');
+            $router->get('/services', 'ServiceAdminController@getServices');
         });
     });
 

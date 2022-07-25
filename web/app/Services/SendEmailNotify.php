@@ -40,10 +40,9 @@ class SendEmailNotify
      */
     public function requestUrl(): string
     {
-        $host = env('MESSENGER_BASE_URL');
-        $version = env('MESSENGER_VERSION');
+        $host = config('settings.api.communications');
 
-        return "{$host}/{$version}/mail";
+        return "{$host}/mail/sender";
     }
 
     public function getHeaders()

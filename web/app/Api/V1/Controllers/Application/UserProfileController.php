@@ -248,8 +248,10 @@ class UserProfileController extends Controller
                     'last_name',
                     'phone',
                     'email',
+                    'phone',
+                    'birthday',
                     'address_country',
-                    'locale'
+                    'locale',
                 )->firstOrFail();
 
                 // Return response
