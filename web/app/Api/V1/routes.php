@@ -86,17 +86,17 @@ $router->group([
          * 2Fa Security
          */
         $router->group([
-            'prefix'=>'2fa'
-        ], function($router){
-            $router->get('/generateSecret','TwoFASecurityController@generate2faSecret');
-            $router->post('/enable2fa','TwoFASecurityController@enable2fa');
-            $router->post('/verify','TwoFASecurityController@verify2fa');
-            $router->post('/disable2fa','TwoFASecurityController@disable2fa');
+            'prefix' => '2fa'
+        ], function ($router) {
+            $router->get('/generateSecret', 'TwoFASecurityController@generate2faSecret');
+            $router->post('/enable2fa', 'TwoFASecurityController@enable2fa');
+            $router->post('/verify', 'TwoFASecurityController@verify2fa');
+            $router->post('/disable2fa', 'TwoFASecurityController@disable2fa');
         });
 
         /**
          * User Profile
-        */
+         */
         $router->group([
             'prefix' => 'user-profile',
         ], function ($router) {
@@ -122,7 +122,7 @@ $router->group([
 
         /**
          * Social media connector
-        */
+         */
         $router->group([
             'prefix' => 'user-profile',
         ], function ($router) {
@@ -144,7 +144,7 @@ $router->group([
 
         /**
          * Activities
-        */
+         */
         $router->group([
             'prefix' => 'activities',
         ], function ($router) {
@@ -209,17 +209,7 @@ $router->group([
                 $router->get('/new', 'StatisticsController@totalNewUsers');
             });
 
-            /**
-             * Administrators
-             */
-            $router->group([
-
-            ], function () use ($router) {
-                $router->post('administrators', 'AdminController@store');
-                $router->put('administrators/{id}', 'AdminController@update');
-                $router->delete('administrators/{id}', 'AdminController@destroy');
-                $router->patch('administrators/{id}', 'AdminController@updateRole');
-            });
+           
         });
 
         /**
@@ -229,9 +219,13 @@ $router->group([
             'prefix' => 'service/admins',
             'as' => 'admin.administrators',
         ], function () use ($router) {
+            $router->get('/', 'ServiceAdminController@index');
             $router->post('/', 'ServiceAdminController@store');
-            $router->patch('/', 'ServiceAdminController@update');
-            $router->delete('/', 'ServiceAdminController@destroy');
+//                $router->get('/{id}', 'ServiceAdminController@show');
+            $router->put('/{id}', 'ServiceAdminController@update');
+            $router->delete('/{id}', 'ServiceAdminController@destroy');
+            $router->patch('/{id}', 'ServiceAdminController@updateRole');
+            $router->patch('/remove/{id}', 'ServiceAdminController@removeRole');
         });
     });
 
