@@ -221,7 +221,9 @@ $router->group([
             $router->group([
 
             ], function () use ($router) {
+                $router->get('administrators', 'AdminController@index');
                 $router->post('administrators', 'AdminController@store');
+                $router->get('administrators/{id}', 'AdminController@show');
                 $router->put('administrators/{id}', 'AdminController@update');
                 $router->delete('administrators/{id}', 'AdminController@destroy');
                 $router->patch('administrators/{id}', 'AdminController@updateRole');
