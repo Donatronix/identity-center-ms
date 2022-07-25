@@ -759,7 +759,7 @@ class ServiceAdminController extends Controller
      *  Remove admin role
      *
      * @OA\Patch(
-     *     path="/admin/administrators/{id}",
+     *     path="/admin/administrators/remove/{id}",
      *     description="Update admin role",
      *     tags={"Admin | Administrators"},
      *
@@ -925,7 +925,7 @@ class ServiceAdminController extends Controller
      *  Display a listing of services
      *
      * @OA\Get(
-     *     path="/admin/administrators",
+     *     path="/admin/administrators/services",
      *     description="Get all services",
      *     tags={"Admin | Administrators"},
      *
