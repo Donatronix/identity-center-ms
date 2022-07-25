@@ -417,7 +417,7 @@ class UserController extends Controller
             return response()->jsonApi([
                 'title' => 'Create admin user account',
                 'message' => "New user registered successfully!",
-                'data' => $user->toArray()
+                'data' => $user
             ], 200);
         } catch (Exception $e) {
             return response()->jsonApi([

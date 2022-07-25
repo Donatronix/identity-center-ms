@@ -388,7 +388,10 @@ class CreateUserIDController extends Controller
             return response()->jsonApi([
                 'type' => 'success',
                 'message' => "{$channel} verification code sent to {$sendto}.",
-                "data" => ['channel' => $input['channel'], 'id' => $sendto]
+                "data" => [
+                    'channel' => $input['channel'],
+                    'id' => $sendto
+                ]
             ], 200);
 
         } catch (Exception $e) {
