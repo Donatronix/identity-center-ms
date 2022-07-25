@@ -7,15 +7,15 @@ use App\Models\RecoveryQuestion;
 use App\Models\User;
 use App\Models\VerifyStepInfo;
 use App\Services\SendVerifyToken;
+use App\Traits\TokenHandler;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use PubSub;
 use Spatie\Permission\Models\Role;
-use App\Traits\TokenHandler;
-use Sumra\SDK\Facades\PubSub;
 
 class CreateUserIDController extends Controller
 {
@@ -214,23 +214,25 @@ class CreateUserIDController extends Controller
 
                 $user->roles()->sync($role->id);
 
-                if(in_array('referral_code', $input)){
+                if (in_array('referral_code', $input)) {
                     $refData = [
                         'user' => $user->toArray(),
                         // 'application_id' => $input['application_id'],
                         'referral_code' => $input['referral_code']
                     ];
-                }else{
+                } else {
                     $refData = ['user' => $user->toArray()];
                 }
 
-                //Send referral code to Referral MS
-                PubSub::transaction(function () {
-                })->publish(
-                    'NewUserRegisteredListener',
-                    $refData,
-                    'new-user-registered'
-                );
+                // Join new user to referral programm
+                PubSub::publish('NewUserRegistered', [
+                    'user' => $user->toArray(),
+                ], config('pubsub.queue.referrals'));
+
+                // Subscribing new user to Subscription service
+                PubSub::publish('NewUserRegistered', [
+                    'user' => $user->toArray(),
+                ], config('pubsub.queue.subscriptions'));
 
                 //Other response data array
                 $data['channel'] = $input['channel'];
@@ -249,8 +251,7 @@ class CreateUserIDController extends Controller
                 // Send verification token (SMS or Massenger)
                 try {
                     $sendOTP->dispatchOTP($input['channel'], $sendto, $otpToken);
-                }
-                catch (\Throwable $th) {
+                } catch (\Throwable $th) {
                     //throw $th;
                 }
 
@@ -490,8 +491,7 @@ class CreateUserIDController extends Controller
                         'accessToken' => $token
                     ]
                 ], 200);
-            }
-            else {
+            } else {
 
                 //Send invalid token response
                 return response()->jsonApi([
@@ -624,11 +624,10 @@ class CreateUserIDController extends Controller
 
         if ($validator->fails()) {
             return response()->jsonApi([
-                'type' => 'danger',
-                'title'=>'New user personal info',
+                'title' => 'New user personal info',
                 'message' => "Input validator errors. Try again.",
-                "data" => null
-            ], 400);
+                "data" => $validator->errors()
+            ], 422);
         }
 
         try {
@@ -653,26 +652,23 @@ class CreateUserIDController extends Controller
             if ($user->save()) {
                 // Return response
                 return response()->jsonApi([
-                    'type' => 'success',
                     'title' => "New user personal info",
                     'message' => 'User account was successful updated',
-                    'data' => ['username' => $input['username']]
-                ], 200);
+                    'data' => [
+                        'username' => $input['username']
+                    ]
+                ]);
             } else {
                 return response()->jsonApi([
-                    'type' => 'danger',
                     'title' => "New user personal info",
                     'message' => 'User account was NOT  updated',
-                    'data' => null
                 ], 400);
             }
 
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "New user personal info",
-                'message' => $e->getMessage(),
-                'data' => null
+                'message' => $e->getMessage()
             ], 400);
         }
     }
@@ -797,11 +793,10 @@ class CreateUserIDController extends Controller
 
         if ($validator->fails()) {
             return response()->jsonApi([
-                'type' => 'danger',
-                'title'=> 'New user recovery questions',
+                'title' => 'New user recovery questions',
                 'message' => "Input validator errors. Try again.",
-                "data" => null
-            ], 400);
+                'data' => $validator->errors()
+            ], 422);
         }
 
         try {
@@ -824,35 +819,31 @@ class CreateUserIDController extends Controller
                 // Generate user access token
                 $token = $user->createToken($user->username)->accessToken;
 
-
                 return response()->jsonApi([
-                    'type' => 'success',
-                    'title'=> 'New user recovery questions',
+                    'title' => 'New user recovery questions',
                     'message' => 'User account security questions was successful saved',
                     'data' => [
-                            'username' => $input['username'],
-                            'access_token' => $token
-                        ]
-                ], 200);
+                        'username' => $input['username'],
+                        'access_token' => $token
+                    ]
+                ]);
             } else {
                 return response()->jsonApi([
-                    'type' => 'danger',
-                    'title'=> 'New user recovery questions',
+                    'title' => 'New user recovery questions',
                     'message' => 'User account was not found!',
                     'data' => $input
                 ], 404);
             }
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
-                'title'=> 'New user recovery questions',
+                'title' => 'New user recovery questions',
                 'message' => $e->getMessage(),
                 'data' => $input
             ], 400);
-        }catch (ModelNotFoundException $ex) {
+        } catch (ModelNotFoundException $ex) {
             return response()->jsonApi([
                 'type' => 'danger',
-                'title'=> 'New user recovery questions',
+                'title' => 'New user recovery questions',
                 'message' => $ex->getMessage(),
                 'data' => $input
             ], 400);

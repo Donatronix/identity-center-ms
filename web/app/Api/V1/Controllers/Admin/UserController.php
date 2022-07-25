@@ -397,266 +397,32 @@ class UserController extends Controller
 
             $user = User::create($input);
 
-            PubSub::transaction(function () {
-            })->publish('sendVerificationEmail', [
+            PubSub::publish('sendVerificationEmail', [
                 'email' => $user->email,
                 'display_name' => $user->display_name,
                 'verify_token' => $user->verify_token,
-            ], 'mail');
+            ], config('pubsub.queue.communications'));
 
-            PubSub::transaction(function () {
-            })->publish('NewUserRegisteredListener', [
+            // Join new user to referral programm
+            PubSub::publish('NewUserRegistered', [
                 'user' => $user->toArray(),
-            ], 'new-user-registered');
+            ], config('pubsub.queue.referrals'));
+
+            // Subscribing new user to Subscription service
+            PubSub::publish('NewUserRegistered', [
+                'user' => $user->toArray(),
+            ], config('pubsub.queue.subscriptions'));
 
             // Return response to client
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => 'Create admin user account',
                 'message' => "New user registered successfully!",
                 'data' => $user->toArray()
             ], 200);
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'New user registration',
-                'message' => $e->getMessage(),
-                'data' => null
-            ], 400);
-        }
-    }
-
-    /**
-     * Create new use with referral code
-     *
-     * @OA\Post(
-     *     path="/admin/users/referred",
-     *     summary="Save a referred new user data",
-     *     description="Save a referred new user data",
-     *     tags={"Admin | Users"},
-     *
-     *     security={{ "bearerAuth": {} }},
-     *
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="first_name",
-     *                 type="string",
-     *                 description="First name for new user account",
-     *                 required={"true"},
-     *                 example="John"
-     *             ),
-     *             @OA\Property(
-     *                 property="last_name",
-     *                 type="string",
-     *                 description="Last name for new user account",
-     *                 required={"true"},
-     *                 example="Kiels"
-     *             ),
-     *             @OA\Property(
-     *                 property="username",
-     *                 type="string",
-     *                 description="Username for new user account",
-     *                 required={"true"},
-     *                 example="johnkiels"
-     *             ),
-     *             @OA\Property(
-     *                 property="email",
-     *                 type="string",
-     *                 description="Email for user account",
-     *                 required={"true"},
-     *                 example="johnkiels@ultainfinity"
-     *             ),
-     *             @OA\Property(
-     *                 property="phone",
-     *                 type="string",
-     *                 description="Phone number for user account",
-     *                 required={"true"},
-     *                 example="+4492838989"
-     *             ),
-     *             @OA\Property(
-     *                 property="referral_code",
-     *                 type="string",
-     *                 description="Referral code for user account",
-     *                 required={"true"},
-     *                 example="1827oGRL"
-     *             ),
-     *             @OA\Property(
-     *                 property="appliation_id",
-     *                 type="string",
-     *                 description="Appliation ID for user account",
-     *                 required={"true"},
-     *                 example="net.sumra.chat"
-     *             ),
-     *             @OA\Property(
-     *                 property="birthday",
-     *                 type="string",
-     *                 description="Birthday for user account",
-     *                 required={"true"},
-     *                 example="2002-04-09"
-     *             ),
-     *             @OA\Property(
-     *                 property="gender",
-     *                 type="string",
-     *                 description="Gender for user account",
-     *                 required={"true"},
-     *                 example="m"
-     *             ),
-     *             @OA\Property(
-     *                 property="status",
-     *                 type="string",
-     *                 description="Status for user account",
-     *                 example="0"
-     *             ),
-     *             @OA\Property(
-     *                 property="subscribed_to_announcement",
-     *                 type="string",
-     *                 description="subscribed to announcement",
-     *                 required={"true"},
-     *                  example=""
-     *             ),
-     *             @OA\Property(
-     *                 property="address_line1",
-     *                 type="string",
-     *                 description="Address line 1 for user account",
-     *                 required={"true"},
-     *                 example="45 kingston Street"
-     *             ),
-     *             @OA\Property(
-     *                 property="address_line2",
-     *                 type="string",
-     *                 description="Address line 2 for user account",
-     *                 required={"true"},
-     *                 example="Radek Layout"
-     *             ),
-     *             @OA\Property(
-     *                 property="address_city",
-     *                 type="string",
-     *                 description="Address_city for user account",
-     *                 required={"true"},
-     *                 example="Westbron"
-     *             ),
-     *             @OA\Property(
-     *                 property="address_country",
-     *                 type="string",
-     *                 description="Address country for user account",
-     *                 required={"true"},
-     *                 example="UK"
-     *             ),
-     *             @OA\Property(
-     *                 property="address_zip",
-     *                 type="string",
-     *                 description="Address zip for user account",
-     *                 required={"true"},
-     *                 example="+235"
-     *             ),
-     *             @OA\Property(
-     *                 property="password",
-     *                 type="string",
-     *                 description="Password for user account",
-     *                 required={"true"},
-     *                 example="xxxxxxx"
-     *             ),
-     *             @OA\Property(
-     *                 property="accept_terms",
-     *                 type="boolean",
-     *                 description="Accept terms for user account",
-     *                 required={"true"},
-     *                 example="true"
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="Successfully save"
-     *     ),
-     *     @OA\Response(
-     *         response="201",
-     *         description="User created"
-     *     ),
-     *     @OA\Response(
-     *         response="400",
-     *         description="Invalid request"
-     *     ),
-     *     @OA\Response(
-     *         response="401",
-     *         description="Unauthorized"
-     *     ),
-     *     @OA\Response(
-     *         response="404",
-     *         description="Not Found"
-     *     ),
-     *     @OA\Response(
-     *         response="422",
-     *         description="Validation failed"
-     *     ),
-     *     @OA\Response(
-     *         response="500",
-     *         description="Unknown error"
-     *     )
-     * )
-     *
-     * @param Request $request
-     *
-     * @return User|JsonResponse
-     * @throws ValidationException
-     */
-    public function createReferredUser(Request $request): User|JsonResponse
-    {
-        // Try to add new user
-        try {
-            $validate = Validator::make($request->all(), User::referredUserValidation());
-
-            //Validation response
-            if ($validate->fails()) {
-                return response()->jsonApi([
-                    'title' => 'New referred user registration',
-                    'message' => 'Input data validation error',
-                    'data' => $validator->errors()
-                ], 422);
-            }
-
-            //Get validated input
-            $validated = $validate->validated();
-
-            //User data
-            $input = array_merge($validated, [
-                'phone' => $validated['phone'],
-                'password' => Hash::make($validated['password']),
-                'status' => User::STATUS_ACTIVE,
-                'verify_token' => Str::random(32),
-            ]);
-
-            $user = User::create($input);
-
-            PubSub::transaction(function () {
-            })->publish('sendVerificationEmail', [
-                'email' => $user->email,
-                'display_name' => $user->display_name,
-                'verify_token' => $user->verify_token,
-            ], 'mail');
-
-            PubSub::transaction(function () {
-            })->publish('NewUserRegisteredListener', [
-                'user' => $user->toArray(),
-                'application_id' => $validated['application_id'],
-                'referral_code' => $validated['referral_code']
-            ], 'new-user-registered');
-
-            // Return response to client
-            return response()->jsonApi([
-                'title' => 'New referred user registration',
-                'message' => "New referred user registered successfully!",
-                'data' => $user->toArray()
-            ], 200);
-        } catch (Exception $e) {
-            return response()->jsonApi([
-                'title' => 'New referred user registration',
-                'message' => $e->getMessage(),
-                'data' => null
+                'message' => $e->getMessage()
             ], 400);
         }
     }
@@ -978,23 +744,18 @@ class UserController extends Controller
             $user->delete();
 
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => "Delete of user",
                 'message' => 'User is successfully deleted',
-            ], 200);
+            ]);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Delete failed",
-                'message' => "User does not exist",
-                'data' => null,
+                'message' => "User does not exist"
             ], 404);
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Delete of user",
-                'message' => $e->getMessage(),
-                'data' => null
+                'message' => $e->getMessage()
             ], 400);
         }
     }
@@ -1011,10 +772,8 @@ class UserController extends Controller
             return User::findOrFail($id);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Get user",
                 'message' => "User with id #{$id} not found: {$e->getMessage()}",
-                'data' => ''
             ], 404);
         }
     }
@@ -1080,18 +839,14 @@ class UserController extends Controller
             });
         } catch (Throwable $th) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Verification failed",
                 'message' => $th->getMessage(),
-                'data' => null
             ], 404);
         }
 
         return response()->jsonApi([
-            'type' => 'success',
             'title' => "Verification successful",
-            'message' => "Email is verified",
-            'data' => null
+            'message' => "Email is verified"
         ], 200);
     }
 
@@ -1160,28 +915,22 @@ class UserController extends Controller
                 ]);
 
                 if ($password_reset) {
-                    PubSub::transaction(function () {
-
-                    })->publish('sendVerificationEmail', [
+                    PubSub::publish('sendVerificationEmail', [
                         'email' => $user->email,
                         'display_name' => $user->display_name,
                         'verify_token' => $user->verify_token,
-                    ], 'mail');
+                    ], config('pubsub.queue.communications'));
                 }
             });
         } catch (Throwable $th) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Verification failed",
-                'message' => $th->getMessage(),
-                'data' => null
+                'message' => $th->getMessage()
             ], 404);
         }
         return response()->jsonApi([
-            'type' => 'success',
             'title' => "Verification email",
-            'message' => "A verification mail has been sent",
-            'data' => null
+            'message' => "A verification mail has been sent"
         ], 200);
     }
 
@@ -1304,15 +1053,20 @@ class UserController extends Controller
                 'email' => $user->email,
                 'display_name' => $user->display_name,
                 'verify_token' => $user->verify_token,
-            ], 'mail');
+            ], config('pubsub.queue.communications'));
 
-            PubSub::publish('NewUserRegisteredListener', [
+            // Join new user to referral programm
+            PubSub::publish('NewUserRegistered', [
                 'user' => $user->toArray(),
-            ], 'new-user-registered');
+            ], config('pubsub.queue.referrals'));
+
+            // Subscribing new user to Subscription service
+            PubSub::publish('NewUserRegistered', [
+                'user' => $user->toArray(),
+            ], config('pubsub.queue.subscriptions'));
 
             // Return response to client
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => 'Add user account',
                 'message' => "New user registered successfully!",
                 'data' => $user
@@ -1322,7 +1076,6 @@ class UserController extends Controller
                 $user->delete();
 
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'Add user account',
                 'message' => $e->getMessage(),
             ], 500);

@@ -26,7 +26,7 @@ class KYCController extends Controller
      *     summary="Initialize identity verification session",
      *     description="Initialize identity verification session",
      *     description="Document type (1 = PASSPORT, 2 = ID_CARD, 3 = DRIVERS_LICENSE, 4 = RESIDENCE_PERMIT)",
-     *     tags={"User | KYC"},
+     *     tags={"Application | User Identity | KYC"},
      *
      *     security={{ "bearerAuth": {} }},
      *
@@ -123,7 +123,7 @@ class KYCController extends Controller
      *     path="/user-identify/upload",
      *     summary="Upload documents for users KYC",
      *     description="Upload documents for users KYC",
-     *     tags={"User | KYC"},
+     *     tags={"Application | User Identity | KYC"},
      *
      *     security={{ "bearerAuth": {} }},
      *

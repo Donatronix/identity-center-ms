@@ -11,10 +11,10 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Validator;
 use PubSub;
+
+//use Illuminate\Support\Facades\Redis;
 
 class UsernameSubmitController extends Controller
 {
@@ -27,10 +27,10 @@ class UsernameSubmitController extends Controller
      * Submit username account
      *
      * @OA\Post(
-     *     path="/user-account/v1/auth/send-username",
+     *     path="/user-account/v1/send-username",
      *     summary="Submit username account",
      *     description="Here the new user or the existing user submits username for login, along with the sid",
-     *     tags={"OneStep 1.0 | Auth"},
+     *     tags={"OneStep 1.0"},
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -127,20 +127,31 @@ class UsernameSubmitController extends Controller
      */
     public function __invoke(Request $request): JsonResponse
     {
-        // Validate input data
-        $this->validate($request, [
-            'username' => 'required',
-            "sid" => "required",
-        ]);
+        try {
+            // Validate input data
+            $this->validate($request, [
+                'username' => 'required|string|min:3',
+                'sid' => 'required|string|min:8',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->jsonApi([
+                'title' => 'User authorization',
+                'message' => "Validation error: " . $e->getMessage(),
+                'data' => $e->validator->errors()->first()
+            ], 422);
+        }
 
         // try to retrieve user using sid
         try {
-            // retrieve user using the sid
-            $user = User::getBySid($request->sid);
-        } catch (ModelNotFoundException $th) {
+            $twoFa = TwoFactorAuth::where("sid", $request->get('sid'))
+                ->with('user')
+                ->firstOrFail();
+
+            $user = $twoFa->user;
+        } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
-                "type" => "danger",
-                "message" => "Invalid sid Token",
+                'title' => 'User authorization',
+                'message' => 'SID not found or incorrect',
             ], 403);
         }
 
@@ -148,57 +159,65 @@ class UsernameSubmitController extends Controller
         if ($user->status == User::STATUS_BANNED) {
             //report banned
             return response()->jsonApi([
-                "type" => "danger",
+                'title' => 'User authorization',
                 "user_status" => $user->status,
                 "message" => "User has been banned from this platform.",
             ], 403);
-        } elseif ($user->status == User::STATUS_ACTIVE) {
-            //login active user
-            return $this->login($user, $request->sid, $request->username);
         }
 
         // Only  inactive users gets to this part of the code
         // check if username is taken
-        $usernameExists = User::where("username", $request->username)->exists();
-        if ($usernameExists) {
-            return response()->jsonApi([
-                "type" => "danger",
-                "message" => "Username already exists.",
-                "user_status" => $user->status,
-                "phone_exist" => true,
-            ], 400);
-        }
+//        $usernameExists = User::where("username", $request->get('username'))->exists();
+//        if ($usernameExists) {
+//            return response()->jsonApi([
+//                'title' => 'User authorization',
+//                "message" => "Username already exists.",
+//                "user_status" => $user->status,
+//                "phone_exist" => true,
+//            ], 400);
+//        }
 
-        // check if username is empty
+        // check if username is empty, Do finish register user
         if (empty($user->username)) {
             try {
-                $user->username = $request->username;
+                $user->username = $request->get('username');
                 $user->status = User::STATUS_ACTIVE;
-                $user->password = Hash::make(config('settings.password'));
                 $user->save();
 
-                PubSub::transaction(function () {
-                })->publish('NewUserRegisteredListener', [
+                // Join new user to referral programm
+                PubSub::publish('NewUserRegistered', [
                     'user' => $user->toArray(),
-                ], 'new-user-registered');
+                ], config('pubsub.queue.referrals'));
 
-                //throw $th;
+                // Subscribing new user to Subscription service
+                PubSub::publish('NewUserRegistered', [
+                    'user' => $user->toArray(),
+                ], config('pubsub.queue.subscriptions'));
+
+                // Set role to user
                 $user->assignRole('client');
-            } catch (Exception $th) {
+            } catch (Exception $e) {
                 return response()->jsonApi([
-                    "type" => "danger",
-                    "message" => "Unable to save username.",
+                    'title' => 'User authorization',
+                    "message" => "Unable to save username: " . $e->getMessage(),
                 ], 400);
             }
-
-            return $this->login($user, $request->sid, $request->username);
         } else {
+
+//        if ($user->status == User::STATUS_ACTIVE) {
+//            // Login active user
+//            return $this->login($user, $request->get('sid'), $request->get('username'));
+//        }
+
             // username already exists for this SID
-            return response()->jsonApi([
-                "type" => "danger",
-                "message" => "Username already exists for this SID",
-            ]);
+//            return response()->jsonApi([
+//                'title' => 'User authorization',
+//                "message" => "Username already exists for this SID",
+//            ]);
         }
+
+        // Do login, create access token and return
+        return $this->login($user, $request->get('sid'), $request->get('username'));
     }
 
     /**
@@ -212,93 +231,59 @@ class UsernameSubmitController extends Controller
     {
         //check if its a malicious user
         try {
-            $user = User::getBySid($sid);
-            $redis = Redis::connection();
+//            $redis = Redis::connection();
+//
+//            $userLoginAttemptsKey = "login_attempts:" . $user->id;
+//
+//            if (!$redis->exists($userLoginAttemptsKey)) {
+//                //set the key
+//                $redis->set($userLoginAttemptsKey, 1);
+//                //set the expiration
+//                //I understand this means expire in 120s.
+//                $redis->expire($userLoginAttemptsKey, self::LOGIN_ATTEMPTS_DURATION);
+//            } else {
+//                $count = 0;
+//                $count += (int)$redis->get($userLoginAttemptsKey);
+//                $redis->set($userLoginAttemptsKey, $count);
+//            }
+//
+//            if (strtolower($user->username) !== strtolower($username)) {
+//                $loginAttempts = (int)$redis->get($userLoginAttemptsKey);
+//
+//                if ($loginAttempts > self::MAX_LOGIN_ATTEMPTS - 1) {
+//                    // malicious user, warn and block
+//                    //TODO count login attempts and block
+//                    return response()->jsonApi([
+//                        "message" => "Unauthorized operation.",
+//                        "user_status" => $user->status,
+//                    ], 403);
+//                }
+//            }
 
-            $userLoginAttemptsKey = "login_attempts:" . $user->id;
+            //    dd($user);
 
-            if (!$redis->exists($userLoginAttemptsKey)) {
-                //set the key
-                $redis->set($userLoginAttemptsKey, 1);
-                //set the expiration
-                //I understand this means expire in 120s.
-                $redis->expire($userLoginAttemptsKey, self::LOGIN_ATTEMPTS_DURATION);
-            } else {
-                $count = 0;
-                $count += (int)$redis->get($userLoginAttemptsKey);
-                $redis->set($userLoginAttemptsKey, $count);
-            }
-
-            if (strtolower($user->username) !== strtolower($username)) {
-                $loginAttempts = (int)$redis->get($userLoginAttemptsKey);
-
-                if ($loginAttempts > self::MAX_LOGIN_ATTEMPTS - 1) {
-                    // malicious user, warn and block
-                    //TODO count login attempts and block
-                    return response()->jsonApi([
-                        "type" => "danger",
-                        "message" => "Unauthorized operation.",
-                        "user_status" => $user->status,
-                    ], 403);
-                }
-            }
-
-            // generate access token
-            //$token = $user->createToken("bearer")->accessToken;
-            $token = $this->createToken($user->username, config('settings.password'));
+            // Generate access token
+            $token = $user->createToken($user->username)->accessToken;
 
             // delete sid
-            $twoFa = TwoFactorAuth::where("sid", $sid)->first();
+            $twoFa = TwoFactorAuth::where('sid', $sid)->first();
             $twoFa->delete();
 
-            $redis->del($userLoginAttemptsKey);
+//            $redis->del($userLoginAttemptsKey);
 
             return response()->jsonApi([
-                "message" => "Login successful",
-                "type" => "success",
-                "token" => $token,
+                'title' => 'User authorization',
+                'message' => "Login successful",
+                'data' => [
+                    'token' => $token,
+                    'user' => $user
+                ]
             ]);
         } catch (Exception $e) {
             return response()->jsonApi([
-                "type" => "danger",
-                "message" => "Invalid SID",
-            ], 403);
-        }
-    }
-
-    public function store(Request $request): JsonResponse
-    {
-        // Validate input data
-        $this->validate($request, [
-            'phone' => 'required|integer',
-        ]);
-
-        // Try to create new user
-        try {
-
-            $user = null;
-
-            PubSub::transaction(function () use ($request, &$user) {
-                $user = User::create(array_merge($request->all(), [
-                    'phone' => $request->get('phone')
-                ]));
-            })->publish('NewUserRegistered', [
-                'user' => $user?->toArray(),
-            ], 'new_user');
-
-            // Return response
-            return response()->jsonApi([
-                'type' => 'success',
-                'title' => "Create new user. Step 1",
-                'message' => 'User was successful created',
-                'data' => $user,
-            ], 201);
-        } catch (Exception $e) {
-            return response()->jsonApi([
-                'type' => 'danger',
-                'title' => "Create new user. Step 1",
+                'title' => 'User authorization',
                 'message' => $e->getMessage(),
-            ], 400);
+            ], 403);
         }
     }
 }

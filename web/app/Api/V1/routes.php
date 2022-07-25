@@ -19,7 +19,7 @@ $router->group([
          * OneStep 1.0
          */
         $router->group([
-            'prefix' => 'user-account/v1/auth',
+            'prefix' => 'user-account/v1',
             "namespace" => "OneStepId1",
         ], function ($router) {
             $router->post('/send-phone', "PhoneVerifyController");
@@ -85,19 +85,18 @@ $router->group([
         /**
          * 2Fa Security
          */
-
         $router->group([
-            'prefix'=>'2fa'
-        ], function($router){
-            $router->get('/generateSecret','TwoFASecurityController@generate2faSecret');
-            $router->post('/enable2fa','TwoFASecurityController@enable2fa');
-            $router->post('/verify','TwoFASecurityController@verify2fa');
-            $router->post('/disable2fa','TwoFASecurityController@disable2fa');
+            'prefix' => '2fa'
+        ], function ($router) {
+            $router->get('/generateSecret', 'TwoFASecurityController@generate2faSecret');
+            $router->post('/enable2fa', 'TwoFASecurityController@enable2fa');
+            $router->post('/verify', 'TwoFASecurityController@verify2fa');
+            $router->post('/disable2fa', 'TwoFASecurityController@disable2fa');
         });
 
         /**
          * User Profile
-        */
+         */
         $router->group([
             'prefix' => 'user-profile',
         ], function ($router) {
@@ -123,7 +122,7 @@ $router->group([
 
         /**
          * Social media connector
-        */
+         */
         $router->group([
             'prefix' => 'user-profile',
         ], function ($router) {
@@ -144,13 +143,8 @@ $router->group([
         });
 
         /**
-         * Auth - refresh token
-         */
-        $router->post('/auth/refresh-token', 'AuthController@refresh');
-
-        /**
          * Activities
-        */
+         */
         $router->group([
             'prefix' => 'activities',
         ], function ($router) {
@@ -195,7 +189,6 @@ $router->group([
             $router->post('details', 'UserController@usersDetails');
             $router->get('/{id:[a-fA-F0-9\-]{36}}', 'UserController@show');
             $router->delete('/{id:[a-fA-F0-9\-]{36}}', 'UserController@destroy');
-            $router->post('/referred', 'UserController@createReferredUser');
 
             $router->get('/', 'UserController@index');
             $router->post('/', 'UserController@store');
@@ -205,7 +198,7 @@ $router->group([
             $router->delete('/{id:[a-fA-F0-9\-]{36}}', 'UserController@destroy');
             $router->post('/verify', 'UserController@verify');
             $router->post('/verify/send', 'UserController@verifyEmail');
-            
+
             /**
              * Count the number of users
              */
@@ -215,6 +208,8 @@ $router->group([
                 $router->get('/all', 'StatisticsController@totalUsers');
                 $router->get('/new', 'StatisticsController@totalNewUsers');
             });
+
+           
         });
 
         /**
@@ -224,9 +219,13 @@ $router->group([
             'prefix' => 'service/admins',
             'as' => 'admin.administrators',
         ], function () use ($router) {
+            $router->get('/', 'ServiceAdminController@index');
             $router->post('/', 'ServiceAdminController@store');
-            $router->patch('/', 'ServiceAdminController@update');
-            $router->delete('/', 'ServiceAdminController@destroy');
+//                $router->get('/{id}', 'ServiceAdminController@show');
+            $router->put('/{id}', 'ServiceAdminController@update');
+            $router->delete('/{id}', 'ServiceAdminController@destroy');
+            $router->patch('/{id}', 'ServiceAdminController@updateRole');
+            $router->patch('/remove/{id}', 'ServiceAdminController@removeRole');
         });
     });
 

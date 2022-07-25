@@ -148,7 +148,7 @@ class KYCController extends Controller
                     'email' => $user->email,
                     'display_name' => $user->display_name,
                     'kyc' => $kyc,
-                ], 'mail');
+                ], config('pubsub.queue.communications'));
             } catch (Throwable $th) {
             }
 
@@ -159,7 +159,6 @@ class KYCController extends Controller
             ]);
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'KYC Response',
                 'message' => $e->getMessage(),
             ], 500);

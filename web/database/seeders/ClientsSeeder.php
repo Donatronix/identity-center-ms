@@ -41,15 +41,15 @@ class ClientsSeeder extends Seeder
             ]
         ];
 
-        foreach($lists as $list){
+        foreach ($lists as $list) {
             DB::table('oauth_clients')->insert($list);
 
             $client_id = DB::table('oauth_clients')
-                        ->where('secret', $list['secret'])
-                        ->value('id');
+                ->where('secret', $list['secret'])
+                ->value('id');
 
             DB::table('oauth_personal_access_clients')->insert([
-                'client_id'=>$client_id,
+                'client_id' => $client_id,
                 'created_at' => date('Y-m-d h:i:s'),
                 'updated_at' => date('Y-m-d h:i:s')
             ]);

@@ -9,10 +9,12 @@ use Illuminate\Support\Str;
 
 class TwoFactorAuth extends Model
 {
+    protected $table = 'auth_codes';
+
     protected $fillable = [
         "sid",
         "user_id",
-        "code"
+        "auth_code"
     ];
 
     public static function generateToken()
@@ -24,7 +26,7 @@ class TwoFactorAuth extends Model
 
         return $token;
     }
-   
+
     public static function verifyToken(User $user, $token)
     {
         try {
@@ -36,6 +38,6 @@ class TwoFactorAuth extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, "user_id");
+        return $this->belongsTo(User::class);
     }
 }

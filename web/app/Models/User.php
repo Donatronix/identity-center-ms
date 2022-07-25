@@ -273,19 +273,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         });
     }
 
-    public static function getBySid($sid)
-    {
-        try {
-            $twoFa = TwoFactorAuth::where("sid", $sid)->firstOrFail();
-            $user = $twoFa->user;
-
-            return $user;
-            //code...
-        } catch (ModelNotFoundException $e) {
-            throw $e;
-        }
-    }
-
     /**
      * Rules to validate personal data
      *
@@ -372,34 +359,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
             'address_line2' => 'string|max:100',
             'address_city' => 'required|string|max:50',
             'address_zip' => 'required|string|max:15'
-        ];
-    }
-
-    /**
-     * Validation rules for admin new user
-     *
-     * @return array
-     */
-    public static function referredUserValidation(): array
-    {
-        return [
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'required|string',
-            'gender' => 'required|string',
-            'birthday' => 'required|string',
-            'password' => 'required|min:6|max::32',
-            'username' => 'required|string',
-            'birthday' => 'required|date_format:Y-m-d',
-            'accept_terms' => 'required|boolean',
-            'address_country' => 'required|string|max:3',
-            'address_line1' => 'required|string|max:150',
-            'address_line2' => 'string|max:100',
-            'address_city' => 'required|string|max:50',
-            'address_zip' => 'required|string|max:15',
-            'application_id' => 'required|string|min:10|max:50|regex:/[a-z0-9.]/',
-            'referral_code' => 'string|nullable|max:8|min:8'
         ];
     }
 
