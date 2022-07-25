@@ -11,9 +11,10 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-//use Illuminate\Support\Facades\Redis;
 use Illuminate\Validation\ValidationException;
 use PubSub;
+
+//use Illuminate\Support\Facades\Redis;
 
 class UsernameSubmitController extends Controller
 {
@@ -126,15 +127,26 @@ class UsernameSubmitController extends Controller
      */
     public function __invoke(Request $request): JsonResponse
     {
-        // Validate input data
-        $this->validate($request, [
-            'username' => 'required|string|min:3',
-            'sid' => 'required|string|min:8',
-        ]);
+        try {
+            // Validate input data
+            $this->validate($request, [
+                'username' => 'required|string|min:3',
+                'sid' => 'required|string|min:8',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->jsonApi([
+                'title' => 'User authorization',
+                'message' => "Validation error: " . $e->getMessage(),
+                'data' => $e->validator->errors()->first()
+            ], 422);
+        }
 
         // try to retrieve user using sid
         try {
-            $twoFa = TwoFactorAuth::where("sid", $request->get('sid'))->with('user')->firstOrFail();
+            $twoFa = TwoFactorAuth::where("sid", $request->get('sid'))
+                ->with('user')
+                ->firstOrFail();
+
             $user = $twoFa->user;
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
@@ -153,11 +165,6 @@ class UsernameSubmitController extends Controller
             ], 403);
         }
 
-//        if ($user->status == User::STATUS_ACTIVE) {
-//            //login active user
-//            return $this->login($user, $request->get('sid'), $request->get('username'));
-//        }
-
         // Only  inactive users gets to this part of the code
         // check if username is taken
 //        $usernameExists = User::where("username", $request->get('username'))->exists();
@@ -170,12 +177,11 @@ class UsernameSubmitController extends Controller
 //            ], 400);
 //        }
 
-        // check if username is empty
+        // check if username is empty, Do finish register user
         if (empty($user->username)) {
             try {
                 $user->username = $request->get('username');
                 $user->status = User::STATUS_ACTIVE;
-                $user->password = Hash::make(config('settings.password'));
                 $user->save();
 
                 // Join new user to referral programm
@@ -188,20 +194,20 @@ class UsernameSubmitController extends Controller
                     'user' => $user->toArray(),
                 ], config('pubsub.queue.subscriptions'));
 
-                //throw $th;
+                // Set role to user
                 $user->assignRole('client');
-            } catch (Exception $th) {
+            } catch (Exception $e) {
                 return response()->jsonApi([
                     'title' => 'User authorization',
-                    "message" => "Unable to save username.",
+                    "message" => "Unable to save username: " . $e->getMessage(),
                 ], 400);
             }
-
-            return $this->login($user, $request->get('sid'), $request->get('username'));
         } else {
 
-            //login active user
-            return $this->login($user, $request->get('sid'), $request->get('username'));
+//        if ($user->status == User::STATUS_ACTIVE) {
+//            // Login active user
+//            return $this->login($user, $request->get('sid'), $request->get('username'));
+//        }
 
             // username already exists for this SID
 //            return response()->jsonApi([
@@ -209,6 +215,9 @@ class UsernameSubmitController extends Controller
 //                "message" => "Username already exists for this SID",
 //            ]);
         }
+
+        // Do login, create access token and return
+        return $this->login($user, $request->get('sid'), $request->get('username'));
     }
 
     /**
@@ -251,13 +260,13 @@ class UsernameSubmitController extends Controller
 //                }
 //            }
 
-        //    dd($user);
+            //    dd($user);
 
             // Generate access token
             $token = $user->createToken($user->username)->accessToken;
 
             // delete sid
-            $twoFa = TwoFactorAuth::where("sid", $sid)->first();
+            $twoFa = TwoFactorAuth::where('sid', $sid)->first();
             $twoFa->delete();
 
 //            $redis->del($userLoginAttemptsKey);
