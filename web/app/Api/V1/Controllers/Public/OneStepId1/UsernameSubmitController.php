@@ -163,18 +163,6 @@ class UsernameSubmitController extends Controller
             ], 403);
         }
 
-        // Only  inactive users gets to this part of the code
-        // check if username is taken
-//        $usernameExists = User::where("username", $request->get('username'))->exists();
-//        if ($usernameExists) {
-//            return response()->jsonApi([
-//                'title' => 'User authorization',
-//                "message" => "Username already exists.",
-//                "user_status" => $user->status,
-//                "phone_exist" => true,
-//            ], 400);
-//        }
-
         // check if username is empty, Do finish register user
         if (empty($user->username)) {
             try {
@@ -192,26 +180,18 @@ class UsernameSubmitController extends Controller
                     'user' => $user->toArray(),
                 ], config('pubsub.queue.subscriptions'));
 
-                // Set role to user
-                $user->assignRole('client');
+                //Add Client Role to User
+                $role = Role::firstOrCreate([
+                    'name' => USER::INVESTOR_USER
+                ]);
+                $user->roles()->sync($role->id);
+
             } catch (Exception $e) {
                 return response()->jsonApi([
                     'title' => 'User authorization',
                     "message" => "Unable to save username: " . $e->getMessage(),
                 ], 400);
             }
-        } else {
-
-//        if ($user->status == User::STATUS_ACTIVE) {
-//            // Login active user
-//            return $this->login($user, $request->get('sid'), $request->get('username'));
-//        }
-
-            // username already exists for this SID
-//            return response()->jsonApi([
-//                'title' => 'User authorization',
-//                "message" => "Username already exists for this SID",
-//            ]);
         }
 
         // Do login, create access token and return
