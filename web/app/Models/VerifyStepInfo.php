@@ -4,11 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Sumra\SDK\Traits\UuidTrait;
+
 
 class VerifyStepInfo extends Model
 {
-    
+    use HasFactory;
+    use UuidTrait;
+
     protected $table = 'verify_step_infos';
+
+    protected $primaryKey = 'id';
     
     protected $fillable = [
         "username",
@@ -17,12 +24,8 @@ class VerifyStepInfo extends Model
         "code",
         "validity"
     ];
-
-    protected $casts = [
-        'validity' => 'datetime',
-    ];
     
-     /**
+    /**
      *  Create an One-Time-password (for phone number verification)
      * 
      * @param int $strlength
@@ -42,7 +45,7 @@ class VerifyStepInfo extends Model
      */
     public static function tokenValidity($minutes):int
     {
-       return time()+($minute*60*60);
+       return time()+($minutes*60*60);
     }
 
     /**
@@ -52,7 +55,8 @@ class VerifyStepInfo extends Model
      */
     public static function rules():array
     {
-        return [
+       return [
+            'referral_code' => 'string|nullable|max:8|min:8',
             'username'=>'required|string',
             'channel'=>'required|string',
             'phone'=>'nullable|string|max:20',

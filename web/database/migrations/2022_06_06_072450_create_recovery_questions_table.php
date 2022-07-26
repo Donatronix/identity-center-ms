@@ -15,13 +15,16 @@ class CreateRecoveryQuestionsTable extends Migration
     {
         Schema::create('recovery_questions', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('user_id')->unique();
+            //$table->bigIncrements('id');
+            //$table->bigIncrements('id');
+            $table->uuid('user_id')->unique();
             $table->string('question_one')->default('What is my middle name');
             $table->string('answer_one');
             $table->string('question_two')->default('What is my pets name');
             $table->string('answer_two');
             $table->string('question_three')->default('Where is the village');
             $table->string('answer_three');
+
             $table->timestamps();
         });
     }

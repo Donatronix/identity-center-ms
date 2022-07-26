@@ -8,20 +8,21 @@ use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Laravel\Lumen\Auth\Authorizable;
 use Laravel\Passport\HasApiTokens;
-use Sumra\SDK\Traits\UuidTrait;
 use Spatie\Permission\Traits\HasRoles;
+use Sumra\SDK\Traits\UuidTrait;
 
 /**
- * User Schema
+ * User Profile Scheme
  *
  * @package App\Models
  *
  * @OA\Schema(
- *     schema="User",
+ *     schema="UserProfile",
  *
  *     @OA\Property(
  *         property="first_name",
@@ -69,32 +70,43 @@ use Spatie\Permission\Traits\HasRoles;
  *         enum={0, 1},
  *     ),
  *     @OA\Property(
+ *         property="address",
+ *         type="object",
+ *         description="Address of user",
+ *     ),
+ *     @OA\Property(
  *        property="address_country",
  *        type="string",
- *        description="Country code",
+ *        description="Country code  (ISO 3166-1 alpha-2 format)",
+ *        example="GB"
  *     ),
  *     @OA\Property(
  *        property="address_line1",
  *        type="string",
  *        description="First line of address. may contain house number, street name, etc.",
+ *        example="My Big Avenue, 256"
  *     ),
  *     @OA\Property(
  *        property="address_line2",
  *        type="string",
- *        description="Second line of address.",
+ *        description="Second line of address (optional)",
+ *        example=""
  *     ),
  *     @OA\Property(
  *        property="address_city",
  *        type="string",
  *        description="Name of city",
+ *        example=""
  *     ),
  *     @OA\Property(
  *        property="address_zip",
  *        type="string",
- *        description="Zip code",
- *     ),
+ *        description="Post / Zip code",
+ *        example="05123"
+ *     )
  * )
  */
+
 /**
  * User Identity Schema
  *
@@ -153,15 +165,15 @@ use Spatie\Permission\Traits\HasRoles;
  *     )
  * )
  */
- class User extends Model implements AuthenticatableContract, AuthorizableContract
+class User extends Model implements AuthenticatableContract, AuthorizableContract
 {
     use HasApiTokens;
     use Authenticatable;
     use Authorizable;
-    use SoftDeletes;
     use HasFactory;
-    use UuidTrait;
     use HasRoles;
+    use SoftDeletes;
+    use UuidTrait;
 
     /**
      * Statuses of users
@@ -173,12 +185,26 @@ use Spatie\Permission\Traits\HasRoles;
     /**
      * Array statuses of users
      *
-     * @var int[]
+     * @var array|int[]
      */
     public static array $statuses = [
         self::STATUS_INACTIVE,
         self::STATUS_ACTIVE,
         self::STATUS_BANNED
+    ];
+
+    /**
+     * User Category OR Roles
+     *
+     */
+    const ADMIN_USER = 'Admin';
+    const INVESTOR_USER = 'Investor';
+    const SUPER_ADMIN_USER = 'Super';
+
+    public static array $types = [
+        self::ADMIN_USER,
+        self::INVESTOR_USER,
+        self::SUPER_ADMIN_USER
     ];
 
     /**
@@ -202,19 +228,17 @@ use Spatie\Permission\Traits\HasRoles;
         'email',
         'birthday',
         'password',
-        'status',
+        'access_code',
 
-        'subscribed_to_announcement',
         'address_country',
         'address_line1',
         'address_line2',
         'address_city',
         'address_zip',
 
-        'document_number',
-        'document_country',
-        'document_type',
-        'document_file',
+        'subscribed_to_announcement',
+        'is_agreement',
+        'status'
     ];
 
     /**
@@ -224,7 +248,10 @@ use Spatie\Permission\Traits\HasRoles;
      */
     protected $hidden = [
         'password',
-        'remember_token'
+        'remember_token',
+        'created_at',
+        'updated_at',
+        'deleted_at'
     ];
 
     /**
@@ -241,21 +268,158 @@ use Spatie\Permission\Traits\HasRoles;
         parent::boot();
 
         static::creating(function ($model) {
-            $model->phone = Str::after($model->phone, '+');
+            if ($model->model)
+                $model->phone = Str::after($model->phone, '+');
         });
     }
 
-    public static function getBySid($sid)
+    /**
+     * Rules to validate personal data
+     *
+     * @param int|null $id
+     * @return array
+     */
+    public static function profileValidationRules(?int $id = null): array
     {
-        try {
-            $twoFa = TwoFactorAuth::where("sid", $sid)->firstOrFail();
-            $user = $twoFa->user;
+        return [
+            'first_name' => 'sometimes|string|min:2|max:60',
+            'last_name' => 'sometimes|string|min:2|max:60',
 
-            return $user;
-            //code...
-        } catch (ModelNotFoundException $e) {
-            throw $e;
-        }
+            'username' => 'sometimes|string|unique:users,username',
+            'email' => "sometimes|email|unique:users,email",
+            'phone' => "sometimes|regex:/\+?\d{7,16}/i|unique:users,phone",
+            'birthday' => 'sometimes|nullable|date_format:Y-m-d',
+            'subscribed_to_announcement' => 'sometimes|boolean',
+
+            'locale' => 'sometimes|string',
+
+            'address_country' => 'required|string|min:2|max:3',
+            'address_line1' => 'required|string|max:150',
+            'address_line2' => 'sometimes|nullable|string|max:100',
+            'address_city' => 'sometimes|string|max:50',
+            'address_zip' => 'required|string|max:10'
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public static function personValidationRules2(): array
+    {
+        return [
+
+            'address' => 'required|array:country,line1,line2,city,zip',
+            'address.country' => 'required|string|max:3',
+            'address.line1' => 'required|string|max:150',
+            'address.line2' => 'string|max:100',
+            'address.city' => 'required|string|max:50',
+            'address.zip' => 'required|string|max:15'
+        ];
+    }
+
+    /**
+     * Validation rules for identity verification
+     *
+     * @return array
+     */
+    public static function identifyValidationRules(): array
+    {
+        return [
+            'gender' => 'required|string',
+            'birthday' => 'required|string',
+            'id_number' => 'required|string|max:100',
+            'document' => 'required|array:number,country,type,file',
+            'document.number' => 'required|string',
+            'document.country' => 'required|string|max:3',
+            'document.type' => 'required|integer|min:1|max:4',
+            'document.file' => 'required|string'
+        ];
+    }
+
+    /**
+     * Validation rules for admin new user
+     *
+     * @return array
+     */
+    public static function adminValidationRules(): array
+    {
+        return [
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required|string',
+            'gender' => 'required|string',
+            'birthday' => 'required|string',
+            'password' => 'required|min:6|max::32',
+            'username' => 'required|string',
+            'birthday' => 'required|date_format:Y-m-d',
+            'accept_terms' => 'required|boolean',
+            'address_country' => 'required|string|max:3',
+            'address_line1' => 'required|string|max:150',
+            'address_line2' => 'string|max:100',
+            'address_city' => 'required|string|max:50',
+            'address_zip' => 'required|string|max:15'
+        ];
+    }
+
+    /**
+     * Validation rules for admin new user
+     *
+     * @return array
+     */
+    public static function adminUpdateValidateRules(): array
+    {
+        return [
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|email',
+            'phone' => 'required|string',
+            'gender' => 'required|string',
+            'username' => 'required|string',
+            'birthday' => 'required|date_format:Y-m-d',
+            'address_country' => 'required|string|max:3',
+            'address_line1' => 'required|string|max:150',
+            'address_line2' => 'string|max:100',
+            'address_city' => 'required|string|max:50',
+            'address_zip' => 'required|string|max:15'
+        ];
+    }
+
+    /**
+     * Validation rules for admin new user
+     *
+     * @return array
+     */
+    public static function userValidationRules(): array
+    {
+        return [
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|email',
+            'phone' => 'required|string',
+            'username' => 'required|string',
+            'birthday' => 'required|date_format:Y-m-d',
+            'address_country' => 'required|string|max:3',
+            'address_line1' => 'required|string|max:150',
+            'address_line2' => 'string|max:100',
+            'address_zip' => 'required|string|max:15'
+        ];
+    }
+
+    /**
+     * Provide input data validation array.
+     *
+     * @return array
+     */
+    public static function rules(): array
+    {
+        return [
+            'username' => 'required|string',
+            'fullname' => 'required|string',
+            'country' => 'required|string',
+            'address' => 'required|string',
+            'birthday' => 'required|string'
+        ];
     }
 
     /**
@@ -280,56 +444,10 @@ use Spatie\Permission\Traits\HasRoles;
     }
 
     /**
-     * Rules to validate personal data
-     *
-     * @param  int|null  $id
-     * @return array
-     */
-    public static function personalValidationRules(?int $id = null): array
-    {
-        $rules = [
-            'first_name' => 'required|string|min:3|max:60',
-            'last_name' => 'required|string|min:3|max:60',
-            'email' => "sometimes|email|unique:users,email"
-                . ($id ? ",{$id}" : ''),
-            'phone' => "sometimes|regex:/\+?\d{7,16}/i|unique:users,phone"
-                . ($id ? ",{$id}" : ''),
-            'birthday' => 'sometimes|nullable|date_format:d-m-Y',
-            'subscribed_to_announcement' => 'sometimes|boolean',
-            'address_country' => 'required|string|min:2|max:3',
-            'address_line1' => 'required|string|max:150',
-            'address_line2' => 'sometimes|nullable|string|max:100',
-            'address_city' => 'sometimes|string|max:50',
-            'address_zip' => 'required|string|max:10',
-        ];
-
-        return $rules;
-    }
-
-    /**
-     * Validation rules for identity verification
-     *
-     * @return string[]
-     */
-    public static function identifyValidationRules(): array
-    {
-        return [
-            'gender' => 'required|string',
-            'birthday' => 'required|string',
-            'id_number' => 'required|string|max:100',
-            'document' => 'required|array:number,country,type,file',
-            'document.number' => 'required|string',
-            'document.country' => 'required|string|max:3',
-            'document.type' => 'required|integer|min:1|max:4',
-            'document.file' => 'required|string'
-        ];
-    }
-
-    /**
      * Find the user instance for the given username.
      *
-     * @param  string  $username
-     * @return \App\Models\User
+     * @param string $username
+     * @return User
      */
     public function findForPassport($username)
     {
@@ -337,18 +455,17 @@ use Spatie\Permission\Traits\HasRoles;
     }
 
     /**
-     * Provide input data validation array.
+     * One User has many KYC relation
      *
-     * @return array
+     * @return HasMany
      */
-    public static function rules():array
+    public function kycs(): HasMany
     {
-        return [
-            'username' => 'required|string',
-            'fullname' => 'required|string',
-            'country' => 'required|string',
-            'address' => 'required|string',
-            'birthday' => 'required|string' 
-        ];
+        return $this->hasMany(KYC::class);
+    }
+
+    public function loginSecurity()
+    {
+        return $this->hasOne(TwoFactorSecurity::class);
     }
 }

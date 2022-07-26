@@ -19,7 +19,7 @@ class CreateVerifyStepInfosTable extends Migration
             $table->string('channel');
             $table->string('receiver');
             $table->string('code')->unique();
-            $table->datetime("validity")->nullable();
+            $table->string("validity")->nullable();
             $table->timestamps();
         });
     }

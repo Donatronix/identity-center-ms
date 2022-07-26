@@ -3,13 +3,33 @@
 namespace App\Providers;
 
 use Carbon\Carbon;
-use Laravel\Passport\Client;
-use Laravel\Passport\Passport;
-use Illuminate\Support\ServiceProvider;
 use Dusterio\LumenPassport\LumenPassport;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\ServiceProvider;
+use Laravel\Passport\Passport;
+use Laravel\Passport\Client;
 
 class AppServiceProvider extends ServiceProvider
 {
+    /**
+     * Bootstrap any application services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        Schema::defaultStringLength(191);
+
+        Client::retrieved(function (Client $client) {
+            $client->incrementing = false;
+        });
+
+        Client::creating(function (Client $client) {
+            $client->incrementing = false;
+            $client->id = \Ramsey\Uuid\Uuid::uuid4()->toString();
+        });
+    }
+
     /**
      * Register any application services.
      *
@@ -22,9 +42,9 @@ class AppServiceProvider extends ServiceProvider
 
         Passport::tokensExpireIn(Carbon::now()->addDays(15));
         Passport::refreshTokensExpireIn(Carbon::now()->addDays(30));
-        Passport::personalAccessTokensExpireIn(Carbon::now()->addDays(30));
-
-        LumenPassport::tokensExpireIn(Carbon::now()->addDays(1)); // Actor
+        Passport::personalAccessTokensExpireIn(Carbon::now()->addDays(1)); // Actor
+        
+        LumenPassport::tokensExpireIn(Carbon::now()->addDays(1));
         LumenPassport::allowMultipleTokens();
     }
 }

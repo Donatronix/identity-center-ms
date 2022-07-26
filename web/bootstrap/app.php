@@ -63,6 +63,8 @@ $app->configure('settings');
 $app->configure('auth');
 $app->configure('filesystems');
 $app->configure('cache');
+$app->configure('services');
+$app->configure('identity');
 
 /*
 |--------------------------------------------------------------------------
@@ -81,8 +83,6 @@ $app->middleware([
 
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
-    'checkUser' => \Sumra\SDK\Middleware\CheckUserMiddleware::class,
-    'checkAdmin' => \Sumra\SDK\Middleware\CheckAdminMiddleware::class,
     'permission' => Spatie\Permission\Middlewares\PermissionMiddleware::class,
     'role'       => Spatie\Permission\Middlewares\RoleMiddleware::class,
 ]);
@@ -102,6 +102,8 @@ $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Illuminate\Redis\RedisServiceProvider::class);
+$app->register(Laravel\Passport\PassportServiceProvider::class);
+$app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
 
 /**
  * Spatie
@@ -113,9 +115,11 @@ $app->register(Spatie\Permission\PermissionServiceProvider::class);
 /**
  * Pubsub - RabbitMQ
  */
-$app->configure('queues');
+$app->configure('queue');
 $app->register(VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider::class);
-class_alias(\Illuminate\Support\Facades\App::class, 'App');
+if (!class_exists('App')) {
+    class_alias(\Illuminate\Support\Facades\App::class, 'App');
+}
 $app->register(\Sumra\SDK\PubSubServiceProvider::class);
 
 /**
@@ -130,6 +134,7 @@ $app->configure('swagger-lume');
 $app->register(\SwaggerLume\ServiceProvider::class);
 $app->register(Laravel\Passport\PassportServiceProvider::class);
 $app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
+
 
 /**
  * Artisan Commands Lumen Generator
