@@ -439,11 +439,10 @@ class UserProfileController extends Controller
 
             if ($validator->fails()) {
                 return response()->jsonApi([
-                    'type' => 'danger',
                     'title' => "Update user info",
                     'message' => "Input validator errors. Try again.",
                     "data" => $validator->errors()
-                ], 400);
+                ], 422);
             }
 
             // Get User object

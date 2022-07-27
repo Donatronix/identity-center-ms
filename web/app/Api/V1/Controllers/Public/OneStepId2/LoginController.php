@@ -138,7 +138,6 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         try {
-
             $validator = Validator::make($request->all(), [
                 'channel' => 'required|string',
                 'handler' => 'required|string',
@@ -148,11 +147,10 @@ class LoginController extends Controller
 
             if ($validator->fails()) {
                 return response()->jsonApi([
-                    'type' => 'danger',
                     'title' => "User login",
                     'message' => "Input validator errors. Try again.",
-                    "data" => null
-                ], 400);
+                    'data' => $validator->errors()
+                ], 422);
             }
 
             //Get validated input
@@ -165,7 +163,6 @@ class LoginController extends Controller
             $userQuery = User::where('username', $input['username']);
 
             if($userQuery->exists()) {
-
                 //Get user
                 $user = $userQuery->first();
 
@@ -347,11 +344,10 @@ class LoginController extends Controller
 
             if ($validator->fails()) {
                 return response()->jsonApi([
-                    'type' => 'danger',
                     'title' => "Verify user login",
                     'message' => "Input validator errors. Try again.",
-                    "data" => null
-                ], 400);
+                    'data' => $validator->errors()
+                ], 422);
             }
 
             //Get validated input
@@ -498,11 +494,10 @@ class LoginController extends Controller
 
             if ($validator->fails()) {
                 return response()->jsonApi([
-                    'type' => 'danger',
                     'title' => "Refresh token",
                     'message' => "Input validator errors. Try again.",
-                    "data" => null
-                ], 400);
+                    'data' => $validator->errors()
+                ], 422);
             }
 
             //Get validated input

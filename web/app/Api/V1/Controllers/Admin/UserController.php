@@ -822,6 +822,7 @@ class UserController extends Controller
                 if ($validator->fails()) {
                     throw new Exception($validator->messages()->first());
                 }
+
                 $select = DB::table('password_resets')
                     ->where('token', $request->token);
 

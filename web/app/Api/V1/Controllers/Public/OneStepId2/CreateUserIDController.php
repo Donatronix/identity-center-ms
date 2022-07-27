@@ -168,11 +168,10 @@ class CreateUserIDController extends Controller
 
         if ($validator->fails()) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'Create new user',
                 'message' => "Input validator errors. Try again.",
-                "data" => null
-            ], 400);
+                'data' => $validator->errors()
+            ], 422);
         }
 
         //validate input date
@@ -257,23 +256,19 @@ class CreateUserIDController extends Controller
 
                 //Show response
                 return response()->jsonApi([
-                    'type' => 'success',
                     'title' => 'Create new user',
                     'message' => "{$channel} verification code sent to {$sendto}.",
                     "data" => $data
-                ], 200);
+                ]);
 
             } else {
                 return response()->jsonApi([
-                    'type' => 'danger',
                     'title' => 'Create new user',
                     'message' => "{$sendto} is already taken/verified by another user. Try again.",
-                    "data" => null
                 ], 400);
             }
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'Create new user',
                 'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again.",
                 "data" => $e->getMessage()
@@ -386,17 +381,17 @@ class CreateUserIDController extends Controller
 
             //Show response
             return response()->jsonApi([
-                'type' => 'success',
+                'title' => 'Verify OTP code',
                 'message' => "{$channel} verification code sent to {$sendto}.",
                 "data" => [
                     'channel' => $input['channel'],
                     'id' => $sendto
                 ]
-            ], 200);
+            ]);
 
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
+                'title' => 'Verify OTP code',
                 'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again.",
                 "data" => $e->getMessage()
             ], 400);
@@ -629,7 +624,7 @@ class CreateUserIDController extends Controller
             return response()->jsonApi([
                 'title' => 'New user personal info',
                 'message' => "Input validator errors. Try again.",
-                "data" => $validator->errors()
+                'data' => $validator->errors()
             ], 422);
         }
 

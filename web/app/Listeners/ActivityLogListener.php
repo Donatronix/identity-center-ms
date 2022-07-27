@@ -36,7 +36,7 @@ class ActivityLogListener
             "user_id" => "required|string",
         ]);
         if ($validator->fails()) {
-            throw new Exception($validator->errors()->first());
+            throw new Exception($validator->errors());
         }
 
         // Try to add new activity

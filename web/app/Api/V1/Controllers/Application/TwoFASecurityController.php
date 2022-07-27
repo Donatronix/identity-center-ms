@@ -154,9 +154,11 @@ class TwoFASecurityController extends Controller
         $validator = Validator::make($request->all(), [
             'code' => 'required'
         ]);
+
         if ($validator->fails()) {
             throw new Exception($validator->errors()->first());
         }
+
         try {
             $tfa = new \RobThree\Auth\TwoFactorAuth($this->app_name);
 
@@ -168,25 +170,19 @@ class TwoFASecurityController extends Controller
             if ($valid) {
                 $google2fa->update(['status' => 1]);
                 return response()->jsonApi([
-                    "type" => "success",
                     'title' => 'Enabling 2FA',
                     "message" => '2FA is enabled successfully',
-                    "data" => null
-                ], 200);
+                ]);
             } else {
                 return response()->jsonApi([
-                    "type" => "danger",
                     'title' => 'Enabling 2FA',
                     "message" => 'Invalid verification Code, Please try again.',
-                    "data" => null
                 ], 500);
             }
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Enable 2fa",
                 'message' => $e->getMessage(),
-                'data' => null
             ], 400);
         }
     }
@@ -252,9 +248,11 @@ class TwoFASecurityController extends Controller
         $validator = Validator::make($request->all(), [
             'code' => 'required'
         ]);
+
         if ($validator->fails()) {
             throw new Exception($validator->errors()->first());
         }
+
         try {
             $tfa = new \RobThree\Auth\TwoFactorAuth($this->app_name);
 
@@ -265,25 +263,19 @@ class TwoFASecurityController extends Controller
 
             if ($valid) {
                 return response()->jsonApi([
-                    "type" => "success",
                     'title' => 'Code is valid',
                     "message" => 'Code is valid',
-                    "data" => null
-                ], 200);
+                ]);
             } else {
                 return response()->jsonApi([
-                    "type" => "danger",
                     'title' => 'Enabling 2FA',
                     "message" => 'Invalid verification Code, Please try again.',
-                    "data" => null
                 ], 500);
             }
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "verify code",
-                'message' => $e->getMessage(),
-                'data' => null
+                'message' => $e->getMessage()
             ], 400);
         }
     }
@@ -349,6 +341,7 @@ class TwoFASecurityController extends Controller
         $validator = Validator::make($request->all(), [
             'password' => 'required'
         ]);
+
         if ($validator->fails()) {
             throw new Exception($validator->errors()->first());
         }
@@ -358,10 +351,8 @@ class TwoFASecurityController extends Controller
             if (!(Hash::check($request->get('password'), $password))) {
                 // The password doesn't match
                 return response()->jsonApi([
-                    "type" => "danger",
                     'title' => 'Disabling 2FA',
                     "message" => 'Your password does not matches with your account password. Please try again.',
-                    "data" => null
                 ], 403);
             }
 
@@ -370,17 +361,13 @@ class TwoFASecurityController extends Controller
             $google2fa->update(['status' => 0]);
 
             return response()->jsonApi([
-                "type" => "success",
                 'title' => 'Disabling 2FA',
                 "message" => '2FA is now disabled.',
-                "data" => null
             ], 200);
         } catch (Exception $e) {
             return response()->jsonApi([
-                "type" => "danger",
                 'title' => 'Disabling 2FA',
                 "message" => $e->getMessage(),
-                "data" => null
             ], 403);
         }
     }

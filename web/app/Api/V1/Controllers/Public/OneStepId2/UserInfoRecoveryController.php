@@ -144,11 +144,10 @@ class UserInfoRecoveryController extends Controller
 
         if ($validator->fails()) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title'=> 'User account recovery',
                 'message' => "Input validator errors. Try again.",
-                "data" => null
-            ], 400);
+                'data' => $validator->errors()
+            ], 422);
         }
 
         try {
@@ -399,10 +398,9 @@ class UserInfoRecoveryController extends Controller
 
         if ($validator->fails()) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'message' => "Input validator errors. Try again.",
-                "data" => null
-            ], 400);
+                'data' => $validator->errors()
+            ], 422);
         }
 
         try {
@@ -557,10 +555,9 @@ class UserInfoRecoveryController extends Controller
 
         if ($validator->fails()) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'message' => "Input validator errors. Try again.",
-                "data" => null
-            ], 400);
+                'data' => $validator->errors()
+            ], 422);
         }
 
         try {
