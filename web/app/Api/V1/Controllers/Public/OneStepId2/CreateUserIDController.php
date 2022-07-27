@@ -206,27 +206,24 @@ class CreateUserIDController extends Controller
                 $user->phone = $input['phone'];
                 $user->save();
 
-                //Add Client Role to User
+                // Add Client Role to User
                 $role = Role::firstOrCreate([
                     'name' => USER::INVESTOR_USER
                 ]);
-
                 $user->roles()->sync($role->id);
 
-                if (in_array('referral_code', $input)) {
-                    $refData = [
-                        'user' => $user->toArray(),
-                        // 'application_id' => $input['application_id'],
-                        'referral_code' => $input['referral_code']
-                    ];
-                } else {
-                    $refData = ['user' => $user->toArray()];
-                }
+                // Join new user to referral program
+                $sendData = [
+                    'user' => $user->toArray()
+                ];
 
-                // Join new user to referral programm
-                PubSub::publish('NewUserRegistered', [
-                    'user' => $user->toArray(),
-                ], config('pubsub.queue.referrals'));
+                if ($request->has('referral_code')) {
+                    $sendData = [
+                        // 'application_id' => $input['application_id'],
+                        'referral_code' => $request->get('referral_code')
+                    ];
+                }
+                PubSub::publish('NewUserRegistered', $sendData, config('pubsub.queue.referrals'));
 
                 // Subscribing new user to Subscription service
                 PubSub::publish('NewUserRegistered', [

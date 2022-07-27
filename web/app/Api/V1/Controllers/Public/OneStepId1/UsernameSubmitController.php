@@ -5,19 +5,18 @@ namespace App\Api\V1\Controllers\Public\OneStepId1;
 use App\Api\V1\Controllers\Controller;
 use App\Models\TwoFactorAuth;
 use App\Models\User;
-use App\Traits\TokenHandler;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use PubSub;
+use Spatie\Permission\Models\Role;
+
 //use Illuminate\Support\Facades\Redis;
 
 class UsernameSubmitController extends Controller
 {
-    use TokenHandler;
-
     const MAX_LOGIN_ATTEMPTS = 3;
     const LOGIN_ATTEMPTS_DURATION = 120; //secs
 
@@ -53,73 +52,25 @@ class UsernameSubmitController extends Controller
      *                 description="The Message SID is the unique ID for any message successfully created by One Step’s API",
      *                 example="dawsd-sdsd-sdfsds-dsd"
      *             ),
+     *             @OA\Property(
+     *                 property="referral_code",
+     *                 type="string",
+     *                 description="Referral code for user account",
+     *                 required={"false"},
+     *                 example="1827oGRL"
+     *             )
      *         )
      *     ),
      *
      *     @OA\Response(
-     *          response="200",
-     *          description="Success",
-     *
-     *          @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="type",
-     *                 type="string",
-     *                 example="success"
-     *             ),
-     *             @OA\Property(
-     *                 property="sid",
-     *                 type="string",
-     *                 example="Create ew user. Step 3"
-     *             ),
-     *             @OA\Property(
-     *                 property="validate_auth_code",
-     *                 type="boolean",
-     *                 example="true",
-     *                 description="Indicates if validation is successful"
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="User was successful created"
-     *             ),
-     *             @OA\Property(
-     *                 property="user_status",
-     *                 type="number",
-     *                 description="User Status INACTIVE = 0, ACTIVE = 1, BANNED = 2"
-     *             )
-     *         )
+     *         response="200",
+     *         description="Data retrieved",
+     *         @OA\JsonContent(ref="#/components/schemas/OkResponse")
      *     ),
      *     @OA\Response(
-     *          response="400",
-     *          description="Bad Request",
-     *
-     *          @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(
-     *                 property="type",
-     *                 type="string",
-     *                 example="danger"
-     *             ),
-     *             @OA\Property(
-     *                 property="validate_auth_code",
-     *                 type="boolean",
-     *                 example="false"
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example=""
-     *             ),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 description="User object",
-     *                 example=""
-     *             )
-     *         )
+     *         response="400",
+     *         description="Bad request",
+     *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
      *     )
      * )
      *
@@ -199,9 +150,17 @@ class UsernameSubmitController extends Controller
                     $authUser->save();
 
                     // Join new user to referral program
-                    PubSub::publish('NewUserRegistered', [
-                        'user' => $authUser->toArray(),
-                    ], config('pubsub.queue.referrals'));
+                    $sendData = [
+                        'user' => $authUser->toArray()
+                    ];
+
+                    if ($request->has('referral_code')) {
+                        $sendData = [
+                            // 'application_id' => $input['application_id'],
+                            'referral_code' => $request->get('referral_code')
+                        ];
+                    }
+                    PubSub::publish('NewUserRegistered', $sendData, config('pubsub.queue.referrals'));
 
                     // Subscribing new user to Subscription service
                     PubSub::publish('NewUserRegistered', [
