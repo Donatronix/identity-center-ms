@@ -12,7 +12,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use PubSub;
-
 //use Illuminate\Support\Facades\Redis;
 
 class UsernameSubmitController extends Controller
@@ -209,8 +208,11 @@ class UsernameSubmitController extends Controller
                         'user' => $authUser->toArray(),
                     ], config('pubsub.queue.subscriptions'));
 
-                    // Set role to user
-                    $authUser->assignRole('client');
+                    //Add Client Role to User
+                    $role = Role::firstOrCreate([
+                        'name' => USER::INVESTOR_USER
+                    ]);
+                    $authUser->roles()->sync($role->id);
 
                     // Do login, create access token and return
                     return $this->login($authUser, $request->all(), [
@@ -347,5 +349,3 @@ class UsernameSubmitController extends Controller
         }
     }
 }
-
-
