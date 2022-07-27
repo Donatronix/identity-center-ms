@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use PubSub;
+
 //use Illuminate\Support\Facades\Redis;
 
 class UsernameSubmitController extends Controller
@@ -152,8 +153,6 @@ class UsernameSubmitController extends Controller
                 ->firstOrFail()
                 ->user;
 
-           // dd($authUser);
-
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'title' => 'User authorization',
@@ -167,9 +166,7 @@ class UsernameSubmitController extends Controller
             return response()->jsonApi([
                 'title' => 'User authorization',
                 'message' => 'User has been banned from this platform',
-
 //                'message' => 'You cannot use this service. Go to https://onestepid.com for identification and get OneStep ID.',
-
                 'data' => [
                     "user_status" => $authUser->status,
                 ]
@@ -182,7 +179,7 @@ class UsernameSubmitController extends Controller
             $existUser = User::where('username', $request->get('username'))->first();
 
             // If exist user found and exist user another then auth user, so
-            if($existUser && ($existUser->id !== $authUser->id)){
+            if ($existUser && ($existUser->id !== $authUser->id)) {
                 // username already exists for this SID
                 return response()->jsonApi([
                     'title' => 'User authorization',
@@ -194,12 +191,12 @@ class UsernameSubmitController extends Controller
             }
 
             // If inactive haven't username
-            if(empty($authUser->username)){
+            if (empty($authUser->username)) {
                 // Finish user registration
                 try {
                     // Update username and status
-//                    $authUser->username = $request->get('username', null);
-//                    $authUser->status = User::STATUS_ACTIVE;
+                    $authUser->username = $request->get('username', null);
+                    $authUser->status = User::STATUS_ACTIVE;
                     $authUser->save();
 
                     // Join new user to referral program
@@ -216,39 +213,53 @@ class UsernameSubmitController extends Controller
                     $authUser->assignRole('client');
 
                     // Do login, create access token and return
-                    return $this->login($authUser,  $request->all(), [
-                        'success' =>  'User was successfully activated',
+                    return $this->login($authUser, $request->all(), [
+                        'success' => 'User was successfully activated',
                         'incorrect' => 'Username was added, but unable to create access token'
                     ]);
-
                 } catch (Exception $e) {
                     return response()->jsonApi([
                         'title' => 'User authorization',
-                        "message" => "Unable to set username: " . $e->getMessage(),
+                        'message' => "Unable to set username: " . $e->getMessage(),
                         'data' => [
                             'user_status' => $authUser->status,
                             'phone_exist' => false
                         ]
                     ], 403);
                 }
-            }else{
-                return response()->jsonApi([
-                    'title' => 'User authorization',
-                    "message" => "User is inactive. You can't use this service",
-                    'data' => [
-                        'user_status' => $authUser->status,
-                        'phone_exist' => false
-                    ]
-                ], 403);
+            } else {
+                // if username is correct, means that user is disable
+                if($authUser->username === $request->get('username')){
+                    return response()->jsonApi([
+                        'title' => 'User authorization',
+                        'message' => "User is inactive. You can't use this service",
+                        'data' => [
+                            'user_status' => $authUser->status,
+                            'phone_exist' => false
+                        ]
+                    ], 403);
+                }else{
+                    return response()->jsonApi([
+                        'title' => 'User authorization',
+                        "message" => 'Incorrect username for this account'
+                    ], 403);
+                }
             }
         }
 
-        # if user active, do login
+        // if user is active and username is correct, do login
         if ($authUser->status == User::STATUS_ACTIVE) {
-            return $this->login($authUser, $request->all(), [
-                'success' =>  'User logged in successfully',
-                'incorrect' => 'Authorisation Error. Unable to create access token'
-            ]);
+            if($authUser->username === $request->get('username')){
+                return $this->login($authUser, $request->all(), [
+                    'success' => 'User logged in successfully',
+                    'incorrect' => 'Authorisation Error. Unable to create access token'
+                ]);
+            }else{
+                return response()->jsonApi([
+                    'title' => 'User authorization',
+                    'message' => 'Incorrect username for this account'
+                ], 403);
+            }
         }
     }
 
@@ -258,9 +269,9 @@ class UsernameSubmitController extends Controller
      * @param array $messages
      * @return JsonResponse
      */
-    private function login(User $user, Array $input, Array $messages): JsonResponse
+    private function login(User $user, array $input, array $messages): JsonResponse
     {
-        //check if its a malicious user
+        // Check if its a malicious user
         try {
 //            $redis = Redis::connection();
 //
@@ -290,13 +301,6 @@ class UsernameSubmitController extends Controller
 //                    ], 403);
 //                }
 //            }
-              //  dd($user);
-
-//            return response()->jsonApi([
-//                'data' => [
-//                    'user' => $user
-//                ]
-//            ]);
 
             // Generate access token
             $token = $user->createToken($user->username)->accessToken;
@@ -306,12 +310,33 @@ class UsernameSubmitController extends Controller
 
 //            $redis->del($userLoginAttemptsKey);
 
+            $user = collect($user->toArray());
+
+            // Return response
             return response()->jsonApi([
                 'title' => 'User authorization',
                 'message' => $messages['success'],
                 'data' => [
                     'token' => $token,
-                    'user' => $user->toArray()
+                    'user' => $user->only([
+                        'id',
+                        'first_name',
+                        'last_name',
+                        'display_name',
+                        'username',
+                        'gender',
+                        'birthday',
+                        'phone',
+                        'email',
+                        'avatar',
+                        'locale',
+                        'address_zip',
+                        'address_country',
+                        'address_city',
+                        'address_line1',
+                        'address_line2',
+                        'status'
+                    ])
                 ]
             ]);
         } catch (Exception $e) {
