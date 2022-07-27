@@ -23,6 +23,11 @@ class UsernameSubmitController extends Controller
 
     /**
      * Submit username account
+     * Validation of the request parameter username.
+     * Checking username if user with that username.
+     * Checking if the username is empty.
+     * Updating user with added username.
+     * User authentication returns a token if he is logged in.
      *
      * @OA\Post(
      *     path="/user-account/v1/send-username",
@@ -39,13 +44,13 @@ class UsernameSubmitController extends Controller
      *             @OA\Property(
      *                 property="username",
      *                 type="string",
-     *                 description="verification code enter by user",
+     *                 description="User's username",
      *                 example="chinedu338"
      *             ),
      *             @OA\Property(
      *                 property="sid",
      *                 type="string",
-     *                 description="Message ID",
+     *                 description="The Message SID is the unique ID for any message successfully created by One Step’s API",
      *                 example="dawsd-sdsd-sdfsds-dsd"
      *             ),
      *         )
@@ -129,103 +134,131 @@ class UsernameSubmitController extends Controller
             // Validate input data
             $this->validate($request, [
                 'username' => 'required|string|min:3',
-                'sid' => 'required|string|min:8',
+                'sid' => 'required|string|min:8|max:36',
             ]);
         } catch (ValidationException $e) {
             return response()->jsonApi([
                 'title' => 'User authorization',
                 'message' => "Validation error: " . $e->getMessage(),
-                'data' => $e->validator->errors()->first()
+                'data' => $e->validator->errors()
             ], 422);
         }
 
         // try to retrieve user using sid
         try {
-            $twoFa = TwoFactorAuth::where("sid", $request->get('sid'))
+            $authUser = TwoFactorAuth::where('sid', $request->get('sid'))
                 ->with('user')
-                ->firstOrFail();
+                ->orderBy('id', 'desc')
+                ->firstOrFail()
+                ->user;
 
-            $user = $twoFa->user;
+           // dd($authUser);
+
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'title' => 'User authorization',
-                'message' => 'SID not found or incorrect',
+                'message' => 'SID not found or incorrect'
             ], 403);
         }
 
-        // check user status
-        if ($user->status == User::STATUS_BANNED) {
-            //report banned
+
+        // Check if user status is banned
+        if ($authUser->status == User::STATUS_BANNED) {
             return response()->jsonApi([
                 'title' => 'User authorization',
-                "user_status" => $user->status,
-                "message" => "User has been banned from this platform.",
+                'message' => 'User has been banned from this platform',
+
+//                'message' => 'You cannot use this service. Go to https://onestepid.com for identification and get OneStep ID.',
+
+                'data' => [
+                    "user_status" => $authUser->status,
+                ]
             ], 403);
         }
 
-        // Only  inactive users gets to this part of the code
-        // check if username is taken
-//        $usernameExists = User::where("username", $request->get('username'))->exists();
-//        if ($usernameExists) {
-//            return response()->jsonApi([
-//                'title' => 'User authorization',
-//                "message" => "Username already exists.",
-//                "user_status" => $user->status,
-//                "phone_exist" => true,
-//            ], 400);
-//        }
+        // Check if user status is inactive
+        if ($authUser->status == User::STATUS_INACTIVE) {
+            // Check if exist user for given username
+            $existUser = User::where('username', $request->get('username'))->first();
 
-        // check if username is empty, Do finish register user
-        if (empty($user->username)) {
-            try {
-                $user->username = $request->get('username');
-                $user->status = User::STATUS_ACTIVE;
-                $user->save();
-
-                // Join new user to referral programm
-                PubSub::publish('NewUserRegistered', [
-                    'user' => $user->toArray(),
-                ], config('pubsub.queue.referrals'));
-
-                // Subscribing new user to Subscription service
-                PubSub::publish('NewUserRegistered', [
-                    'user' => $user->toArray(),
-                ], config('pubsub.queue.subscriptions'));
-
-                // Set role to user
-                $user->assignRole('client');
-            } catch (Exception $e) {
+            // If exist user found and exist user another then auth user, so
+            if($existUser && ($existUser->id !== $authUser->id)){
+                // username already exists for this SID
                 return response()->jsonApi([
                     'title' => 'User authorization',
-                    "message" => "Unable to save username: " . $e->getMessage(),
-                ], 400);
+                    "message" => 'Username already exists',
+                    'data' => [
+                        'user_status' => $authUser->status,
+                    ]
+                ], 403);
             }
-        } else {
 
-//        if ($user->status == User::STATUS_ACTIVE) {
-//            // Login active user
-//            return $this->login($user, $request->get('sid'), $request->get('username'));
-//        }
+            // If inactive haven't username
+            if(empty($authUser->username)){
+                // Finish user registration
+                try {
+                    // Update username and status
+//                    $authUser->username = $request->get('username', null);
+//                    $authUser->status = User::STATUS_ACTIVE;
+                    $authUser->save();
 
-            // username already exists for this SID
-//            return response()->jsonApi([
-//                'title' => 'User authorization',
-//                "message" => "Username already exists for this SID",
-//            ]);
+                    // Join new user to referral program
+                    PubSub::publish('NewUserRegistered', [
+                        'user' => $authUser->toArray(),
+                    ], config('pubsub.queue.referrals'));
+
+                    // Subscribing new user to Subscription service
+                    PubSub::publish('NewUserRegistered', [
+                        'user' => $authUser->toArray(),
+                    ], config('pubsub.queue.subscriptions'));
+
+                    // Set role to user
+                    $authUser->assignRole('client');
+
+                    // Do login, create access token and return
+                    return $this->login($authUser,  $request->all(), [
+                        'success' =>  'User was successfully activated',
+                        'incorrect' => 'Username was added, but unable to create access token'
+                    ]);
+
+                } catch (Exception $e) {
+                    return response()->jsonApi([
+                        'title' => 'User authorization',
+                        "message" => "Unable to set username: " . $e->getMessage(),
+                        'data' => [
+                            'user_status' => $authUser->status,
+                            'phone_exist' => false
+                        ]
+                    ], 403);
+                }
+            }else{
+                return response()->jsonApi([
+                    'title' => 'User authorization',
+                    "message" => "User is inactive. You can't use this service",
+                    'data' => [
+                        'user_status' => $authUser->status,
+                        'phone_exist' => false
+                    ]
+                ], 403);
+            }
         }
 
-        // Do login, create access token and return
-        return $this->login($user, $request->get('sid'), $request->get('username'));
+        # if user active, do login
+        if ($authUser->status == User::STATUS_ACTIVE) {
+            return $this->login($authUser, $request->all(), [
+                'success' =>  'User logged in successfully',
+                'incorrect' => 'Authorisation Error. Unable to create access token'
+            ]);
+        }
     }
 
     /**
      * @param User $user
-     * @param                  $sid
-     * @param                  $username
-     *
+     * @param array $input
+     * @param array $messages
      * @return JsonResponse
      */
-    private function login(User $user, $sid, $username): JsonResponse
+    private function login(User $user, Array $input, Array $messages): JsonResponse
     {
         //check if its a malicious user
         try {
@@ -245,7 +278,7 @@ class UsernameSubmitController extends Controller
 //                $redis->set($userLoginAttemptsKey, $count);
 //            }
 //
-//            if (strtolower($user->username) !== strtolower($username)) {
+//            if (strtolower($user->username) !== strtolower($input['username'])) {
 //                $loginAttempts = (int)$redis->get($userLoginAttemptsKey);
 //
 //                if ($loginAttempts > self::MAX_LOGIN_ATTEMPTS - 1) {
@@ -257,31 +290,37 @@ class UsernameSubmitController extends Controller
 //                    ], 403);
 //                }
 //            }
+              //  dd($user);
 
-            //    dd($user);
+//            return response()->jsonApi([
+//                'data' => [
+//                    'user' => $user
+//                ]
+//            ]);
 
             // Generate access token
             $token = $user->createToken($user->username)->accessToken;
 
-            // delete sid
-            $twoFa = TwoFactorAuth::where('sid', $sid)->first();
-            $twoFa->delete();
+            // Deleting SID
+            TwoFactorAuth::where('sid', $input['sid'])->delete();
 
 //            $redis->del($userLoginAttemptsKey);
 
             return response()->jsonApi([
                 'title' => 'User authorization',
-                'message' => "Login successful",
+                'message' => $messages['success'],
                 'data' => [
                     'token' => $token,
-                    'user' => $user
+                    'user' => $user->toArray()
                 ]
             ]);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'title' => 'User authorization',
-                'message' => $e->getMessage(),
+                'message' => $messages['incorrect'] . ': ' . $e->getMessage(),
             ], 403);
         }
     }
 }
+
+
