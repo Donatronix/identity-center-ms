@@ -193,7 +193,7 @@ class UsernameSubmitController extends Controller
                 if($authUser->username === $request->get('username')){
                     return response()->jsonApi([
                         'title' => 'User authorization',
-                        'message' => "User is inactive. You can't use this service",
+                        'message' => "Account is disabled. You can't use this service. Please contact support",
                         'data' => [
                             'user_status' => $authUser->status,
                             'phone_exist' => false
