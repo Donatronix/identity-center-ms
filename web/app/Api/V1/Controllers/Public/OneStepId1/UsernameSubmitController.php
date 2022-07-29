@@ -133,7 +133,7 @@ class UsernameSubmitController extends Controller
                 // username already exists for this SID
                 return response()->jsonApi([
                     'title' => 'User authorization',
-                    "message" => 'Username already exists',
+                    "message" => 'This username already exists. Use something else',
                     'data' => [
                         'user_status' => $authUser->status,
                     ]
@@ -181,7 +181,7 @@ class UsernameSubmitController extends Controller
                 } catch (Exception $e) {
                     return response()->jsonApi([
                         'title' => 'User authorization',
-                        'message' => "Unable to set username: " . $e->getMessage(),
+                        'message' => "Unable to save username: " . $e->getMessage(),
                         'data' => [
                             'user_status' => $authUser->status,
                             'phone_exist' => false
@@ -202,7 +202,7 @@ class UsernameSubmitController extends Controller
                 }else{
                     return response()->jsonApi([
                         'title' => 'User authorization',
-                        "message" => 'Incorrect username for this account'
+                        "message" => 'You are trying to use a username that does not belong to this account'
                     ], 403);
                 }
             }
@@ -218,7 +218,7 @@ class UsernameSubmitController extends Controller
             }else{
                 return response()->jsonApi([
                     'title' => 'User authorization',
-                    'message' => 'Incorrect username for this account'
+                    'message' => 'You are trying to use a username that does not belong to this account'
                 ], 403);
             }
         }
