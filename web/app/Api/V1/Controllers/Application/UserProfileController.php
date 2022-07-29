@@ -246,12 +246,13 @@ class UserProfileController extends Controller
                     'id',
                     'first_name',
                     'last_name',
-                    'phone',
                     'email',
                     'phone',
-                    'birthday',
-                    'address_country',
-                    'locale',
+                    'address_line1',
+                    'address_line2',
+                    'address_city',
+                    'address_zip',
+                    'address_country'
                 )->firstOrFail();
 
                 // Return response
@@ -1324,81 +1325,4 @@ class UserProfileController extends Controller
         return response()->jsonApi($data, 200);
     }
 
-    /**
-     * Details of Users
-     *
-     * @OA\Post(
-     *     path="/user-profile/details",
-     *     description="Get details of users",
-     *     tags={"Application | User Profile"},
-     *
-     *     security={{ "bearerAuth": {} }},
-     *
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(
-     *                 property="users",
-     *                 type="array",
-     *                 description="Array of user IDs",
-     *                 required={"true"},
-     *                 @OA\Items()
-     *             ),
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="Details Fetched",
-     *         @OA\JsonContent(ref="#/components/schemas/OkResponse")
-     *     ),
-     *     @OA\Response(
-     *         response="401",
-     *         description="Unauthorized",
-     *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
-     *     ),
-     *     @OA\Response(
-     *         response="422",
-     *         description="Validation Error",
-     *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
-     *     ),
-     *     @OA\Response(
-     *         response="500",
-     *         description="Server Error",
-     *         @OA\JsonContent(ref="#/components/schemas/DangerResponse")
-     *     ),
-     * )
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function usersDetails(Request $request)
-    {
-        try {
-            $this->validate($request, [
-                'users' => 'required|array',
-            ]);
-
-            foreach ($request->users as $key => $user) {
-                $user = User::find($user);
-                if ($user) {
-                    $users[] = $user;
-                }
-            }
-
-            return response()->jsonApi([
-                'type' => 'success',
-                'title' => 'Users Details',
-                'message' => "Information fetched successfully!",
-                'data' => $users
-            ], 200);
-        } catch (Exception $e) {
-            return response()->jsonApi([
-                'type' => 'danger',
-                'title' => 'Users Details',
-                'message' => $e->getMessage(),
-            ], 500);
-        }
-    }
 }
