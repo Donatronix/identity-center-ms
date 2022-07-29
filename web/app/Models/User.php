@@ -288,51 +288,25 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
             'username' => 'sometimes|string|unique:users,username',
             'email' => "sometimes|email|unique:users,email",
             'phone' => "sometimes|regex:/\+?\d{7,16}/i|unique:users,phone",
+
             'birthday' => 'sometimes|nullable|date_format:Y-m-d',
             'subscribed_to_announcement' => 'sometimes|boolean',
 
             'locale' => 'sometimes|string',
 
+
             'address_country' => 'required|string|min:2|max:3',
             'address_line1' => 'required|string|max:150',
             'address_line2' => 'sometimes|nullable|string|max:100',
             'address_city' => 'sometimes|string|max:50',
-            'address_zip' => 'required|string|max:10'
-        ];
-    }
+            'address_zip' => 'required|string|max:15',
 
-    /**
-     * @return array
-     */
-    public static function personValidationRules2(): array
-    {
-        return [
-
-            'address' => 'required|array:country,line1,line2,city,zip',
-            'address.country' => 'required|string|max:3',
-            'address.line1' => 'required|string|max:150',
-            'address.line2' => 'string|max:100',
-            'address.city' => 'required|string|max:50',
-            'address.zip' => 'required|string|max:15'
-        ];
-    }
-
-    /**
-     * Validation rules for identity verification
-     *
-     * @return array
-     */
-    public static function identifyValidationRules(): array
-    {
-        return [
-            'gender' => 'required|string',
-            'birthday' => 'required|string',
-            'id_number' => 'required|string|max:100',
-            'document' => 'required|array:number,country,type,file',
-            'document.number' => 'required|string',
-            'document.country' => 'required|string|max:3',
-            'document.type' => 'required|integer|min:1|max:4',
-            'document.file' => 'required|string'
+//            'address' => 'sometimes|array:country,line1,line2,city,zip',
+//            'address.country' => 'required|string|max:3',
+//            'address.line1' => 'required|string|max:150',
+//            'address.line2' => 'string|max:100',
+//            'address.city' => 'required|string|max:50',
+//            'address.zip' => 'required|string|max:15'
         ];
     }
 
@@ -349,10 +323,9 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
             'email' => 'required|email|unique:users,email',
             'phone' => 'required|string',
             'gender' => 'required|string',
-            'birthday' => 'required|string',
+            'birthday' => 'required|date_format:Y-m-d',
             'password' => 'required|min:6|max::32',
             'username' => 'required|string',
-            'birthday' => 'required|date_format:Y-m-d',
             'accept_terms' => 'required|boolean',
             'address_country' => 'required|string|max:3',
             'address_line1' => 'required|string|max:150',
@@ -381,27 +354,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
             'address_line1' => 'required|string|max:150',
             'address_line2' => 'string|max:100',
             'address_city' => 'required|string|max:50',
-            'address_zip' => 'required|string|max:15'
-        ];
-    }
-
-    /**
-     * Validation rules for admin new user
-     *
-     * @return array
-     */
-    public static function userValidationRules(): array
-    {
-        return [
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'email' => 'required|email',
-            'phone' => 'required|string',
-            'username' => 'required|string',
-            'birthday' => 'required|date_format:Y-m-d',
-            'address_country' => 'required|string|max:3',
-            'address_line1' => 'required|string|max:150',
-            'address_line2' => 'string|max:100',
             'address_zip' => 'required|string|max:15'
         ];
     }

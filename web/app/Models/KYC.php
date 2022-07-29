@@ -149,6 +149,25 @@ class KYC extends Model
     }
 
     /**
+     * Validation rules for identity verification
+     *
+     * @return array
+     */
+    public static function identifyValidationRules(): array
+    {
+        return [
+            'gender' => 'required|string',
+            'birthday' => 'required|string',
+            'id_number' => 'required|string|max:100',
+            'document' => 'required|array:number,country,type,file',
+            'document.number' => 'required|string',
+            'document.country' => 'required|string|max:3',
+            'document.type' => 'required|integer|min:1|max:4',
+            'document.file' => 'required|string'
+        ];
+    }
+
+    /**
      * @return BelongsTo
      */
     public function user(): BelongsTo

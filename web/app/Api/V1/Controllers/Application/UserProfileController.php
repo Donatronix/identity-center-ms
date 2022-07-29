@@ -86,7 +86,7 @@ class UserProfileController extends Controller
         // Try to save received data
         try {
             // Validate input
-           $validate = Validator::make($request->all(), User::userValidationRules());
+           $validate = Validator::make($request->all(), User::profileValidationRules());
 
             //Validation response
             if($validate->fails()){
@@ -94,8 +94,7 @@ class UserProfileController extends Controller
                     'type' => 'danger',
                     'title' => 'New user registration',
                     'message' => $validate->errors(),
-                    'data' => null
-                ], 400);
+                ], 422);
             }
 
             // Find exist user
@@ -447,7 +446,6 @@ class UserProfileController extends Controller
 
             // Get User object
             $user = User::findOrFail($id);
-
 
             DB::beginTransaction();
 
