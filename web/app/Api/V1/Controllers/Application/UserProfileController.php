@@ -436,7 +436,7 @@ class UserProfileController extends Controller
     {
         try {
             //validate input data
-            $validator = Validator::make($request->all(), User::profileValidationRules((int)$id));
+            $validator = Validator::make($request->all(), User::profileValidationRules());
 
             if ($validator->fails()) {
                 return response()->jsonApi([
