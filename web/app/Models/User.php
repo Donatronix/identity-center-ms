@@ -294,19 +294,18 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 
             'locale' => 'sometimes|string',
 
-
-            'address_country' => 'required|string|min:2|max:3',
-            'address_line1' => 'required|string|max:150',
+            'address_country' => 'sometimes|string|min:2|max:3',
+            'address_line1' => 'sometimes|string|max:150',
             'address_line2' => 'sometimes|nullable|string|max:100',
             'address_city' => 'sometimes|string|max:50',
-            'address_zip' => 'required|string|max:15',
+            'address_zip' => 'sometimes|string|max:15',
 
 //            'address' => 'sometimes|array:country,line1,line2,city,zip',
-//            'address.country' => 'required|string|max:3',
-//            'address.line1' => 'required|string|max:150',
+//            'address.country' => 'sometimes|string|max:3',
+//            'address.line1' => 'sometimes|string|max:150',
 //            'address.line2' => 'string|max:100',
-//            'address.city' => 'required|string|max:50',
-//            'address.zip' => 'required|string|max:15'
+//            'address.city' => 'sometimes|string|max:50',
+//            'address.zip' => 'sometimes|string|max:15'
         ];
     }
 
