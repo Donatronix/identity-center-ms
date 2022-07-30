@@ -9,6 +9,7 @@ use App\Services\IdentityVerification;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -155,65 +156,50 @@ class KYCController extends Controller
      */
     public function store(Request $request): mixed
     {
-        // Validate input
+        
         try {
-            $this->validate($request, KYC::validationRules());
-        } catch (ValidationException $e) {
-            return response()->jsonApi([
-                'title' => 'User KYC identification',
-                'message' => "Validation error: " . $e->getMessage()
-            ], 422);
-        }
+            // Validate input
+            $validate = Validator::make($request->all(), KYC::validationRules());
+            
+            if($validate->fails()) {
+                return response()->jsonApi([
+                    'title' => 'User KYC identification',
+                    'message' => "Validation error: " . $validate->errors()->first()
+                ], 422);
+            }
 
-        // Try to save received document data
-        try {
-            // Find existing user
-            // $user = User::find(Auth::user()->id);
-            // if (!$user) {
-            //     return response()->jsonApi([
-            //         'type' => 'danger',
-            //         'title' => "Get user",
-            //         'message' => "User with id #" . Auth::user()->id . " not found!",
-            //         'data' => '',
-            //     ], 404);
-            // }
+            //Find existing user
+            if (User::where('id', Auth::user()->id)->doesntExist()) {
+                return response()->jsonApi([
+                    'title' => "User KYC identification",
+                    'message' => "User NOT found!",
+                    'data' => null,
+                ], 404);
+            }
 
-//            // Find exist user
-//            $user = $this->getObject(Auth::user()->getAuthIdentifier());
-//            if ($user instanceof JsonApiResponse) {
-//                return $user;
-//            }
-
-            // Transform data and save
-            // $identifyData = $request->all();
-            // foreach ($identifyData['document'] as $key => $value) {
-            //     $identifyData['document_' . $key] = $value;
-            // }
-            // unset($identifyData['document']);
-
-            // $user->fill($identifyData);
-            // $user->status = User::STATUS_ACTIVE;
-            // // $user->status = User::STATUS_STEP_3;
-            // $user->save();
-            // Return response to client
-
-            /**
-             * Save KYC info
-             */
-            $data = $request->all();
-            $data['user_id'] = Auth::user()->id;
-
-            KYC::create($data);
+            //Get validated data
+            $input = $validate->validated();
+            
+            //Save KYC info
+            KYC::create([
+                'id_doctype' => KYC::$document_types[$input['id_doctype']],
+                'address_verify_doctype' => KYC::$verify_document_types[$input['address_verify_doctype']],
+                'id_document' => $input['id_document'],
+                'address_verify_document' => $input['address_verify_document'],
+                'portrait' => $input['portrait'],
+                'user_id'=> Auth::user()->id
+            ]);
 
             return response()->jsonApi([
                 'title' => 'User KYC identification',
                 'message' => "User identity submitted successfully",
-            ]);
+            ], 200);
+            
         } catch (Exception $e) {
             return response()->jsonApi([
                 'title' => 'User KYC identification',
                 'message' => $e->getMessage()
-            ], 500);
+            ], 400);
         }
     }
 }

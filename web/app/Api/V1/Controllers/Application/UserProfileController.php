@@ -324,28 +324,12 @@ class UserProfileController extends Controller
      *                 example="johnkiels@ultainfinity.com"
      *             ),
      *              @OA\Property(
-     *                  property="birthday",
-     *                  type="string",
-     *                  description="Date of birth in format DD-MM-YYYY",
-     *              ),
-     *              @OA\Property(
-     *                 property="locale",
-     *                 type="string",
-     *                 description="Update user profile locale",
-     *                 example="UK English"
-     *              ),
-     *              @OA\Property(
-     *                  property="subscribed_to_announcement",
-     *                  type="string",
-     *                  description="Indicate whether or not the user should be subscribed for announcements",
-     *              ),
-     *              @OA\Property(
      *                  property="address_country",
      *                  type="string",
      *                  description="User country code",
      *                  example="uk"
      *              ),
-     *              @OA\Property(
+     *             @OA\Property(
      *                  property="address_line1",
      *                  type="string",
      *                  description="First line of address. may contain house number, street name, etc.",
@@ -440,7 +424,7 @@ class UserProfileController extends Controller
 
             if ($validator->fails()) {
                 return response()->jsonApi([
-                    'title' => "Update user info",
+                    'title' => "User profile update",
                     'message' => "Input validator errors. Try again.",
                     "data" => $validator->errors()
                 ], 422);

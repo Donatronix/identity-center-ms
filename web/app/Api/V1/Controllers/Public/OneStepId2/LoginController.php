@@ -197,7 +197,7 @@ class LoginController extends Controller
                 ]);
 
                 $sendOTP = new SendVerifyToken();
-                $sendOTP->dispatchOTP($input['channel'], $sendto, $otpToken);
+               // $sendOTP->dispatchOTP($input['channel'], $sendto, $otpToken);
                 $data['login_otp'] = $otpToken;
 
                 //Send response

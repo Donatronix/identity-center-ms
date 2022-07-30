@@ -282,22 +282,20 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     public static function profileValidationRules(): array
     {
         return [
-            'first_name' => 'sometimes|string|min:2|max:60',
-            'last_name' => 'sometimes|string|min:2|max:60',
-
-            'username' => 'sometimes|string|unique:users,username',
-            'email' => "sometimes|email|unique:users,email",
-            'phone' => "sometimes|regex:/\+?\d{7,16}/i|unique:users,phone",
-            'birthday' => 'sometimes|nullable|date_format:Y-m-d',
-            'subscribed_to_announcement' => 'sometimes|boolean',
-
-            'locale' => 'sometimes|string',
-
+            'first_name' => 'required|string|min:2|max:60',
+            'last_name' => 'required|string|min:2|max:60',
+            'email' => "required|email",
             'address_country' => 'required|string|min:2|max:3',
             'address_line1' => 'required|string|max:150',
-            'address_line2' => 'sometimes|nullable|string|max:100',
-            'address_city' => 'sometimes|string|max:50',
+            'address_line2' => 'nullable|string|max:100',
+            'address_city' => 'required|string|max:50',
             'address_zip' => 'required|string|max:10'
+
+            //'username' => 'sometimes|string|unique:users,username',
+            //'phone' => "sometimes|regex:/\+?\d{7,16}/i|unique:users,phone",
+            //'birthday' => 'sometimes|nullable|date_format:Y-m-d',
+            //'subscribed_to_announcement' => 'sometimes|boolean',
+            //'locale' => 'sometimes|string',
         ];
     }
 
