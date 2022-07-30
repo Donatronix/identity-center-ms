@@ -279,7 +279,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @param int|null $id
      * @return array
      */
-    public static function profileValidationRules(?int $id = null): array
+    public static function profileValidationRules(): array
     {
         return [
             'first_name' => 'sometimes|string|min:2|max:60',

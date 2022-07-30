@@ -15,40 +15,28 @@ use Sumra\SDK\Traits\UuidTrait;
  *
  * @OA\Schema(
  *     schema="UserKYC",
- *     required={"document_type", "document_front", "portrait"},
+ *     required={"id_doctype", "address_verify_doctype", "portrait"},
  *
  *     @OA\Property(
- *         property="id_number",
- *         type="string",
- *         description="National identification number",
- *         example="xxxxxxxxxxxx"
- *     ),
- *     @OA\Property(
- *         property="document_number",
- *         type="string",
- *         description="Document number",
- *         example="FG1452635"
- *     ),
- *     @OA\Property(
- *         property="document_country",
- *         type="string",
- *         description="Document country",
- *         example="UK"
- *     ),
- *     @OA\Property(
- *         property="document_type",
- *         type="string",
+ *         property="id_doctype",
+ *         type="integer",
  *         description="Type of the Document uploaded (1 = PASSPORT, 2 = ID_CARD, 3 = DRIVERS_LICENSE, 4 = RESIDENCE_PERMIT)",
  *         example="1"
  *     ),
  *     @OA\Property(
- *         property="document_front",
+ *         property="address_verify_doctype",
+ *         type="integer",
+ *         description="Type of the Document uploaded (1 = UTILITY_BILL, 2 = BANK_STATEMENT, 3 = TENANCY_AGREEMENT)",
+ *         example="1"
+ *     ),
+ *     @OA\Property(
+ *         property="id_document",
  *         type="string",
  *         description="Uploaded document front view in base64",
  *         example=""
  *     ),
  *     @OA\Property(
- *         property="document_back",
+ *         property="address_verify_document",
  *         type="string",
  *         description="Uploaded document back view in base64",
  *         example=""
@@ -58,7 +46,7 @@ use Sumra\SDK\Traits\UuidTrait;
  *         type="string",
  *         description="Uploaded selfie in base64",
  *         example=""
- *     ),
+ *     )
  * )
  */
 
@@ -71,17 +59,24 @@ class KYC extends Model
     /**
      * Statuses
      */
-    const STATUS_PENDING = 'pending';
-    const STATUS_APPROVED = 'approved';
-    const STATUS_REJECTED = 'rejected';
+    const STATUS_PENDING = 'PENDING';
+    const STATUS_APPROVED = 'APPROVED';
+    const STATUS_REJECTED = 'REJECTED';
 
     /**
      * Document Types constants
      */
-    const DOCUMENT_TYPES_PASSPORT = 1;
-    const DOCUMENT_TYPES_ID_CARD = 2;
-    const DOCUMENT_TYPES_DRIVERS_LICENSE = 3;
-    const DOCUMENT_TYPES_RESIDENCE_PERMIT = 4;
+    const DOCUMENT_TYPES_PASSPORT = 'Passport';
+    const DOCUMENT_TYPES_ID_CARD = 'ID Card';
+    const DOCUMENT_TYPES_DRIVERS_LICENSE = 'Drivers License';
+    const DOCUMENT_TYPES_RESIDENCE_PERMIT = 'Residence Permit';
+
+    /**
+     * Address Verification Document Types constants
+     */
+    const DOCUMENT_TYPES_UTILITY_BILL = 'Utility Bill';
+    const DOCUMENT_TYPES_BANK_STATEMENT = 'Bank Statement';
+    const DOCUMENT_TYPES_TENANCY_AGREEMENT = 'Tenancy Agreement';
 
     /**
      * @var array|string[]
@@ -103,22 +98,29 @@ class KYC extends Model
     ];
 
     /**
+     * @var array|int[]
+     */
+    public static array $verify_document_types = [
+        1 => self::DOCUMENT_TYPES_UTILITY_BILL,
+        2 => self::DOCUMENT_TYPES_BANK_STATEMENT,
+        3 => self::DOCUMENT_TYPES_TENANCY_AGREEMENT
+    ];
+
+    /**
      * Mass assignable attributes.
      *
      * @var string[]
      */
     protected $fillable = [
-        'id_number',
-        'document_number',
-        'document_country',
-        'document_type',
-        'document_front',
-        'document_back',
+        'id_doctype',
+        'address_verify_doctype',
+        'id_document',
+        'address_verify_document',
         'portrait',
         'status',
-        'user_id',
+        'user_id'
     ];
-
+    
     /**
      * The attributes excluded from the model's JSON form.
      *
@@ -138,16 +140,15 @@ class KYC extends Model
     public static function validationRules(): array
     {
         return [
-            'id_number' => 'string|max:100',
-            'document_number' => 'string',
-            'document_country' => 'string|max:3',
-            'document_type' => 'required|integer|in:1,2,3,4',
-            'document_front' => 'required|string',
-            'document_back' => 'string',
+            'id_doctype' => 'required|integer|in:1,2,3,4',
+            'address_verify_doctype' => 'required|integer|in:1,2,3,4',
+            'id_document' => 'required|string',
+            'address_verify_document' => 'required|string',
             'portrait' => 'required|string'
         ];
     }
 
+    
     /**
      * Validation rules for identity verification
      *
