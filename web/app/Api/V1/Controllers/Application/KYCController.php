@@ -156,11 +156,11 @@ class KYCController extends Controller
      */
     public function store(Request $request): mixed
     {
-        
+
         try {
             // Validate input
             $validate = Validator::make($request->all(), KYC::validationRules());
-            
+
             if($validate->fails()) {
                 return response()->jsonApi([
                     'title' => 'User KYC identification',
@@ -179,7 +179,7 @@ class KYCController extends Controller
 
             //Get validated data
             $input = $validate->validated();
-            
+
             //Save KYC info
             KYC::create([
                 'id_doctype' => KYC::$document_types[$input['id_doctype']],
@@ -193,8 +193,8 @@ class KYCController extends Controller
             return response()->jsonApi([
                 'title' => 'User KYC identification',
                 'message' => "User identity submitted successfully",
-            ], 200);
-            
+            ]);
+
         } catch (Exception $e) {
             return response()->jsonApi([
                 'title' => 'User KYC identification',

@@ -104,7 +104,7 @@ class AgreementController extends Controller
                 'title' => 'User agreement',
                 'message' => "User agreement set successfully",
                 'data' => []
-            ], 200);
+            ]);
         } catch (ValidationException $e) {
             return response()->jsonApi([
                 'title' => 'User agreement',

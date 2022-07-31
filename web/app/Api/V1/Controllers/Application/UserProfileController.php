@@ -5,7 +5,6 @@ namespace App\Api\V1\Controllers\Application;
 use App\Api\V1\Controllers\Controller;
 use App\Models\User;
 use App\Services\SendEmailNotify;
-use App\Traits\TokenHandler;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -29,8 +28,6 @@ use Sumra\SDK\Facades\PubSub;
  */
 class UserProfileController extends Controller
 {
-    use TokenHandler;
-
     /**
      * Saving user full person detail
      *
@@ -113,17 +110,14 @@ class UserProfileController extends Controller
 
             // Return response to client
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => 'New user registration',
                 'message' => "User person detail data successfully saved",
                 'data' => $user->toArray()
-            ], 200);
+            ]);
         }  catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'Saving user personal data',
                 'message' => $e->getMessage(),
-                'data' => null
             ], 400);
         }
     }
@@ -464,7 +458,7 @@ class UserProfileController extends Controller
             return response()->jsonApi([
                 'type' => 'success',
                 'message' => "Account update was successful."
-            ], 200);
+            ]);
         }
         catch (ValidationException $e) {
             DB::rollback();
@@ -618,7 +612,7 @@ class UserProfileController extends Controller
                     "data" => [
                         'email' => $input['phone']
                     ]
-                ], 200);
+                ]);
             }
 
             return response()->jsonApi([
@@ -766,7 +760,7 @@ class UserProfileController extends Controller
                     'type' => 'success',
                     'message' => "User password updated successfully.",
                     "data" => null
-                ], 200);
+                ]);
 
             } else {
                 return response()->jsonApi([
@@ -905,7 +899,7 @@ class UserProfileController extends Controller
                     "data" => [
                         'email' => $input['email']
                     ]
-                ], 200);
+                ]);
             }
 
             return response()->jsonApi([
@@ -975,7 +969,7 @@ class UserProfileController extends Controller
             'verify_token' => $user->verify_token,
         ], config('pubsub.queue.communications'));
 
-        return response()->jsonApi(["email sent"], 200);
+        return response()->jsonApi(["email sent"]);
     }
 
     /**

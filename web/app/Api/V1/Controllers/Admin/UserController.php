@@ -193,7 +193,7 @@ class UserController extends Controller
                 'title' => 'Users list',
                 'message' => 'List of users successfully received',
                 'data' => $users->toArray()
-            ], 200);
+            ]);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',
@@ -418,7 +418,7 @@ class UserController extends Controller
                 'title' => 'Create admin user account',
                 'message' => "New user registered successfully!",
                 'data' => $user
-            ], 200);
+            ]);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'title' => 'New user registration',
@@ -491,7 +491,7 @@ class UserController extends Controller
                 'title' => 'User details',
                 'message' => "user details received",
                 'data' => $user->toArray()
-            ], 200);
+            ]);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'type' => 'danger',
@@ -664,7 +664,7 @@ class UserController extends Controller
                     'title' => 'Admin user update',
                     'message' => "User successfully updated",
                     'data' => $user
-                ], 200);
+                ]);
             }
 
             // Return response to client
@@ -848,7 +848,7 @@ class UserController extends Controller
         return response()->jsonApi([
             'title' => "Verification successful",
             'message' => "Email is verified"
-        ], 200);
+        ]);
     }
 
     /**
@@ -932,7 +932,7 @@ class UserController extends Controller
         return response()->jsonApi([
             'title' => "Verification email",
             'message' => "A verification mail has been sent"
-        ], 200);
+        ]);
     }
 
     /**
@@ -1071,7 +1071,7 @@ class UserController extends Controller
                 'title' => 'Add user account',
                 'message' => "New user registered successfully!",
                 'data' => $user
-            ], 200);
+            ]);
         } catch (Exception $e) {
             if (isset($user))
                 $user->delete();
@@ -1153,7 +1153,7 @@ class UserController extends Controller
                 'title' => 'Users Details',
                 'message' => "Information fetched successfully!",
                 'data' => $users
-            ], 200);
+            ]);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'type' => 'danger',

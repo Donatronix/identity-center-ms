@@ -83,7 +83,7 @@ class TwoFASecurityController extends Controller
                 'title' => 'Generating 2FA secret',
                 "message" => "Secret key is generated.",
                 "data" => $data->toArray()
-            ], 200);
+            ]);
         } catch (Exception $e) {
             return response()->jsonApi([
                 "type" => "danger",
@@ -363,7 +363,7 @@ class TwoFASecurityController extends Controller
             return response()->jsonApi([
                 'title' => 'Disabling 2FA',
                 "message" => '2FA is now disabled.',
-            ], 200);
+            ]);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'title' => 'Disabling 2FA',

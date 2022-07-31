@@ -152,7 +152,7 @@ class ServiceAdminController extends Controller
                 'title' => 'Operation was success',
                 'message' => 'The data was displayed successfully',
                 'data' => $administrators
-            ], 200);
+            ]);
 
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
@@ -566,7 +566,7 @@ class ServiceAdminController extends Controller
             return response()->jsonApi([
                 'title' => 'Operation was a success',
                 'message' => 'Administrator was deleted successfully',
-            ], 200);
+            ]);
 
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
@@ -736,7 +736,7 @@ class ServiceAdminController extends Controller
             return response()->jsonApi([
                 'title' => 'Role update was a success',
                 'message' => 'Administrator was updated successfully',
-            ], 200);
+            ]);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'title' => "Update failed",
@@ -903,7 +903,7 @@ class ServiceAdminController extends Controller
             return response()->jsonApi([
                 'title' => 'Role removal was a success',
                 'message' => 'Administrator was updated successfully',
-            ], 200);
+            ]);
 
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
@@ -993,7 +993,7 @@ class ServiceAdminController extends Controller
                 'title' => 'Operation was success',
                 'message' => 'The data was displayed successfully',
                 'data' => $admin->getServices(),
-            ], 200);
+            ]);
 
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([

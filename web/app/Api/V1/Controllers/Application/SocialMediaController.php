@@ -75,7 +75,7 @@ class SocialMediaController extends Controller
                         'type' => 'success',
                         'message' => "Redirect URL created successfully.",
                         "data" => ['redirect_url' => $redirectUrl]
-                    ], 200);
+                    ]);
                 } else {
                     return response()->jsonApi([
                         'type' => 'danger',
@@ -165,7 +165,7 @@ class SocialMediaController extends Controller
                     'type' => 'success',
                     'message' => "{$provider} connection was successful.",
                     "data" => $mediaArray
-                ], 200);
+                ]);
 
             } else {
                 //Response with required info
@@ -243,7 +243,7 @@ class SocialMediaController extends Controller
                     'type' => 'success',
                     'message' => "{$provider} connection was successful.",
                     "data" => $mediaArray
-                ], 200);
+                ]);
 
             } else {
                 //Response with required info
@@ -299,7 +299,7 @@ class SocialMediaController extends Controller
                     'type' => 'success',
                     'message' => "Retrieved media connections successfully.",
                     "data" => $userMedia->toArray()
-                ], 200);
+                ]);
 
             } else {
                 //Response with required info

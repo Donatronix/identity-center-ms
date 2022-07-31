@@ -60,7 +60,7 @@ class IdentitiesWebhookController extends Controller
                 'type' => 'success',
                 'message' => 'Data received successfully',
                 'data' => $data
-            ], 200);
+            ]);
         } catch
         (Throwable $e) {
             return response()->jsonApi([

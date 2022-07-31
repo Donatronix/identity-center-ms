@@ -7,7 +7,6 @@ use App\Models\RecoveryQuestion;
 use App\Models\User;
 use App\Models\VerifyStepInfo;
 use App\Services\SendVerifyToken;
-use App\Traits\TokenHandler;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -19,8 +18,6 @@ use Spatie\Permission\Models\Role;
 
 class CreateUserIDController extends Controller
 {
-    use TokenHandler;
-
     /**
      * Create new user for One-Step 2.0
      *
@@ -195,12 +192,7 @@ class CreateUserIDController extends Controller
                 //Generate token expiry time in minutes
                 $validity = VerifyStepInfo::tokenValidity(30);
 
-                // For Testing purpose
-                if (app()->environment('local', 'staging')) {
-                    $data['otpToken'] = $otpToken;
-                }
-
-                //Create user Account
+                // Create user Account
                 $user = new User;
                 $user->username = $input['username'];
                 $user->phone = $input['phone'];
@@ -244,11 +236,12 @@ class CreateUserIDController extends Controller
                     'validity' => $validity
                 ]);
 
-                // Send verification token (SMS or Massenger)
-                try {
-                    $sendOTP->dispatchOTP($input['channel'], $sendto, $otpToken);
-                } catch (\Throwable $th) {
-                    //throw $th;
+                // Send verification token (SMS or Messenger)
+                $sendOTP->dispatchOTP($input['channel'], $sendto, $otpToken);
+
+                // For Testing purpose
+                if (app()->environment('local', 'staging')) {
+                    $data['otp'] = $otpToken;
                 }
 
                 //Show response
@@ -257,7 +250,6 @@ class CreateUserIDController extends Controller
                     'message' => "{$channel} verification code sent to {$sendto}.",
                     "data" => $data
                 ]);
-
             } else {
                 return response()->jsonApi([
                     'title' => 'Create new user',
@@ -267,8 +259,7 @@ class CreateUserIDController extends Controller
         } catch (Exception $e) {
             return response()->jsonApi([
                 'title' => 'Create new user',
-                'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again.",
-                "data" => $e->getMessage()
+                'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again. " . $e->getMessage(),
             ], 400);
         }
     }
@@ -341,7 +332,7 @@ class CreateUserIDController extends Controller
      * )
      *
      * @param Request $request
-     *
+     * @param SendVerifyToken $sendOTP
      * @return JsonResponse
      * @throws ValidationException
      */
@@ -373,24 +364,22 @@ class CreateUserIDController extends Controller
                 'validity' => $validity
             ]);
 
-            // Send verification token (SMS or Massenger)
+            // Send verification token (SMS or Messenger)
             $sendOTP->dispatchOTP($input['channel'], $sendto, $token);
 
             //Show response
             return response()->jsonApi([
-                'title' => 'Verify OTP code',
+                'title' => 'Resend OTP code',
                 'message' => "{$channel} verification code sent to {$sendto}.",
                 "data" => [
                     'channel' => $input['channel'],
                     'id' => $sendto
                 ]
             ]);
-
         } catch (Exception $e) {
             return response()->jsonApi([
-                'title' => 'Verify OTP code',
-                'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again.",
-                "data" => $e->getMessage()
+                'title' => 'Resend OTP code',
+                'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again. " . $e->getMessage(),
             ], 400);
         }
     }
@@ -478,29 +467,24 @@ class CreateUserIDController extends Controller
 
                 //Send success response
                 return response()->jsonApi([
-                    'type' => 'success',
                     'message' => "New user verification was successful.",
                     "data" => [
                         'username' => $username,
                         'id' => $id,
                         'accessToken' => $token
                     ]
-                ], 200);
+                ]);
             } else {
-
-                //Send invalid token response
+                // Send invalid token response
                 return response()->jsonApi([
-                    'type' => 'danger',
+                    'title' => 'Verify OTP code',
                     'message' => "New user verification FAILED. Try again.",
-                    "data" => null
                 ], 400);
             }
         } catch (Exception $e) {
-            // Error occured
             return response()->jsonApi([
-                'type' => 'danger',
-                'message' => "Unable to verify new use with token {$input['token']}. Try again.",
-                "data" => $e->getMessage()
+                'title' => 'Verify OTP code',
+                'message' => "Unable to verify new use with token {$input['token']}. Try again. " . $e->getMessage(),
             ], 400);
         }
     }
@@ -659,7 +643,6 @@ class CreateUserIDController extends Controller
                     'message' => 'User account was NOT  updated',
                 ], 400);
             }
-
         } catch (Exception $e) {
             return response()->jsonApi([
                 'title' => "New user personal info",
