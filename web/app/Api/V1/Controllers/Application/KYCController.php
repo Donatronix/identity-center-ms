@@ -154,8 +154,7 @@ class KYCController extends Controller
     {
         try {
             //Get user ID
-            //$userId = Auth::user()->id;
-            $userId = '90000009-9009-9009-9009-900000000009';
+            $userId = Auth::user()->id;
 
             //Check whether user exist
             if (User::where('id', $userId)->doesntExist()) {

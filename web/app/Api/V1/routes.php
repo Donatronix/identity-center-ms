@@ -78,9 +78,9 @@ $router->group([
      */
     $router->group([
         'namespace' => 'Application',
-        // 'middleware' => [
-        //     'auth:api'
-        // ]
+        'middleware' => [
+            'auth:api'
+        ]
     ], function ($router) {
         /**
          * 2Fa Security
