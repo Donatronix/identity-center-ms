@@ -139,6 +139,7 @@ $router->group([
         ], function ($router) {
             $router->post('/upload', 'KYCController@store');
             $router->post('/start', 'KYCController@identifyStart');
+            $router->get('/details', 'KYCController@show');
         });
 
         /**

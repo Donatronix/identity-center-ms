@@ -161,9 +161,7 @@ class LoginController extends Controller
                 // Get user
                 $user = $userQuery->first();
 
-                /**
-                 * Login As
-                 */
+                // Login As
                 if(isset($input['isAdmin']) && $input['isAdmin']) {
                     if (!$user->hasRole('Admin') || !$user->hasRole('Super')) {
                         return response()->jsonApi([
@@ -194,9 +192,9 @@ class LoginController extends Controller
                 $sendOTP->dispatchOTP($input['channel'], $sendto, $otpToken);
 
                 // For Testing purpose
-                if (app()->environment('local', 'staging')) {
-                    $data['otp'] = $otpToken;
-                }
+//                if (app()->environment('local', 'staging')) {
+//                    $data['otp'] = $otpToken;
+//                }
 
                 //Send response
                 return response()->jsonApi([
