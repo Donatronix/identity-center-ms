@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * Class KYCController
@@ -113,6 +114,71 @@ class KYCController extends Controller
                 'data' => [
                     'code' => $data->code ?? ''
                 ]
+            ], 400);
+        }
+    }
+
+    /**
+     * Retrieve infomation for users KYC
+     *
+     * @OA\Get(
+     *     path="/user-identify/details",
+     *     summary="Upload documents for users KYC",
+     *     description="Upload documents for users KYC",
+     *     tags={"Application | User Identity | KYC"},
+     *
+     *     security={{ "bearerAuth": {} }},
+     *
+     *     @OA\Response(
+     *         response="200",
+     *         description="KYC Retrieved",
+     *         @OA\JsonContent(ref="#/components/schemas/OkResponse")
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Not Found",
+     *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Server error",
+     *         @OA\JsonContent(ref="#/components/schemas/DangerResponse")
+     *     )
+     * )
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function show(): mixed
+    {
+        try {
+            //Get user ID
+            //$userId = Auth::user()->id;
+            $userId = '90000009-9009-9009-9009-900000000009';
+
+            //Check whether user exist
+            if (User::where('id', $userId)->doesntExist()) {
+                return response()->jsonApi([
+                    'title' => "User KYC identification",
+                    'message' => "User NOT found!"
+                ], 404);
+            }
+
+            //Get KYC info for user
+           $userKyc = KYC::where('user_id', $userId)->first();
+            
+            //Return response data for success
+            return response()->jsonApi([
+                'title' => 'User KYC identification',
+                'message' => "User identity submitted successfully",
+                'data' => $userKyc,
+            ], 200);
+            
+        } catch (Exception $e) {
+            return response()->jsonApi([
+                'title' => 'User KYC identification',
+                'message' => $e->getMessage()
             ], 400);
         }
     }
