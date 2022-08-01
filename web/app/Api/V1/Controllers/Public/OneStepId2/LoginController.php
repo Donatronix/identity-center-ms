@@ -175,21 +175,21 @@ class LoginController extends Controller
                 $otpToken = VerifyStepInfo::generateOTP(6);
                 $validity = VerifyStepInfo::tokenValidity(30);
 
-                $sendto = $user->phone;
+                $send_to = $user->phone;
                 if ($input['channel'] != 'sms') {
-                    $sendto = $input['handler'];
+                    $send_to = $input['handler'];
                 }
 
                 VerifyStepInfo::create([
                     'username' => $input['username'],
                     'channel' => $input['channel'],
-                    'receiver' => $sendto,
+                    'receiver' => $send_to,
                     'code' => $otpToken,
                     'validity' => $validity
                 ]);
 
                 $sendOTP = new SendVerifyToken();
-                $sendOTP->dispatchOTP($input['channel'], $sendto, $otpToken);
+                $sendOTP->dispatchOTP($input['channel'], $send_to, $otpToken);
 
                 // For Testing purpose
 //                if (app()->environment('local', 'staging')) {
@@ -199,8 +199,8 @@ class LoginController extends Controller
                 //Send response
                 return response()->jsonApi([
                     'title' => 'User login',
-                    'message' => "{$input['channel']} verification code sent to {$sendto}.",
-                    "data" => $data
+                    'message' => "{$input['channel']} verification code sent to {$send_to}.",
+                   // 'data' => $data
                 ]);
             }
 

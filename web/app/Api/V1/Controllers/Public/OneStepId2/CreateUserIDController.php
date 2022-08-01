@@ -222,7 +222,7 @@ class CreateUserIDController extends Controller
                     'user' => $user->toArray(),
                 ], config('pubsub.queue.subscriptions'));
 
-                //Other response data array
+                // Other response data array
                 $data['channel'] = $input['channel'];
                 $data['username'] = $input['username'];
                 $data['receiver'] = $sendto;
@@ -240,9 +240,9 @@ class CreateUserIDController extends Controller
                 $sendOTP->dispatchOTP($input['channel'], $sendto, $otpToken);
 
                 // For Testing purpose
-                if (app()->environment('local', 'staging')) {
-                    $data['otp'] = $otpToken;
-                }
+//                if (app()->environment('local', 'staging')) {
+//                    $data['otp'] = $otpToken;
+//                }
 
                 //Show response
                 return response()->jsonApi([
