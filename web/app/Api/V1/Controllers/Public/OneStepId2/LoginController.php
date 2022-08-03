@@ -190,18 +190,13 @@ class LoginController extends Controller
 
                 $sendOTP = new SendVerifyToken();
                 $sendOTP->dispatchOTP($input['channel'], $send_to, $otpToken);
-
-                // For Testing purpose
-//                if (app()->environment('local', 'staging')) {
-//                    $data['otp'] = $otpToken;
-//                }
+                $sendToPhone = $this->maskPhone($send_to);
 
                 //Send response
                 return response()->jsonApi([
                     'title' => 'User login',
-                    'message' => "{$input['channel']} verification code sent to {$send_to}.",
-                   // 'data' => $data
-                ]);
+                    'message' => "{$input['channel']} verification code sent to {$sendToPhone}."
+                ], 200);
             }
 
             //Show response
@@ -516,5 +511,19 @@ class LoginController extends Controller
         unset($user['roles']);
         $user['role'] = $role;
         return $user;
+    }
+
+    /**
+     * Mask phone number
+     *
+     * @param string $phone
+     *
+     * @return string
+     */
+    private function maskPhone($phone):string
+    {
+        $codeMask = substr($phone, 0, 3);
+        $mobileMask = substr($phone, 4, strlen($phone) - 1);
+        return $codeMask.str_pad(substr($mobileMask, -2), strlen($mobileMask), '*', STR_PAD_LEFT);
     }
 }
