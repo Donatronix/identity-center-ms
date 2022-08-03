@@ -166,14 +166,14 @@ class KYCController extends Controller
 
             //Get KYC info for user
            $userKyc = KYC::where('user_id', $userId)->first();
-            
+
             //Return response data for success
             return response()->jsonApi([
                 'title' => 'User KYC identification',
                 'message' => "User identity submitted successfully",
                 'data' => $userKyc,
-            ], 200);
-            
+            ]);
+
         } catch (Exception $e) {
             return response()->jsonApi([
                 'title' => 'User KYC identification',

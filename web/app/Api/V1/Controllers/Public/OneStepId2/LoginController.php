@@ -196,7 +196,7 @@ class LoginController extends Controller
                 return response()->jsonApi([
                     'title' => 'User login',
                     'message' => "{$input['channel']} verification code sent to {$sendToPhone}."
-                ], 200);
+                ]);
             }
 
             //Show response
