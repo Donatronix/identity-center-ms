@@ -138,8 +138,13 @@ class OTPVerifyController extends Controller
                 ], 403);
             }
 
+            //Update user verify time
             $user->phone_verified_at = Carbon::now();
             $user->save();
+
+            //Delete the OTP
+            TwoFactorAuth::where("auth_code", $request->auth_code_from_user)->delete();
+            
         } catch (Exception $th) {
             return response()->jsonApi([
                 "message" => "Unable to verify token",
