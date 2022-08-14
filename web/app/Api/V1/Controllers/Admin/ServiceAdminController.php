@@ -152,7 +152,7 @@ class ServiceAdminController extends Controller
                 'title' => 'Operation was success',
                 'message' => 'The data was displayed successfully',
                 'data' => $administrators
-            ], 200);
+            ]);
 
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
@@ -288,7 +288,8 @@ class ServiceAdminController extends Controller
                 return response()->jsonApi([
                     'title' => "Invalid request",
                     'message' => $validator->errors()->first(),
-                ], 400);
+                    'data' => $validator->errors()
+                ], 422);
             }
 
             $user = User::findOrFail($request->get('user_id'));
@@ -296,24 +297,18 @@ class ServiceAdminController extends Controller
             $user->assignRole($request->get('role'));
 
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => 'Operation was a success',
                 'message' => 'Administrator was added successfully',
-                'data' => null,
-            ], 200);
+            ]);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Not operation",
-                'message' => "Administrator was not added. Please try again.",
-                'data' => null,
+                'message' => "Administrator was not added. Please try again."
             ], 404);
         } catch (Throwable $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => "Operation failed",
                 'message' => $e->getMessage(),
-                'data' => null,
             ], 404);
         }
     }
@@ -440,7 +435,8 @@ class ServiceAdminController extends Controller
                 return response()->jsonApi([
                     'title' => "Invalid request",
                     'message' => $validator->errors()->first(),
-                ], 400);
+                    'data' => $validator->errors()
+                ], 422);
             }
 
             $user = User::query()->findOrFail($id);
@@ -570,7 +566,7 @@ class ServiceAdminController extends Controller
             return response()->jsonApi([
                 'title' => 'Operation was a success',
                 'message' => 'Administrator was deleted successfully',
-            ], 200);
+            ]);
 
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
@@ -727,7 +723,8 @@ class ServiceAdminController extends Controller
                 return response()->jsonApi([
                     'title' => "Not operation",
                     'message' => $validator->errors()->first(),
-                ], 404);
+                    'data' => $validator->errors()
+                ], 422);
             }
 
             $admin = new AdminManager();
@@ -739,7 +736,7 @@ class ServiceAdminController extends Controller
             return response()->jsonApi([
                 'title' => 'Role update was a success',
                 'message' => 'Administrator was updated successfully',
-            ], 200);
+            ]);
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'title' => "Update failed",
@@ -897,16 +894,16 @@ class ServiceAdminController extends Controller
                 return response()->jsonApi([
                     'title' => "Not operation",
                     'message' => $validator->errors()->first(),
-                ], 404);
+                    'data' => $validator->errors()
+                ], 422);
             }
 
             User::findOrFail($id)->removeRole($request->role);
 
-
             return response()->jsonApi([
                 'title' => 'Role removal was a success',
                 'message' => 'Administrator was updated successfully',
-            ], 200);
+            ]);
 
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
@@ -996,7 +993,7 @@ class ServiceAdminController extends Controller
                 'title' => 'Operation was success',
                 'message' => 'The data was displayed successfully',
                 'data' => $admin->getServices(),
-            ], 200);
+            ]);
 
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([

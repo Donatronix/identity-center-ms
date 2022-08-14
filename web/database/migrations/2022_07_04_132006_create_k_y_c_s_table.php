@@ -17,12 +17,11 @@ class CreateKYCSTable extends Migration
         Schema::create('k_y_c_s', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->string('id_number')->nullable(); // National identification number
-            $table->string('document_number')->nullable();  // Document number
-            $table->string('document_country', 3)->nullable(); // ISO-2- String Country that issued the document
-            $table->tinyInteger('document_type')->default(0);  // Document type
-            $table->longText('document_front')->nullable();  // Document file
-            $table->longText('document_back')->nullable();  // Document file
+            $table->string('id_doctype');  // Document type
+            $table->string('address_verify_doctype');  // Document type
+
+            $table->longText('id_document')->nullable(); // ID document file
+            $table->longText('address_verify_document')->nullable(); //Address verification document file
             $table->longText('portrait')->nullable(); // Selfie
 
             $table->foreignUuid('user_id')
@@ -36,6 +35,7 @@ class CreateKYCSTable extends Migration
             $table->softDeletes();
         });
     }
+
 
     /**
      * Reverse the migrations.

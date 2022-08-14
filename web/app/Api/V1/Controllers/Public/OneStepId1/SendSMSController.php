@@ -7,7 +7,6 @@ use App\Models\TwoFactorAuth;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -158,9 +157,7 @@ class SendSMSController extends Controller
                 "phone_exists" => true,
                 "user_status" => $user->status,
                 'sid' => $sid,
-                // TODO Remove this before shipping
-                "test_purpose_token" => $token
-            ], 200);
+            ]);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'message' => "Unable to send sms to phone number. Try again",

@@ -5,7 +5,6 @@ namespace App\Api\V1\Controllers\Application;
 use App\Api\V1\Controllers\Controller;
 use App\Models\User;
 use App\Services\SendEmailNotify;
-use App\Traits\TokenHandler;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -29,8 +28,6 @@ use Sumra\SDK\Facades\PubSub;
  */
 class UserProfileController extends Controller
 {
-    use TokenHandler;
-
     /**
      * Saving user full person detail
      *
@@ -86,7 +83,7 @@ class UserProfileController extends Controller
         // Try to save received data
         try {
             // Validate input
-           $validate = Validator::make($request->all(), User::userValidationRules());
+           $validate = Validator::make($request->all(), User::profileValidationRules());
 
             //Validation response
             if($validate->fails()){
@@ -94,8 +91,7 @@ class UserProfileController extends Controller
                     'type' => 'danger',
                     'title' => 'New user registration',
                     'message' => $validate->errors(),
-                    'data' => null
-                ], 400);
+                ], 422);
             }
 
             // Find exist user
@@ -114,17 +110,14 @@ class UserProfileController extends Controller
 
             // Return response to client
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => 'New user registration',
                 'message' => "User person detail data successfully saved",
                 'data' => $user->toArray()
-            ], 200);
+            ]);
         }  catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'Saving user personal data',
                 'message' => $e->getMessage(),
-                'data' => null
             ], 400);
         }
     }
@@ -246,12 +239,13 @@ class UserProfileController extends Controller
                     'id',
                     'first_name',
                     'last_name',
-                    'phone',
                     'email',
                     'phone',
-                    'birthday',
-                    'address_country',
-                    'locale',
+                    'address_line1',
+                    'address_line2',
+                    'address_city',
+                    'address_zip',
+                    'address_country'
                 )->firstOrFail();
 
                 // Return response
@@ -323,28 +317,12 @@ class UserProfileController extends Controller
      *                 example="johnkiels@ultainfinity.com"
      *             ),
      *              @OA\Property(
-     *                  property="birthday",
-     *                  type="string",
-     *                  description="Date of birth in format DD-MM-YYYY",
-     *              ),
-     *              @OA\Property(
-     *                 property="locale",
-     *                 type="string",
-     *                 description="Update user profile locale",
-     *                 example="UK English"
-     *              ),
-     *              @OA\Property(
-     *                  property="subscribed_to_announcement",
-     *                  type="string",
-     *                  description="Indicate whether or not the user should be subscribed for announcements",
-     *              ),
-     *              @OA\Property(
      *                  property="address_country",
      *                  type="string",
      *                  description="User country code",
      *                  example="uk"
      *              ),
-     *              @OA\Property(
+     *             @OA\Property(
      *                  property="address_line1",
      *                  type="string",
      *                  description="First line of address. may contain house number, street name, etc.",
@@ -435,20 +413,18 @@ class UserProfileController extends Controller
     {
         try {
             //validate input data
-            $validator = Validator::make($request->all(), User::profileValidationRules((int)$id));
+            $validator = Validator::make($request->all(), User::profileValidationRules());
 
             if ($validator->fails()) {
                 return response()->jsonApi([
-                    'type' => 'danger',
-                    'title' => "Update user info",
+                    'title' => "User profile update",
                     'message' => "Input validator errors. Try again.",
                     "data" => $validator->errors()
-                ], 400);
+                ], 422);
             }
 
             // Get User object
             $user = User::findOrFail($id);
-
 
             DB::beginTransaction();
 
@@ -482,7 +458,7 @@ class UserProfileController extends Controller
             return response()->jsonApi([
                 'type' => 'success',
                 'message' => "Account update was successful."
-            ], 200);
+            ]);
         }
         catch (ValidationException $e) {
             DB::rollback();
@@ -636,7 +612,7 @@ class UserProfileController extends Controller
                     "data" => [
                         'email' => $input['phone']
                     ]
-                ], 200);
+                ]);
             }
 
             return response()->jsonApi([
@@ -784,7 +760,7 @@ class UserProfileController extends Controller
                     'type' => 'success',
                     'message' => "User password updated successfully.",
                     "data" => null
-                ], 200);
+                ]);
 
             } else {
                 return response()->jsonApi([
@@ -923,7 +899,7 @@ class UserProfileController extends Controller
                     "data" => [
                         'email' => $input['email']
                     ]
-                ], 200);
+                ]);
             }
 
             return response()->jsonApi([
@@ -993,7 +969,7 @@ class UserProfileController extends Controller
             'verify_token' => $user->verify_token,
         ], config('pubsub.queue.communications'));
 
-        return response()->jsonApi(["email sent"], 200);
+        return response()->jsonApi(["email sent"]);
     }
 
     /**
@@ -1325,81 +1301,4 @@ class UserProfileController extends Controller
         return response()->jsonApi($data, 200);
     }
 
-    /**
-     * Details of Users
-     *
-     * @OA\Post(
-     *     path="/user-profile/details",
-     *     description="Get details of users",
-     *     tags={"Application | User Profile"},
-     *
-     *     security={{ "bearerAuth": {} }},
-     *
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(
-     *                 property="users",
-     *                 type="array",
-     *                 description="Array of user IDs",
-     *                 required={"true"},
-     *                 @OA\Items()
-     *             ),
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="Details Fetched",
-     *         @OA\JsonContent(ref="#/components/schemas/OkResponse")
-     *     ),
-     *     @OA\Response(
-     *         response="401",
-     *         description="Unauthorized",
-     *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
-     *     ),
-     *     @OA\Response(
-     *         response="422",
-     *         description="Validation Error",
-     *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
-     *     ),
-     *     @OA\Response(
-     *         response="500",
-     *         description="Server Error",
-     *         @OA\JsonContent(ref="#/components/schemas/DangerResponse")
-     *     ),
-     * )
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function usersDetails(Request $request)
-    {
-        try {
-            $this->validate($request, [
-                'users' => 'required|array',
-            ]);
-
-            foreach ($request->users as $key => $user) {
-                $user = User::find($user);
-                if ($user) {
-                    $users[] = $user;
-                }
-            }
-
-            return response()->jsonApi([
-                'type' => 'success',
-                'title' => 'Users Details',
-                'message' => "Information fetched successfully!",
-                'data' => $users
-            ], 200);
-        } catch (Exception $e) {
-            return response()->jsonApi([
-                'type' => 'danger',
-                'title' => 'Users Details',
-                'message' => $e->getMessage(),
-            ], 500);
-        }
-    }
 }

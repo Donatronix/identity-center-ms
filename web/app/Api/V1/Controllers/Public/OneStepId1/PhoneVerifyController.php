@@ -3,7 +3,7 @@
 namespace App\Api\V1\Controllers\Public\OneStepId1;
 
 use App\Api\V1\Controllers\Controller;
-use App\Exceptions\SMSGatewayException;
+use App\Exceptions\CommunicationChannelsException;
 use App\Models\TwoFactorAuth;
 use App\Models\User;
 use Exception;
@@ -145,13 +145,13 @@ class PhoneVerifyController extends Controller
                     "message" => "This user already exists. Required send verification code",
                     "phone_exists" => true,
                     "user_status" => $user->status,
-                ], 200);
+                ]);
             } elseif ($user->status == User::STATUS_ACTIVE) {
                 return response()->jsonApi([
                     "message" => "This user already exists.",
                     "phone_exists" => true,
                     "user_status" => $user->status,
-                ], 200);
+                ]);
             }
 
         } catch (ValidationException $e) {
@@ -183,6 +183,7 @@ class PhoneVerifyController extends Controller
                 "user_id" => $user->id,
                 "auth_code" => $token,
             ]);
+
             // Send the code to the user
             DB::commit();
 
@@ -190,12 +191,10 @@ class PhoneVerifyController extends Controller
             return response()->jsonApi([
                 'title' => "Create new user. Step 1",
                 'message' => 'User was successful created',
-                'sid' => $sid,
-                // TODO Remove this before shipping
-                "test_purpose_token" => $token,
+                'sid' => $sid
             ], 201);
         } catch (Exception $e) {
-            if ($e instanceof SMSGatewayException) {
+            if ($e instanceof CommunicationChannelsException) {
                 return response()->jsonApi([
                     'title' => "Create new user. Step 1",
                     'message' => "Unable to send sms to phone Number.",

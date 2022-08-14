@@ -2,13 +2,19 @@
 
 namespace App\Services;
 
-use App\Exceptions\SMSGatewayException;
 use GuzzleHttp\Exception\ConnectException;
 use Illuminate\Support\Facades\Http;
 
 class SendVerifyToken
 {
-    public function dispatchOTP($instance, $to, $message)
+    /**
+     * @param $instance
+     * @param $to
+     * @param $message
+     * @return bool
+     * @throws \Exception
+     */
+    public function dispatchOTP($instance, $to, $message): bool
     {
         $params = $this->requestData($to, $message);
         $url = $this->requestUrl($instance);
@@ -17,15 +23,18 @@ class SendVerifyToken
         try {
             $response = Http::withHeaders($headers)
                              ->post($url, $params);
-        } catch (SMSGatewayException $e) {
-            return false;
         } catch (ConnectException $e) {
-            return false;
+            throw new \Exception($e->getMessage(), 400);
         }
 
         return $response->successful();
     }
 
+    /**
+     * @param $to
+     * @param $message
+     * @return array
+     */
     public function requestData($to, $message)
     {
         return [
@@ -48,6 +57,9 @@ class SendVerifyToken
         return "{$host}/messages/{$instance}/send-message";
     }
 
+    /**
+     * @return string[]
+     */
     public function getHeaders()
     {
         return [

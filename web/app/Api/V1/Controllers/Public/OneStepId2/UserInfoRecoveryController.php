@@ -144,11 +144,10 @@ class UserInfoRecoveryController extends Controller
 
         if ($validator->fails()) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title'=> 'User account recovery',
                 'message' => "Input validator errors. Try again.",
-                "data" => null
-            ], 400);
+                'data' => $validator->errors()
+            ], 422);
         }
 
         try {
@@ -180,7 +179,7 @@ class UserInfoRecoveryController extends Controller
                     'validity' => $validity
                 ]);
 
-                // Send verification token (SMS or Massenger)
+                // Send verification token (SMS or Messenger)
                 $sendOTP->dispatchOTP($channel, $sendto, $token);
 
                 //Show response
@@ -193,7 +192,7 @@ class UserInfoRecoveryController extends Controller
                         'username' => $username,
                         'receiver' => $sendto
                     ]
-                ], 200);
+                ]);
 
             } else {
                 return response()->jsonApi([
@@ -292,7 +291,7 @@ class UserInfoRecoveryController extends Controller
                     'title'=> 'Verify user account OTP',
                     'message' => "User account verification was successful.",
                     "data" => ['username' => $username, 'id' => $id]
-                ], 200);
+                ]);
             } else {
                 //Send invalid token response
                 return response()->jsonApi([
@@ -399,10 +398,9 @@ class UserInfoRecoveryController extends Controller
 
         if ($validator->fails()) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'message' => "Input validator errors. Try again.",
-                "data" => null
-            ], 400);
+                'data' => $validator->errors()
+            ], 422);
         }
 
         try {
@@ -427,7 +425,7 @@ class UserInfoRecoveryController extends Controller
                         'type' => 'success',
                         'message' => 'User account security questions verified.',
                         'data' => ['username' => $input['username']]
-                    ], 200);
+                    ]);
                 } else {
                     return response()->jsonApi([
                         'type' => 'danger',
@@ -557,10 +555,10 @@ class UserInfoRecoveryController extends Controller
 
         if ($validator->fails()) {
             return response()->jsonApi([
-                'type' => 'danger',
+                'title' => 'Send recovery OPT code',
                 'message' => "Input validator errors. Try again.",
-                "data" => null
-            ], 400);
+                'data' => $validator->errors()
+            ], 422);
         }
 
         try {
@@ -576,7 +574,7 @@ class UserInfoRecoveryController extends Controller
                 $sendby = $input['sendby'];
                 $id = "{$username}@onestep.com";
 
-                // Send retrieved ID to user (SMS or Massenger)
+                // Send retrieved ID to user (SMS or Messenger)
                 if (!empty($sendby)) {
                     if (in_array('phone', $sendby)) {
                         $sendOTP->dispatchOTP('sms', $user->phone, $id);
@@ -587,23 +585,22 @@ class UserInfoRecoveryController extends Controller
 
                 // Return response
                 return response()->jsonApi([
-                    'type' => 'success',
+                    'title' => 'Send recovery OPT code',
                     'message' => 'User account ID has been sent.',
-                    'data' => ['username' => $input['username']]
-                ], 200);
-
+                    'data' => [
+                        'username' => $input['username']
+                    ]
+                ]);
             } else {
                 return response()->jsonApi([
-                    'type' => 'danger',
+                    'title' => 'Send recovery OPT code',
                     'message' => 'User account was not found!',
-                    'data' => null
                 ], 404);
             }
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
+                'title' => 'Send recovery OPT code',
                 'message' => $e->getMessage(),
-                'data' => null
             ], 400);
         }
     }

@@ -118,7 +118,7 @@ class ActivityController extends Controller
                 'title' => "Activities list",
                 'message' => 'List of activities successfully received',
                 'data' => $activities->toArray()
-            ], 200);
+            ]);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'title' => "Activities list",
@@ -294,7 +294,7 @@ class ActivityController extends Controller
             return response()->jsonApi([
                 'title' => "Deleted activity",
                 'message' => 'activity is successfully deleted'
-            ], 200);
+            ]);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'title' => "Delete of activity",

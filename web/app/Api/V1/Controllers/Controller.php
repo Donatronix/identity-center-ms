@@ -83,9 +83,7 @@ use Laravel\Lumen\Routing\Controller as BaseController;
  *          type="object"
  *      ),
  * )
- *
  */
-
 
 /**
  * Warning Response
@@ -113,7 +111,6 @@ use Laravel\Lumen\Routing\Controller as BaseController;
  *          type="object"
  *      ),
  * )
- *
  */
 
 /**
@@ -142,9 +139,7 @@ use Laravel\Lumen\Routing\Controller as BaseController;
  *          type="object"
  *      ),
  * )
- *
  */
-
 
 /**
  * Danger Response
@@ -172,7 +167,6 @@ use Laravel\Lumen\Routing\Controller as BaseController;
  *          type="object"
  *      ),
  * )
- *
  */
 
 /**

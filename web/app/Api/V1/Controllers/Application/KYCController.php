@@ -9,7 +9,9 @@ use App\Services\IdentityVerification;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * Class KYCController
@@ -117,6 +119,70 @@ class KYCController extends Controller
     }
 
     /**
+     * Retrieve infomation for users KYC
+     *
+     * @OA\Get(
+     *     path="/user-identify/details",
+     *     summary="Upload documents for users KYC",
+     *     description="Upload documents for users KYC",
+     *     tags={"Application | User Identity | KYC"},
+     *
+     *     security={{ "bearerAuth": {} }},
+     *
+     *     @OA\Response(
+     *         response="200",
+     *         description="KYC Retrieved",
+     *         @OA\JsonContent(ref="#/components/schemas/OkResponse")
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Not Found",
+     *         @OA\JsonContent(ref="#/components/schemas/WarningResponse")
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Server error",
+     *         @OA\JsonContent(ref="#/components/schemas/DangerResponse")
+     *     )
+     * )
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function show(): mixed
+    {
+        try {
+            //Get user ID
+            $userId = Auth::user()->id;
+
+            //Check whether user exist
+            if (User::where('id', $userId)->doesntExist()) {
+                return response()->jsonApi([
+                    'title' => "User KYC identification",
+                    'message' => "User NOT found!"
+                ], 404);
+            }
+
+            //Get KYC info for user
+           $userKyc = KYC::where('user_id', $userId)->first();
+
+            //Return response data for success
+            return response()->jsonApi([
+                'title' => 'User KYC identification',
+                'message' => "User identity submitted successfully",
+                'data' => $userKyc,
+            ]);
+
+        } catch (Exception $e) {
+            return response()->jsonApi([
+                'title' => 'User KYC identification',
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
      * Upload documents for users KYC
      *
      * @OA\Post(
@@ -155,65 +221,50 @@ class KYCController extends Controller
      */
     public function store(Request $request): mixed
     {
-        // Validate input
+
         try {
-            $this->validate($request, KYC::validationRules());
-        } catch (ValidationException $e) {
-            return response()->jsonApi([
-                'title' => 'User KYC identification',
-                'message' => "Validation error: " . $e->getMessage()
-            ], 422);
-        }
+            // Validate input
+            $validate = Validator::make($request->all(), KYC::validationRules());
 
-        // Try to save received document data
-        try {
-            // Find existing user
-            // $user = User::find(Auth::user()->id);
-            // if (!$user) {
-            //     return response()->jsonApi([
-            //         'type' => 'danger',
-            //         'title' => "Get user",
-            //         'message' => "User with id #" . Auth::user()->id . " not found!",
-            //         'data' => '',
-            //     ], 404);
-            // }
+            if($validate->fails()) {
+                return response()->jsonApi([
+                    'title' => 'User KYC identification',
+                    'message' => "Validation error: " . $validate->errors()->first()
+                ], 422);
+            }
 
-//            // Find exist user
-//            $user = $this->getObject(Auth::user()->getAuthIdentifier());
-//            if ($user instanceof JsonApiResponse) {
-//                return $user;
-//            }
+            //Find existing user
+            if (User::where('id', Auth::user()->id)->doesntExist()) {
+                return response()->jsonApi([
+                    'title' => "User KYC identification",
+                    'message' => "User NOT found!",
+                    'data' => null,
+                ], 404);
+            }
 
-            // Transform data and save
-            // $identifyData = $request->all();
-            // foreach ($identifyData['document'] as $key => $value) {
-            //     $identifyData['document_' . $key] = $value;
-            // }
-            // unset($identifyData['document']);
+            //Get validated data
+            $input = $validate->validated();
 
-            // $user->fill($identifyData);
-            // $user->status = User::STATUS_ACTIVE;
-            // // $user->status = User::STATUS_STEP_3;
-            // $user->save();
-            // Return response to client
-
-            /**
-             * Save KYC info
-             */
-            $data = $request->all();
-            $data['user_id'] = Auth::user()->id;
-
-            KYC::create($data);
+            //Save KYC info
+            KYC::create([
+                'id_doctype' => KYC::$document_types[$input['id_doctype']],
+                'address_verify_doctype' => KYC::$verify_document_types[$input['address_verify_doctype']],
+                'id_document' => $input['id_document'],
+                'address_verify_document' => $input['address_verify_document'],
+                'portrait' => $input['portrait'],
+                'user_id'=> Auth::user()->id
+            ]);
 
             return response()->jsonApi([
                 'title' => 'User KYC identification',
                 'message' => "User identity submitted successfully",
             ]);
+
         } catch (Exception $e) {
             return response()->jsonApi([
                 'title' => 'User KYC identification',
                 'message' => $e->getMessage()
-            ], 500);
+            ], 400);
         }
     }
 }

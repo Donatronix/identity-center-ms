@@ -3,7 +3,6 @@
 namespace App\Api\V1\Controllers\Public\OneStepId2;
 
 use App\Api\V1\Controllers\Controller;
-use App\Traits\TokenHandler;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,8 +13,6 @@ use App\Services\SendVerifyToken;
 
 class LoginController extends Controller
 {
-    use TokenHandler;
-
     /**
      * Login user endpoint
      *
@@ -132,13 +129,10 @@ class LoginController extends Controller
      * )
      *
      * @param Request $request
-     *
-     * @return Response
      */
     public function login(Request $request)
     {
         try {
-
             $validator = Validator::make($request->all(), [
                 'channel' => 'required|string',
                 'handler' => 'required|string',
@@ -148,14 +142,13 @@ class LoginController extends Controller
 
             if ($validator->fails()) {
                 return response()->jsonApi([
-                    'type' => 'danger',
                     'title' => "User login",
                     'message' => "Input validator errors. Try again.",
-                    "data" => null
-                ], 400);
+                    'data' => $validator->errors()
+                ], 422);
             }
 
-            //Get validated input
+            // Get validated input
             $input = $validator->validated();
             if (strpos($input['username'], '@')) {
                 $input['username'] = explode('@', $input['username'])[0];
@@ -165,14 +158,10 @@ class LoginController extends Controller
             $userQuery = User::where('username', $input['username']);
 
             if($userQuery->exists()) {
-
-                //Get user
+                // Get user
                 $user = $userQuery->first();
 
-                /**
-                 * Login As
-                 *
-                 */
+                // Login As
                 if(isset($input['isAdmin']) && $input['isAdmin']) {
                     if (!$user->hasRole('Admin') || !$user->hasRole('Super')) {
                         return response()->jsonApi([
@@ -186,46 +175,39 @@ class LoginController extends Controller
                 $otpToken = VerifyStepInfo::generateOTP(6);
                 $validity = VerifyStepInfo::tokenValidity(30);
 
-                $sendto = $user->phone;
+                $send_to = $user->phone;
                 if ($input['channel'] != 'sms') {
-                    $sendto = $input['handler'];
+                    $send_to = $input['handler'];
                 }
 
                 VerifyStepInfo::create([
                     'username' => $input['username'],
                     'channel' => $input['channel'],
-                    'receiver' => $sendto,
+                    'receiver' => $send_to,
                     'code' => $otpToken,
                     'validity' => $validity
                 ]);
 
                 $sendOTP = new SendVerifyToken();
-                $sendOTP->dispatchOTP($input['channel'], $sendto, $otpToken);
-                $data['login_otp'] = $otpToken;
+                $sendOTP->dispatchOTP($input['channel'], $send_to, $otpToken);
+                $sendToPhone = $this->maskPhone($send_to);
 
                 //Send response
                 return response()->jsonApi([
-                    'type' => 'success',
                     'title' => 'User login',
-                    'message' => "{$input['channel']} verification code sent to {$sendto}.",
-                    "data" => $data
-                ], 200);
+                    'message' => "{$input['channel']} verification code sent to {$sendToPhone}."
+                ]);
             }
 
             //Show response
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'User login',
-                'message' => "User does NOT exist. Try again.",
-                "data" => null
+                'message' => 'User does NOT exist. Try again',
             ], 400);
-
         }catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'User login',
-                'message' => $e->getMessage(),
-                "data" => null
+                'message' => $e->getMessage()
             ], 400);
         }
     }
@@ -347,11 +329,10 @@ class LoginController extends Controller
 
             if ($validator->fails()) {
                 return response()->jsonApi([
-                    'type' => 'danger',
                     'title' => "Verify user login",
                     'message' => "Input validator errors. Try again.",
-                    "data" => null
-                ], 400);
+                    'data' => $validator->errors()
+                ], 422);
             }
 
             //Get validated input
@@ -379,7 +360,7 @@ class LoginController extends Controller
                     'title' => 'Verify user login',
                     'message' => "User login was successfull",
                     'data' => $data
-                ], 200);
+                ]);
             }
 
             return response()->jsonApi([
@@ -498,11 +479,10 @@ class LoginController extends Controller
 
             if ($validator->fails()) {
                 return response()->jsonApi([
-                    'type' => 'danger',
                     'title' => "Refresh token",
                     'message' => "Input validator errors. Try again.",
-                    "data" => null
-                ], 400);
+                    'data' => $validator->errors()
+                ], 422);
             }
 
             //Get validated input
@@ -511,18 +491,15 @@ class LoginController extends Controller
             //$token = $this->refreshToken($request);
 
             return response()->jsonApi([
-                "type" => "success",
                 'title' => "Refresh token",
                 "message" => "Token has been resfreshed successfully",
                 "data" => null
-            ], 200);
+            ]);
 
         } catch (Exception $e) {
             return response()->jsonApi([
-                "type" => "danger",
                 'title' => "Refresh token",
                 "message" => $e->getMessage(),
-                "data" => null
             ], 400);
         }
     }
@@ -534,5 +511,19 @@ class LoginController extends Controller
         unset($user['roles']);
         $user['role'] = $role;
         return $user;
+    }
+
+    /**
+     * Mask phone number
+     *
+     * @param string $phone
+     *
+     * @return string
+     */
+    private function maskPhone($phone):string
+    {
+        $codeMask = substr($phone, 0, 3);
+        $mobileMask = substr($phone, 4, strlen($phone) - 1);
+        return $codeMask.str_pad(substr($mobileMask, -2), strlen($mobileMask), '*', STR_PAD_LEFT);
     }
 }

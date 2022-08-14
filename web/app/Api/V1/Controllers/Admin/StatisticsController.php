@@ -77,7 +77,7 @@ class StatisticsController extends Controller
                     'title' => 'Users Count',
                     'message' => 'Total count of users retrieved successfully',
                     'data' => $userCount
-                ], 200);
+                ]);
             }
             // Return response
             return response()->jsonApi([
@@ -146,7 +146,7 @@ class StatisticsController extends Controller
                     'title' => 'Users Count',
                     'message' => 'Total count of users retrieved successfully',
                     'data' => $userCount
-                ], 200);
+                ]);
             }
             // Return response
             return response()->jsonApi([
