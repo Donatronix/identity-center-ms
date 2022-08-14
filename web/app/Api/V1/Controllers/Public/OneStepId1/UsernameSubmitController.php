@@ -83,9 +83,10 @@ class UsernameSubmitController extends Controller
     {
         try {
             // Validate input data
-            $this->validate($request, [
+            $inputData = (object)$this->validate($request, [
                 'username' => 'required|string|min:3',
                 'sid' => 'required|string|min:8|max:36',
+                'referral_code' => 'sometimes|string|min:6',
             ]);
         } catch (ValidationException $e) {
             return response()->jsonApi([
@@ -97,7 +98,7 @@ class UsernameSubmitController extends Controller
 
         // try to retrieve user using sid
         try {
-            $authUser = TwoFactorAuth::where('sid', $request->get('sid'))
+            $authUser = TwoFactorAuth::where('sid', $inputData->sid)
                 ->with('user')
                 ->orderBy('id', 'desc')
                 ->firstOrFail()
@@ -126,14 +127,14 @@ class UsernameSubmitController extends Controller
         // Check if user status is inactive
         if ($authUser->status == User::STATUS_INACTIVE) {
             // Check if exist user for given username
-            $existUser = User::where('username', $request->get('username'))->first();
+            $existUser = User::where('username', $inputData->username)->first();
 
             // If exist user found and exist user another then auth user, so
             if ($existUser && ($existUser->id !== $authUser->id)) {
                 // username already exists for this SID
                 return response()->jsonApi([
                     'title' => 'User authorization',
-                    "message" => 'This username already exists. Use something else',
+                    "message" => 'Username already taken. Use something else',
                     'data' => [
                         'user_status' => $authUser->status,
                     ]
@@ -145,7 +146,7 @@ class UsernameSubmitController extends Controller
                 // Finish user registration
                 try {
                     // Update username and status
-                    $authUser->username = $request->get('username', null);
+                    $authUser->username = $inputData->username;
                     $authUser->status = User::STATUS_ACTIVE;
                     $authUser->save();
 
@@ -157,7 +158,7 @@ class UsernameSubmitController extends Controller
                     if ($request->has('referral_code')) {
                         $sendData = [
                             // 'application_id' => $input['application_id'],
-                            'referral_code' => $request->get('referral_code')
+                            'referral_code' => $inputData->referral_code
                         ];
                     }
                     PubSub::publish('NewUserRegistered', $sendData, config('pubsub.queue.referrals'));
@@ -190,19 +191,15 @@ class UsernameSubmitController extends Controller
                 }
             } else {
                 // if username is correct, means that user is disable
-                if($authUser->username === $request->get('username')){
+                if($authUser->username === $inputData->username){
                     return response()->jsonApi([
                         'title' => 'User authorization',
-                        'message' => "Account is disabled. You can't use this service. Please contact support",
-                        'data' => [
-                            'user_status' => $authUser->status,
-                            'phone_exist' => false
-                        ]
+                        'message' => "Account is disabled. You can't use this service. Please contact support"
                     ], 403);
                 }else{
                     return response()->jsonApi([
                         'title' => 'User authorization',
-                        "message" => 'You are trying to use a username that does not belong to this account'
+                        "message" => 'Account is disabled. Username does not match your account. Please contact support'
                     ], 403);
                 }
             }
@@ -210,7 +207,7 @@ class UsernameSubmitController extends Controller
 
         // if user is active and username is correct, do login
         if ($authUser->status == User::STATUS_ACTIVE) {
-            if($authUser->username === $request->get('username')){
+            if($authUser->username === $inputData->username){
                 return $this->login($authUser, $request->all(), [
                     'success' => 'User logged in successfully',
                     'incorrect' => 'Authorisation Error. Unable to create access token'
@@ -218,7 +215,7 @@ class UsernameSubmitController extends Controller
             }else{
                 return response()->jsonApi([
                     'title' => 'User authorization',
-                    'message' => 'You are trying to use a username that does not belong to this account'
+                    'message' => sprintf("Username %s does not belong to your account", $inputData->username)
                 ], 403);
             }
         }
