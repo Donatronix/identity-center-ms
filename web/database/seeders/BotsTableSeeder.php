@@ -26,6 +26,12 @@ class BotsTableSeeder extends Seeder
                 'token' => '2088982449:AAHJ7d16HCpFI9j9B9JqOX1yDEgSb5piKmc',
                 'type' => 'telegram'
             ],
+            // Test Telegram Bot
+            [
+                'id' => '50000000-5000-5000-5000-000000000005',
+                'token' => '5463036835:AAEZF2SnX6GGxT6Id8o92ycKgPF5-cfdxeg',
+                'type' => 'telegram'
+            ],
             [
                 'id' => '456c0391-9502-4081-b215-d070c2f803f2',
                 'token' => '4e2f1b3446e7d9c2-ed5513c52400990a-9306a458fd9fef70',
