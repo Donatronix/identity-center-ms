@@ -4,6 +4,7 @@ namespace App\Services;
 
 use GuzzleHttp\Exception\ConnectException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class SendVerifyToken
 {
@@ -19,6 +20,12 @@ class SendVerifyToken
         $params = $this->requestData($to, $message);
         $url = $this->requestUrl($instance);
         $headers = $this->getHeaders();
+
+        // Logging income data
+        if(env('APP_DEBUG')){
+            Log::info($url);
+            Log::info($params);
+        }
 
         try {
             $response = Http::withHeaders($headers)

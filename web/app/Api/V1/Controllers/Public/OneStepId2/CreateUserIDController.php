@@ -171,31 +171,34 @@ class CreateUserIDController extends Controller
             ], 422);
         }
 
-        //validate input date
-        $input = $validator->validated();
+        // Validate input date
+        $input = (object)$validator->validated();
 
-        //Receiver token
-        $sendto = $this->getTokenReceiver($input);
-        $channel = $input['channel'];
+        //Select OTP destination
+        if ($input->channel === 'sms') {
+            $sendTo = $input->phone;
+        } elseif ($input->channel === 'messenger') {
+            $sendTo = $input->handler;
+        }
 
         try {
             // Check whether user already exist
             $userExist = User::where([
-                'phone' => $input['phone'],
-                'username' => $input['username']
+                'phone' => $input->phone,
+                'username' => $input->username
             ])->doesntExist();
 
             if ($userExist) {
                 // Create verification token (OTP - One Time Password)
                 $otpToken = VerifyStepInfo::generateOTP(6);
 
-                //Generate token expiry time in minutes
+                // Generate token expiry time in minutes
                 $validity = VerifyStepInfo::tokenValidity(30);
 
                 // Create user Account
                 $user = new User;
-                $user->username = $input['username'];
-                $user->phone = $input['phone'];
+                $user->username = $input->username;
+                $user->phone = $input->phone;
                 $user->save();
 
                 // Add Client Role to User
@@ -203,6 +206,19 @@ class CreateUserIDController extends Controller
                     'name' => USER::INVESTOR_USER
                 ]);
                 $user->roles()->sync($role->id);
+
+                // save verification token
+                VerifyStepInfo::create([
+                    'username' => $input->username,
+                    'channel' => $input->channel,
+                    'receiver' => $sendTo,
+                    'code' => $otpToken,
+                    'validity' => $validity
+                ]);
+
+                // Send verification token (SMS or Messenger)
+                $sendOTP->dispatchOTP($input->channel, $sendTo, $otpToken);
+
 
                 // Join new user to referral program
                 $sendData = [
@@ -222,44 +238,26 @@ class CreateUserIDController extends Controller
                     'user' => $user->toArray(),
                 ], config('pubsub.queue.subscriptions'));
 
-                // Other response data array
-                $data['channel'] = $input['channel'];
-                $data['username'] = $input['username'];
-                $data['receiver'] = $sendto;
-
-                // save verification token
-                VerifyStepInfo::create([
-                    'username' => $input['username'],
-                    'channel' => $input['channel'],
-                    'receiver' => $sendto,
-                    'code' => $otpToken,
-                    'validity' => $validity
-                ]);
-
-                // Send verification token (SMS or Messenger)
-                $sendOTP->dispatchOTP($input['channel'], $sendto, $otpToken);
-
-                // For Testing purpose
-//                if (app()->environment('local', 'staging')) {
-//                    $data['otp'] = $otpToken;
-//                }
-
                 //Show response
                 return response()->jsonApi([
                     'title' => 'Create new user',
-                    'message' => "{$channel} verification code sent to {$sendto}.",
-                    "data" => $data
+                    'message' => "{$input->channel} verification code sent to {$sendTo}.",
+                    'data' => [
+                        'channel' => $input->channel,
+                        'username' => $input->username,
+                        'receiver' => $sendTo
+                    ]
                 ]);
             } else {
                 return response()->jsonApi([
                     'title' => 'Create new user',
-                    'message' => "{$sendto} is already taken/verified by another user. Try again.",
+                    'message' => "{$sendTo} is already taken/verified by another user. Try again.",
                 ], 400);
             }
         } catch (Exception $e) {
             return response()->jsonApi([
                 'title' => 'Create new user',
-                'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again. " . $e->getMessage(),
+                'message' => "Unable to send {$input->channel} verification code to {$sendTo}. Try again. " . $e->getMessage(),
             ], 400);
         }
     }
@@ -338,15 +336,21 @@ class CreateUserIDController extends Controller
      */
     public function resendOTP(Request $request, SendVerifyToken $sendOTP): JsonResponse
     {
-        //validate input date
-        $input = $this->validate($request, [
+        // Validate input date
+        $validator = Validator::make($request->all(), [
             'receiver' => 'required|string',
             'channel' => 'required|string',
             'username' => 'required|string'
         ]);
 
-        $sendto = $input['receiver'];
-        $channel = $input['channel'];
+        if ($validator->fails()) {
+            return response()->jsonApi([
+                'title' => 'Resend OTP code',
+                'message' => $validator->errors(),
+            ], 422);
+        }
+
+        $input = (object)$validator->validated();
 
         try {
             // Create verification token (OTP - One Time Password)
@@ -357,29 +361,29 @@ class CreateUserIDController extends Controller
 
             // save verification token
             VerifyStepInfo::create([
-                'username' => $input['username'],
-                'channel' => $input['channel'],
-                'receiver' => $sendto,
+                'username' => $input->username,
+                'channel' => $input->channel,
+                'receiver' => $input->receiver,
                 'code' => $token,
                 'validity' => $validity
             ]);
 
             // Send verification token (SMS or Messenger)
-            $sendOTP->dispatchOTP($input['channel'], $sendto, $token);
+            $sendOTP->dispatchOTP($input->channel, $input->receiver, $token);
 
             //Show response
             return response()->jsonApi([
                 'title' => 'Resend OTP code',
-                'message' => "{$channel} verification code sent to {$sendto}.",
+                'message' => "{$input->channel} verification code sent to {$input->receiver}.",
                 "data" => [
-                    'channel' => $input['channel'],
-                    'id' => $sendto
+                    'channel' => $input->channel,
+                    'id' => $input->receiver
                 ]
             ]);
         } catch (Exception $e) {
             return response()->jsonApi([
                 'title' => 'Resend OTP code',
-                'message' => "Unable to send {$input['channel']} verification code to {$sendto}. Try again. " . $e->getMessage(),
+                'message' => "Unable to send {$input->channel} verification code to {$input->receiver}. Try again. " . $e->getMessage(),
             ], 400);
         }
     }
@@ -611,14 +615,14 @@ class CreateUserIDController extends Controller
 
         try {
             // Update user account
-            $user = User::where('username', $input['username'])->first();
-            $names = explode(" ", $input['fullname']);
+            $user = User::where('username', $input->username)->first();
+            $names = explode(" ", $input->fullname);
 
             if (is_array($names) && count($names) >= 2) {
                 $firstname = $names[0];
                 $lastname = $names[1];
             } else {
-                $firstname = $input['fullname'];
+                $firstname = $input->fullname;
                 $lastname = null;
             }
 
@@ -634,7 +638,7 @@ class CreateUserIDController extends Controller
                     'title' => "New user personal info",
                     'message' => 'User account was successful updated',
                     'data' => [
-                        'username' => $input['username']
+                        'username' => $input->username
                     ]
                 ]);
             } else {
@@ -779,7 +783,7 @@ class CreateUserIDController extends Controller
 
         try {
             // Update user account
-            $userQuery = User::where('username', $input['username']);
+            $userQuery = User::where('username', $input->username);
 
             //Does the user account exist?
             if ($userQuery->exists()) {
@@ -801,7 +805,7 @@ class CreateUserIDController extends Controller
                     'title' => 'New user recovery questions',
                     'message' => 'User account security questions was successful saved',
                     'data' => [
-                        'username' => $input['username'],
+                        'username' => $input->username,
                         'access_token' => $token
                     ]
                 ]);
@@ -825,23 +829,6 @@ class CreateUserIDController extends Controller
                 'message' => $ex->getMessage(),
                 'data' => $input
             ], 400);
-        }
-    }
-
-    /**
-     * Get the OTP reciever based on channel
-     *
-     * @param array $input
-     *
-     * @return string
-     */
-    private function getTokenReceiver(array $input): string
-    {
-        //Select OTP destination
-        if ($input['channel'] === 'sms') {
-            return $input['phone'];
-        } elseif ($input['channel'] === 'messenger') {
-            return $input['handler'];
         }
     }
 }
