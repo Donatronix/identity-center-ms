@@ -35,6 +35,7 @@ class ActivityLogListener
             "activity_time" => "required|string",
             "user_id" => "required|string",
         ]);
+
         if ($validator->fails()) {
             throw new Exception($validator->errors());
         }

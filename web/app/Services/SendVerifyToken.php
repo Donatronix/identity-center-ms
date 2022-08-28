@@ -17,7 +17,11 @@ class SendVerifyToken
      */
     public function dispatchOTP($instance, $to, $message): bool
     {
-        $params = $this->requestData($to, $message);
+        $params = [
+            'to' => $to,
+            'message' => $message
+        ];
+
         $url = $this->requestUrl($instance);
         $headers = $this->getHeaders();
 
@@ -31,23 +35,10 @@ class SendVerifyToken
             $response = Http::withHeaders($headers)
                              ->post($url, $params);
         } catch (ConnectException $e) {
-            throw new \Exception($e->getMessage(), 400);
+            throw $e;
         }
 
         return $response->successful();
-    }
-
-    /**
-     * @param $to
-     * @param $message
-     * @return array
-     */
-    public function requestData($to, $message)
-    {
-        return [
-            'to' => $to,
-            'message' => $message
-        ];
     }
 
     /**

@@ -152,16 +152,21 @@ class UsernameSubmitController extends Controller
 
                     // Join new user to referral program
                     $sendData = [
-                        'user' => $authUser->toArray()
+                        'user_id' => $authUser->id,
+                        'name' => $authUser->display_name,
+                        'username' => $authUser->username,
+                        'phone' => $authUser->phone,
+                        'country' => $authUser->address_country,
+                        'type' => 'client'
                     ];
 
                     if ($request->has('referral_code')) {
                         $sendData = [
-                            // 'application_id' => $input['application_id'],
+                            'application_id' => $inputData->application_id ?? null,
                             'referral_code' => $inputData->referral_code
                         ];
                     }
-                    PubSub::publish('NewUserRegistered', $sendData, config('pubsub.queue.referrals'));
+                    PubSub::publish('JoinNewUserRequest', $sendData, config('pubsub.queue.referrals'));
 
                     // Subscribing new user to Subscription service
                     PubSub::publish('NewUserRegistered', [
@@ -191,12 +196,12 @@ class UsernameSubmitController extends Controller
                 }
             } else {
                 // if username is correct, means that user is disable
-                if($authUser->username === $inputData->username){
+                if ($authUser->username === $inputData->username) {
                     return response()->jsonApi([
                         'title' => 'User authorization',
                         'message' => "Account is disabled. You can't use this service. Please contact support"
                     ], 403);
-                }else{
+                } else {
                     return response()->jsonApi([
                         'title' => 'User authorization',
                         "message" => 'Account is disabled. Username does not match your account. Please contact support'
@@ -207,12 +212,12 @@ class UsernameSubmitController extends Controller
 
         // if user is active and username is correct, do login
         if ($authUser->status == User::STATUS_ACTIVE) {
-            if($authUser->username === $inputData->username){
+            if ($authUser->username === $inputData->username) {
                 return $this->login($authUser, $request->all(), [
                     'success' => 'User logged in successfully',
                     'incorrect' => 'Authorisation Error. Unable to create access token'
                 ]);
-            }else{
+            } else {
                 return response()->jsonApi([
                     'title' => 'User authorization',
                     'message' => sprintf("Username %s does not belong to your account", $inputData->username)

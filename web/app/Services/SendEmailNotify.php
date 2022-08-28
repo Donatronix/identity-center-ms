@@ -7,30 +7,25 @@ use Illuminate\Support\Facades\Http;
 
 class SendEmailNotify
 {
-    public function dispatchEmail($to, $subject, $message)
+    public function dispatchEmail($to, $subject, $message, $template): bool
     {
-        $params = $this->requestData($to, $subject, $message);
+        $params = [
+            'subject' => $subject,
+            'body' => $message,
+            'emails' => $to,
+            'template' => $template,
+        ];
+
         $url = $this->requestUrl();
         $headers = $this->getHeaders();
 
         try {
             $response = Http::withHeaders($headers)->post($url, $params);
-        } catch (Excection $e) {
-            return false;
         } catch (ConnectException $e) {
-            return false;
+            throw $e;
         }
 
         return $response->successful();
-    }
-
-    public function requestData($to, $subject, $message)
-    {
-        return [
-            'emails' => $to,
-            'subject' => $to,
-            'body' => $message
-        ];
     }
 
     /**

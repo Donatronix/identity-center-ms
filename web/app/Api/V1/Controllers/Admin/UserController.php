@@ -377,10 +377,8 @@ class UserController extends Controller
             //Validation response
             if ($validate->fails()) {
                 return response()->jsonApi([
-                    'type' => 'danger',
                     'title' => 'New user registration',
                     'message' => $validate->errors(),
-                    'data' => null
                 ], 400);
             }
 
@@ -404,8 +402,15 @@ class UserController extends Controller
             ], config('pubsub.queue.communications'));
 
             // Join new user to referral programm
-            PubSub::publish('NewUserRegistered', [
-                'user' => $user->toArray(),
+            PubSub::publish('JoinNewUserRequest', [
+                'user_id' => $user->id,
+                'name' => $user->display_name,
+                'username' => $user->username,
+                'phone' => $user->phone,
+                'country' => $user->address_country,
+                'application_id' => '121345678910',
+                //'referral_code' => '',
+                'type' => 'client'
             ], config('pubsub.queue.referrals'));
 
             // Subscribing new user to Subscription service
@@ -1057,8 +1062,15 @@ class UserController extends Controller
             ], config('pubsub.queue.communications'));
 
             // Join new user to referral programm
-            PubSub::publish('NewUserRegistered', [
-                'user' => $user->toArray(),
+            PubSub::publish('JoinNewUserRequest', [
+                'user_id' => $user->id,
+                'name' => $user->display_name,
+                'username' => $user->username,
+                'phone' => $user->phone,
+                'country' => $user->address_country,
+                'application_id' => '121345678910',
+                //'referral_code' => '',
+                'type' => $request->user_type
             ], config('pubsub.queue.referrals'));
 
             // Subscribing new user to Subscription service

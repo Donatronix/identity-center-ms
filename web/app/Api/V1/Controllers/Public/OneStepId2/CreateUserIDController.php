@@ -221,16 +221,21 @@ class CreateUserIDController extends Controller
 
                 // Join new user to referral program
                 $sendData = [
-                    'user' => $user->toArray()
+                    'user_id' => $user->id,
+                    'name' => $user->display_name,
+                    'username' => $user->username,
+                    'phone' => $user->phone,
+                    'country' => $user->address_country,
+                    'type' => 'client'
                 ];
 
                 if ($request->has('referral_code')) {
                     $sendData = [
-                        // 'application_id' => $input['application_id'],
-                        'referral_code' => $request->get('referral_code')
+                        'application_id' => $inputData->application_id ?? null,
+                        'referral_code' => $inputData->referral_code
                     ];
                 }
-                PubSub::publish('NewUserRegistered', $sendData, config('pubsub.queue.referrals'));
+                PubSub::publish('JoinNewUserRequest', $sendData, config('pubsub.queue.referrals'));
 
                 // Subscribing new user to Subscription service
                 PubSub::publish('NewUserRegistered', [
