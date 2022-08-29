@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
         if (App::environment(['local', 'staging'])) {
             $this->call([
                 UsersTableSeeder::class,
-                KYCsTableSeeder::class
+                // KYCsTableSeeder::class
             ]);
         }
 
