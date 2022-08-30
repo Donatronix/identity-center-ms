@@ -120,7 +120,7 @@ class KYC extends Model
         'status',
         'user_id'
     ];
-    
+
     /**
      * The attributes excluded from the model's JSON form.
      *
@@ -132,23 +132,6 @@ class KYC extends Model
         'deleted_at'
     ];
 
-    /**
-     * Validation rules
-     *
-     * @return string[]
-     */
-    public static function validationRules(): array
-    {
-        return [
-            'id_doctype' => 'required|integer|in:1,2,3,4',
-            'address_verify_doctype' => 'required|integer|in:1,2,3,4',
-            'id_document' => 'required|string',
-            'address_verify_document' => 'required|string',
-            'portrait' => 'required|string'
-        ];
-    }
-
-    
     /**
      * Validation rules for identity verification
      *

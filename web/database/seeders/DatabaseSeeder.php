@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Seeds for all
         $this->call([
             ClientsSeeder::class,
             BotsTableSeeder::class,
@@ -25,14 +26,8 @@ class DatabaseSeeder extends Seeder
         if (App::environment(['local', 'staging'])) {
             $this->call([
                 UsersTableSeeder::class,
-                // KYCsTableSeeder::class
+                KYCsTableSeeder::class
             ]);
-        }
-
-        // Seeds for production
-        if (App::environment('production')) {
-//            $this->call([
-//            ]);
         }
     }
 }

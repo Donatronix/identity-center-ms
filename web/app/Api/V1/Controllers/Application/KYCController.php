@@ -119,7 +119,7 @@ class KYCController extends Controller
     }
 
     /**
-     * Retrieve infomation for users KYC
+     * Retrieve information for users KYC
      *
      * @OA\Get(
      *     path="/user-identify/details",
@@ -145,8 +145,6 @@ class KYCController extends Controller
      *         @OA\JsonContent(ref="#/components/schemas/DangerResponse")
      *     )
      * )
-     *
-     * @param Request $request
      *
      * @return JsonResponse
      */
@@ -221,10 +219,15 @@ class KYCController extends Controller
      */
     public function store(Request $request): mixed
     {
-
         try {
             // Validate input
-            $validate = Validator::make($request->all(), KYC::validationRules());
+            $validate = Validator::make($request->all(), [
+                'id_doctype' => 'required|integer|in:1,2,3,4',
+                'address_verify_doctype' => 'required|integer|in:1,2,3,4',
+                'id_document' => 'required|string',
+                'address_verify_document' => 'required|string',
+                'portrait' => 'required|string'
+            ]);
 
             if($validate->fails()) {
                 return response()->jsonApi([
@@ -233,38 +236,37 @@ class KYCController extends Controller
                 ], 422);
             }
 
-            //Find existing user
-            if (User::where('id', Auth::user()->id)->doesntExist()) {
+            // Find existing user
+            if (User::where('id', Auth::user()->getAuthIdentifier())->doesntExist()) {
                 return response()->jsonApi([
                     'title' => "User KYC identification",
                     'message' => "User NOT found!",
-                    'data' => null,
                 ], 404);
             }
 
-            //Get validated data
+            // Get validated data
             $input = $validate->validated();
 
-            //Save KYC info
+            // Save KYC info
             KYC::create([
                 'id_doctype' => KYC::$document_types[$input['id_doctype']],
                 'address_verify_doctype' => KYC::$verify_document_types[$input['address_verify_doctype']],
                 'id_document' => $input['id_document'],
                 'address_verify_document' => $input['address_verify_document'],
                 'portrait' => $input['portrait'],
-                'user_id'=> Auth::user()->id
+                'user_id'=> Auth::user()->getAuthIdentifier()
             ]);
 
+            // Return success response
             return response()->jsonApi([
                 'title' => 'User KYC identification',
                 'message' => "User identity submitted successfully",
             ]);
-
         } catch (Exception $e) {
             return response()->jsonApi([
                 'title' => 'User KYC identification',
                 'message' => $e->getMessage()
-            ], 400);
+            ], 500);
         }
     }
 }

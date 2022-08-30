@@ -24,16 +24,13 @@ class KYCFactory extends Factory
     public function definition(): array
     {
     	return [
-            /**
-             * User document
-             */
-            'id_number' => '',
-            'document_number' => '',
-            'document_country' => $this->faker->countryCode(),
-            'document_type' => Arr::random(KYC::$document_types),
-            'document_front' => '',
-            'document_back' => '',
+            'id_doctype' => Arr::random(KYC::$document_types),
+            'address_verify_doctype' => '',
+
+            'id_document' => '',
+            'address_verify_document' => '',
             'portrait' => '',
+
             'user_id'  => User::all()->random(),
             'status' => Arr::random(KYC::$statuses),
     	];
