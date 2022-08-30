@@ -8,12 +8,11 @@ use Sumra\SDK\Facades\PubSub;
 
 class PartnerRegisterRequestListener
 {
+
     /**
      * Handle the event.
      *
-     * @param array $data
-     *
-     *
+     * @param array $event
      *
      * @return void
      */
@@ -21,7 +20,13 @@ class PartnerRegisterRequestListener
     {
         try {
             $user = new User();
-            $user->fill($data);
+            $user->id = $data['id'];
+            $user->username = $data['first_name'].".".$data['last_name'];
+            $user->first_name = $data['first_name'];
+            $user->last_name = $data['last_name'];
+            $user->email = $data['email'] ?? null;
+            $user->phone = $data['mobile'] ?? null;
+
             $user->save();
 
             PubSub::publish('partnerRegisterResponse', $user, config('pubsub.queue.g_met'));
