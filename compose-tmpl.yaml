@@ -14,6 +14,10 @@ services:
       - WEB_DOCUMENT_ROOT=/var/www/html/public
       - PHP_DISMOD=apcu,calendar,exif,gd,imagick,imap,ioncube,mongodb,ldap,pcntl,pdo_pgsql,pgsql,shmop,soap,sysvmsg,sysvsem,sysvshm,vips
       - PHP_DISPLAY_ERRORS=1
+      - SERVICE_NGINX_CLIENT_MAX_BODY_SIZE=100M
+      - PHP_MEMORY_LIMIT=1024M
+      - PHP_POST_MAX_SIZE=100M
+      - PHP_UPLOAD_MAX_FILESIZE=100M
       - LOG_STDERR=/var/log/vhost-error.log
       - PUBSUB_RECEIVER=Local.IdentityCentreMS
     volumes:
