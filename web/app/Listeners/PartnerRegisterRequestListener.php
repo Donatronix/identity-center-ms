@@ -4,32 +4,30 @@ namespace App\Listeners;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
-use Sumra\SDK\Facades\PubSub;
 
 class PartnerRegisterRequestListener
 {
-
     /**
      * Handle the event.
      *
-     * @param array $event
-     *
+     * @param array $data
      * @return void
      */
     public function handle(array $data): void
     {
         try {
             $user = new User();
-            $user->id = $data['id'];
-            $user->username = $data['first_name'].".".$data['last_name'];
-            $user->first_name = $data['first_name'];
-            $user->last_name = $data['last_name'];
-            $user->email = $data['email'] ?? null;
-            $user->phone = $data['mobile'] ?? null;
-
+            $user->fill([
+                'id' => $data['id'],
+                'username' => strtolower($data['first_name'] . "." . $data['last_name']),
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'email' => $data['email'] ?? null,
+                'phone' => $data['mobile'] ?? null,
+                'status' => 1,
+                'is_agreement' => true,
+            ]);
             $user->save();
-
-            PubSub::publish('partnerRegisterResponse', $user, config('pubsub.queue.g_met'));
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
         }

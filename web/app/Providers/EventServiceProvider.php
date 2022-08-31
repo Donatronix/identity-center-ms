@@ -12,12 +12,17 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        'partnerRegisterRequest' => [
+        /**
+         * Register company partner from G-MET service
+         */
+        'PartnerRegisterRequest' => [
             'App\Listeners\PartnerRegisterRequestListener'
         ],
+
         'getUserByPhone' => [
             'App\Listeners\GetUserByPhoneListener'
         ],
+
         'logActivity' => [
             'App\Listeners\ActivityLogListener'
         ]
