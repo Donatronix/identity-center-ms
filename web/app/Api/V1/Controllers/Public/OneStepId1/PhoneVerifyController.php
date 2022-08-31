@@ -122,8 +122,16 @@ class PhoneVerifyController extends Controller
         try {
             // Validate input data
             $this->validate($request, [
-                'phone_number' => 'required|numeric|min:10',
+                'phone_number' => 'required|numeric|min:10|unique:users,phone',
             ]);
+
+            //Verify Phone number format
+            if(!User::formatPhoneNum($request->get('phone_number'))){
+                return response()->jsonApi([
+                    'message' => "Input validator errors. Try again.",
+                    'data' => 'Invalid phone number'
+                ], 422); 
+            }
 
             // Get User by phone number
             $user = User::where("phone", $request->get('phone_number', null))

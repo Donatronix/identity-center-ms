@@ -174,6 +174,15 @@ class CreateUserIDController extends Controller
         // Validate input date
         $input = (object)$validator->validated();
 
+         //Verify Phone number format
+         if(!User::formatPhoneNum($input->phone)){
+            return response()->jsonApi([
+                'title' => 'Create new user',
+                'message' => "Input validator errors. Try again.",
+                'data' => 'Invalid phone number'
+            ], 422); 
+        }
+
         //Select OTP destination
         if ($input->channel === 'sms') {
             $sendTo = $input->phone;
@@ -843,4 +852,5 @@ class CreateUserIDController extends Controller
             ], 400);
         }
     }
+
 }

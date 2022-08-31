@@ -59,7 +59,7 @@ class VerifyStepInfo extends Model
             'referral_code' => 'string|nullable|max:8|min:8',
             'username'=>'required|string',
             'channel'=>'required|string',
-            'phone'=>'nullable|string|max:20',
+            'phone'=>'nullable|string|max:20|unique:users,phone',
             'handler'=>'nullable|string',
             'messenger'=>'required|string'
         ];
