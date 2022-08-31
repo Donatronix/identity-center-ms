@@ -419,4 +419,18 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     {
         return $this->hasOne(TwoFactorSecurity::class);
     }
+
+     /**
+     * Format user phone number
+     * 
+     * @param string $phone
+     * 
+     */
+    public static function formatPhoneNum(string $phone)
+    {
+        // Validate phone number
+        $phone_regex = "/^\\+?\\d{1,4}?[-.\\s]?\\(?\\d{1,3}?\\)?[-.\\s]?\\d{1,4}[-.\\s]?\\d{1,4}[-.\\s]?\\d{1,9}$/";
+
+        return preg_match($phone_regex, $phone); // returns 1 if true
+    }
 }

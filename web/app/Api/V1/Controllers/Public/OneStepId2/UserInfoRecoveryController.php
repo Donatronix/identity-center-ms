@@ -138,7 +138,7 @@ class UserInfoRecoveryController extends Controller
 
         $validator = Validator::make($input, [
             'id' => 'required|string',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'nullable|string|max:20|unique:users,phone',
             'handler' => 'nullable|string',
         ]);
 
@@ -148,6 +148,15 @@ class UserInfoRecoveryController extends Controller
                 'message' => "Input validator errors. Try again.",
                 'data' => $validator->errors()
             ], 422);
+        }
+
+         //Verify Phone number format
+         if(!User::formatPhoneNum($input['phone'])){
+            return response()->jsonApi([
+                'title' => 'User account recovery',
+                'message' => "Input validator errors. Try again.",
+                'data' => 'Invalid phone number'
+            ], 422); 
         }
 
         try {
