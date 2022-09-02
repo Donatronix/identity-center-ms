@@ -194,20 +194,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     ];
 
     /**
-     * User Category OR Roles
-     *
-     */
-    const ADMIN_USER = 'Admin';
-    const INVESTOR_USER = 'Investor';
-    const SUPER_ADMIN_USER = 'Super';
-
-    public static array $types = [
-        self::ADMIN_USER,
-        self::INVESTOR_USER,
-        self::SUPER_ADMIN_USER
-    ];
-
-    /**
      * @var string[]
      */
     protected $appends = [
@@ -422,9 +408,9 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 
      /**
      * Format user phone number
-     * 
+     *
      * @param string $phone
-     * 
+     *
      */
     public static function formatPhoneNum(string $phone)
     {

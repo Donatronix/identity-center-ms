@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
@@ -28,6 +29,13 @@ class PartnerRegisterRequestListener
                 'is_agreement' => true,
             ]);
             $user->save();
+
+            // Update role
+            $role = Role::firstOrCreate([
+                'name' => Role::ROLE_INFLUENCER
+            ]);
+            $user->roles()->sync($role->id);
+
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
         }

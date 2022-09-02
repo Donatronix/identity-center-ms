@@ -3,6 +3,7 @@
 namespace App\Api\V1\Controllers\Public\OneStepId2;
 
 use App\Api\V1\Controllers\Controller;
+use App\Models\Role;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -163,7 +164,7 @@ class LoginController extends Controller
 
                 // Login As
                 if(isset($input['isAdmin']) && $input['isAdmin']) {
-                    if (!$user->hasRole('Admin') || !$user->hasRole('Super')) {
+                    if (!$user->hasRole(Role::ROLE_ADMIN) || !$user->hasRole(Role::ROLE_SUPER_ADMIN)) {
                         return response()->jsonApi([
                             'title' => 'Login',
                             'message' => "Permission denied",

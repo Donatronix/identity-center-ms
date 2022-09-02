@@ -3,6 +3,7 @@
 namespace App\Api\V1\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -68,16 +69,16 @@ class ServiceAdminController extends Controller
      *                     property="phone",
      *                     type="string",
      *                     description="Administrator phone number",
-     *                     example="++44625546453",
+     *                     example="+44625546453",
      *                 ),
      *                 @OA\Property(
      *                     property="role",
      *                     type="string",
      *                     description="Administrator role",
-     *                     example="admin",
-     *                 ),
-     *             ),
-     *         ),
+     *                     example="admin"
+     *                 )
+     *             )
+     *         )
      *     ),
      *
      *     @OA\Response(
@@ -136,13 +137,13 @@ class ServiceAdminController extends Controller
     {
         try {
             $this->validate($request, [
-                'role' => 'nullable|string|in:admin,super admin',
+                'role' => 'nullable|string|in:admin,super_admin',
             ]);
 
-            $query = User::with('roles')->role(['admin', 'super admin']);
+            $query = User::with('roles')->role([Role::ROLE_SUPER_ADMIN, Role::ROLE_ADMIN]);
             if ($request->has('role')) {
                 $query = User::with('roles')->whereHas('roles', function ($query) use ($request) {
-                    $query->where('name', $request->role);
+                    $query->where('name', Role::$roles[$request->role]);
                 });
             }
 
@@ -453,13 +454,11 @@ class ServiceAdminController extends Controller
             return response()->jsonApi([
                 'title' => "Update failed",
                 'message' => "Administrator does not exist",
-                'data' => null,
             ], 404);
         } catch (Throwable $e) {
             return response()->jsonApi([
                 'title' => "Update failed",
                 'message' => $e->getMessage(),
-                'data' => null,
             ], 404);
         }
     }

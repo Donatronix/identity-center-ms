@@ -11,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use PubSub;
-use Spatie\Permission\Models\Role;
+use App\Models\Role;
 
 //use Illuminate\Support\Facades\Redis;
 
@@ -86,7 +86,7 @@ class UsernameSubmitController extends Controller
             $inputData = (object)$this->validate($request, [
                 'username' => 'required|string|min:3',
                 'sid' => 'required|string|min:8|max:36',
-                'referral_code' => 'sometimes|string|min:6',
+                'referral_code' => 'sometimes|string|min:8',
             ]);
         } catch (ValidationException $e) {
             return response()->jsonApi([
@@ -173,9 +173,9 @@ class UsernameSubmitController extends Controller
                         'user' => $authUser->toArray(),
                     ], config('pubsub.queue.subscriptions'));
 
-                    //Add Client Role to User
+                    // Add investor role to User
                     $role = Role::firstOrCreate([
-                        'name' => USER::INVESTOR_USER
+                        'name' => Role::ROLE_INVESTOR
                     ]);
                     $authUser->roles()->sync($role->id);
 

@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use PubSub;
-use Spatie\Permission\Models\Role;
+use App\Models\Role;
 use Sumra\SDK\Services\JsonApiResponse;
 use Throwable;
 
@@ -41,7 +41,7 @@ class UserController extends Controller
      *     @OA\Parameter(
      *         name="type",
      *         in="query",
-     *         description="Category of Users to get: Admin, Super, Investor",
+     *         description="Category of Users to get: Admin, Super Admin, Investor",
      *         @OA\Schema(
      *             type="All"
      *         )
@@ -177,7 +177,7 @@ class UserController extends Controller
                 /**
                  *
                  */
-                if (!in_array(ucfirst($request->type), User::$types)) {
+                if (!in_array(ucfirst($request->type), Role::$roles)) {
                     throw new Exception("User Type not allowed", 400);
                 }
 
@@ -189,17 +189,14 @@ class UserController extends Controller
 
             // Return response
             return response()->jsonApi([
-                'type' => 'success',
                 'title' => 'Users list',
                 'message' => 'List of users successfully received',
                 'data' => $users->toArray()
             ]);
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'Users list',
                 'message' => $e->getMessage(),
-                'data' => null
             ], 400);
         }
     }
@@ -418,7 +415,7 @@ class UserController extends Controller
                 'user' => $user->toArray(),
             ], config('pubsub.queue.subscriptions'));
 
-            // Return response to client
+            // Return response
             return response()->jsonApi([
                 'title' => 'Create admin user account',
                 'message' => "New user registered successfully!",
@@ -646,10 +643,8 @@ class UserController extends Controller
         //Validation response
         if ($validate->fails()) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'Admin user update',
                 'message' => $validate->errors(),
-                'data' => null
             ], 400);
         }
 
@@ -665,26 +660,21 @@ class UserController extends Controller
 
                 //Send response
                 return response()->jsonApi([
-                    'type' => 'success',
                     'title' => 'Admin user update',
                     'message' => "User successfully updated",
                     'data' => $user
                 ]);
             }
 
-            // Return response to client
+            // Return response
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'Admin user update',
                 'message' => "User does NOT exist.",
-                'data' => null
             ], 404);
         } catch (Exception $e) {
             return response()->jsonApi([
-                'type' => 'danger',
                 'title' => 'Admin user update',
                 'message' => $e->getMessage(),
-                'data' => null
             ], 400);
         }
     }
@@ -993,7 +983,7 @@ class UserController extends Controller
      *             @OA\Property(
      *                 property="user_type",
      *                 type="string",
-     *                 description="User Type:Admin, Super",
+     *                 description="User Role:Admin, Super Admin",
      *                 required={"true"},
      *                 example="Super"
      *             )
@@ -1026,7 +1016,7 @@ class UserController extends Controller
                 'password' => 'required|string|min:6',
                 'email' => 'required|email|unique:users,email',
                 'username' => 'required|string|unique:users,username',
-                'user_type' => 'required|in:Admin,Super'
+                'user_type' => 'required|in:admin,super_admin'
             ]);
 
             //
@@ -1034,10 +1024,9 @@ class UserController extends Controller
 
             /**
              * Get Role
-             *
              */
             $role = Role::firstOrCreate([
-                'name' => $input['user_type']
+                'name' => Role::$roles[$input['user_type']]
             ]);
             unset($input['user_type']);
 
@@ -1078,7 +1067,7 @@ class UserController extends Controller
                 'user' => $user->toArray(),
             ], config('pubsub.queue.subscriptions'));
 
-            // Return response to client
+            // Return response
             return response()->jsonApi([
                 'title' => 'Add user account',
                 'message' => "New user registered successfully!",

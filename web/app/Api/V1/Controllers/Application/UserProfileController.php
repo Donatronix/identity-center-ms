@@ -107,7 +107,7 @@ class UserProfileController extends Controller
             //$user->status = User::STATUS_STEP_2;
             $user->save();
 
-            // Return response to client
+            // Return response
             return response()->jsonApi([
                 'title' => 'New user registration',
                 'message' => "User person detail data successfully saved",

@@ -45,7 +45,7 @@ class ActivityLogListener
             // Create new
             $activity = Activity::create($data);
 
-            // Return response to client
+            // Return response
             Log::info("Activity Logged");
         } catch (Exception $e) {
             Log::info($e->getMessage());

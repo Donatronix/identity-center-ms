@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use PubSub;
-use Spatie\Permission\Models\Role;
+use App\Models\Role;
 use Sumra\SDK\Services\JsonApiResponse;
 use Throwable;
 

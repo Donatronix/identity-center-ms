@@ -100,7 +100,7 @@ class KYCController extends Controller
         // Init verify session
         $data = (new IdentityVerification())->startSession($user, $request);
 
-        // Return response to client
+        // Return response
         if ($data->status === 'success') {
             return response()->jsonApi([
                 'title' => 'Start KYC verification',

@@ -200,7 +200,7 @@ class ActivityController extends Controller
             // Create new
             $activity = $this->model->create($request->all());
 
-            // Return response to client
+            // Return response
             return response()->jsonApi([
                 'title' => 'New activity registration',
                 'message' => "Activity successfully added",

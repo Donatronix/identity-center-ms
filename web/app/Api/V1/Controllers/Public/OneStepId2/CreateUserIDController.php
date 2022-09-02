@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use PubSub;
-use Spatie\Permission\Models\Role;
+use App\Models\Role;
 
 class CreateUserIDController extends Controller
 {
@@ -180,7 +180,7 @@ class CreateUserIDController extends Controller
                 'title' => 'Create new user',
                 'message' => "Input validator errors. Try again.",
                 'data' => 'Invalid phone number'
-            ], 422); 
+            ], 422);
         }
 
         //Select OTP destination
@@ -210,9 +210,9 @@ class CreateUserIDController extends Controller
                 $user->phone = $input->phone;
                 $user->save();
 
-                // Add Client Role to User
+                // Add investor role to User
                 $role = Role::firstOrCreate([
-                    'name' => USER::INVESTOR_USER
+                    'name' => Role::ROLE_INVESTOR
                 ]);
                 $user->roles()->sync($role->id);
 

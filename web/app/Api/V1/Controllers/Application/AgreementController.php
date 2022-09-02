@@ -98,7 +98,7 @@ class AgreementController extends Controller
             $user->fill($input);
             $user->save();
 
-            // Return response to client
+            // Return response
             return response()->jsonApi([
                 'type' => 'success',
                 'title' => 'User agreement',

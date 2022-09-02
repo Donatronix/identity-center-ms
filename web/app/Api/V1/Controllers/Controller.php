@@ -36,10 +36,10 @@ use Laravel\Lumen\Routing\Controller as BaseController;
  *         tokenUrl= "http://localhost:8200/v1/auth/token",
  *         refreshUrl="http://localhost:8200/v1/auth/token",
  *         scopes={
- *             "Client"="User access",
- *             "Staff":"Staff access",
- *             "Admin":"Admin access",
  *             "Super Admin": "Super Admin access"
+ *             "Admin": "Admin access",
+ *             "Investor": "User access",
+ *             "Staff": "Staff access",
  *         }
  *     )
  * )
