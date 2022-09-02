@@ -75,11 +75,8 @@ class UsernameSubmitController extends Controller
      * )
      *
      * @param Request $request
-     *
-     * @return JsonResponse
-     * @throws ValidationException
      */
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(Request $request): mixed
     {
         try {
             // Validate input data
@@ -103,14 +100,12 @@ class UsernameSubmitController extends Controller
                 ->orderBy('id', 'desc')
                 ->firstOrFail()
                 ->user;
-
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'title' => 'User authorization',
                 'message' => 'SID not found or incorrect'
             ], 403);
         }
-
 
         // Check if user status is banned
         if ($authUser->status == User::STATUS_BANNED) {
@@ -223,7 +218,7 @@ class UsernameSubmitController extends Controller
             }
         }
 
-        return;
+        return false;
     }
 
     /**
