@@ -239,10 +239,8 @@ class CreateUserIDController extends Controller
                 ];
 
                 if ($request->has('referral_code') && !empty($request->get('referral_code'))) {
-                    $sendData = [
-                        'application_id' => $input->application_id ?? null,
-                        'referral_code' => $input->referral_code
-                    ];
+                    $sendData['application_id'] = 'V256789012345';
+                    $sendData['referral_code'] = $input->referral_code;
                 }
                 PubSub::publish('JoinNewUserRequest', $sendData, config('pubsub.queue.referrals'));
 

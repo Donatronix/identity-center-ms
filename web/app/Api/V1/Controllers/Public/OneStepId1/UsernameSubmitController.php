@@ -161,10 +161,8 @@ class UsernameSubmitController extends Controller
                     ];
 
                     if ($request->has('referral_code')) {
-                        $sendData = [
-                            'application_id' => $inputData->application_id ?? null,
-                            'referral_code' => $inputData->referral_code
-                        ];
+                        $sendData['application_id'] = 'V14567890123';
+                        $sendData['referral_code'] = $inputData->referral_code;
                     }
                     PubSub::publish('JoinNewUserRequest', $sendData, config('pubsub.queue.referrals'));
 
@@ -224,6 +222,8 @@ class UsernameSubmitController extends Controller
                 ], 403);
             }
         }
+
+        return;
     }
 
     /**
