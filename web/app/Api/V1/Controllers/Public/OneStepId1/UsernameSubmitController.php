@@ -155,7 +155,7 @@ class UsernameSubmitController extends Controller
                         'type' => 'client'
                     ];
 
-                    if ($request->has('referral_code')) {
+                    if ($request->has('referral_code') && !empty($request->get('referral_code'))) {
                         $sendData['application_id'] = 'V14567890123';
                         $sendData['referral_code'] = $inputData->referral_code;
                     }

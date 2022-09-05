@@ -398,7 +398,7 @@ class UserController extends Controller
                 'verify_token' => $user->verify_token,
             ], config('pubsub.queue.communications'));
 
-            // Join new user to referral programm
+            // Join new user to referral program
             PubSub::publish('JoinNewUserRequest', [
                 'user_id' => $user->id,
                 'name' => $user->display_name,
