@@ -20,7 +20,7 @@ class PartnerRegisterRequestListener
             $user = new User();
             $user->fill([
                 'id' => $data['id'],
-                'username' => strtolower($data['first_name'] . "." . $data['last_name']),
+                'username' => $data['username'],
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
                 'email' => $data['email'] ?? null,
