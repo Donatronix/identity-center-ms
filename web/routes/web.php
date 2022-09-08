@@ -29,4 +29,22 @@ $router->group([
             echo "Connected successfully to database: " . DB::connection()->getDatabaseName();
         }
     });
+
+
+    $router->get('register-user', function () {
+
+//        PubSub::publish('JoinNewUserRequest', [
+//            'user_id' => '9736ce26-446f-4add-ab05-f8629961734c',
+//            'name' => 'Imabhipatidar',
+//            'username' => 'Imabhipatidar',
+//            'phone' => '917000421246',
+//            'country' => '',
+//            'type' => 'client',
+//            'application_id' => 'V14567890123',
+//            'referral_code' => 'WSL4TD-FHD2F2'
+//
+//        ], 'Production.ReferralsMS');
+
+    });
+
 });
