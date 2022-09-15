@@ -9,6 +9,7 @@ use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use PubSub;
 use App\Models\Role;
@@ -86,9 +87,12 @@ class UsernameSubmitController extends Controller
                 'referral_code' => 'sometimes|string|min:8',
             ]);
         } catch (ValidationException $e) {
+            // Send log
+            Log::error('User authorization. Validation error: ' . $e->getMessage() . '. ' . json_encode($request->all()));
+
             return response()->jsonApi([
                 'title' => 'User authorization',
-                'message' => "Validation error: " . $e->getMessage(),
+                'message' => 'Validation error: ' . $e->getMessage(),
                 'data' => $e->validator->errors()
             ], 422);
         }
@@ -99,6 +103,10 @@ class UsernameSubmitController extends Controller
                 ->orderBy('id', 'desc')
                 ->firstOrFail();
         } catch (ModelNotFoundException $e) {
+            // Send log
+            Log::error('User authorization. SID not found or incorrect: ' . $inputData->sid . '. ' . $e->getMessage());
+
+            // Return response
             return response()->jsonApi([
                 'title' => 'User authorization',
                 'message' => 'SID not found or incorrect'
@@ -109,6 +117,10 @@ class UsernameSubmitController extends Controller
         try {
             $authUser = User::findOrFail($twoFa->user_id);
         } catch (ModelNotFoundException $e) {
+            // Send log
+            Log::error('User authorization. User no found or incorrect: ' . $twoFa->user_id . '. ' . $e->getMessage());
+
+            // Return response
             return response()->jsonApi([
                 'title' => 'User authorization',
                 'message' => 'User no found or incorrect'
@@ -313,6 +325,10 @@ class UsernameSubmitController extends Controller
                 ]
             ]);
         } catch (Exception $e) {
+            // Send log
+            Log::error('User authorization. Create access token failed: ' . $e->getMessage());
+
+            // Return response
             return response()->jsonApi([
                 'title' => 'User authorization',
                 'message' => $messages['incorrect'] . ': ' . $e->getMessage(),
