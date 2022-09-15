@@ -95,11 +95,9 @@ class UsernameSubmitController extends Controller
 
         // try to retrieve user using sid
         try {
-            $authUser = TwoFactorAuth::where('sid', $inputData->sid)
-                ->with('user')
+            $twoFa = TwoFactorAuth::where('sid', $inputData->sid)
                 ->orderBy('id', 'desc')
-                ->firstOrFail()
-                ->user;
+                ->firstOrFail();
         } catch (ModelNotFoundException $e) {
             return response()->jsonApi([
                 'title' => 'User authorization',
@@ -107,8 +105,22 @@ class UsernameSubmitController extends Controller
             ], 403);
         }
 
+        // Try get auth user
+        try {
+            $authUser = User::findOrFail($twoFa->user_id);
+        } catch (ModelNotFoundException $e) {
+            return response()->jsonApi([
+                'title' => 'User authorization',
+                'message' => 'User no found or incorrect'
+            ], 403);
+        }
+
         // Check if user status is banned
         if ($authUser->status == User::STATUS_BANNED) {
+            // Clean all SIDs
+            TwoFactorAuth::where('user_id', $authUser->id)->delete();
+
+            // Return response
             return response()->jsonApi([
                 'title' => 'User authorization',
                 'message' => 'User has been banned from this platform',
@@ -188,6 +200,9 @@ class UsernameSubmitController extends Controller
                     ], 403);
                 }
             } else {
+                // Clean all SIDs
+                TwoFactorAuth::where('user_id', $authUser->id)->delete();
+
                 // if username is correct, means that user is disable
                 if ($authUser->username === $inputData->username) {
                     return response()->jsonApi([
@@ -263,10 +278,10 @@ class UsernameSubmitController extends Controller
             // Generate access token
             $token = $user->createToken($user->username)->accessToken;
 
-            // Deleting SID
-            TwoFactorAuth::where('sid', $input['sid'])->delete();
-
 //            $redis->del($userLoginAttemptsKey);
+
+            // Clean all SIDs
+            TwoFactorAuth::where('user_id', $user->id)->delete();
 
             $user = collect($user->toArray());
 
