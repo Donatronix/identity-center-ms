@@ -5,7 +5,7 @@
  */
 $router->group([
     'prefix' => env('APP_API_VERSION', ''),
-    'namespace' => '\App\Api\V1\Controllers'
+    'namespace' => '\App\Api\V1\Controllers',
 ], function ($router) {
     /**
      * PUBLIC ACCESS
@@ -13,7 +13,7 @@ $router->group([
      * level with free access to the endpoint
      */
     $router->group([
-        'namespace' => 'Public'
+        'namespace' => 'Public',
     ], function ($router) {
         /**
          * OneStep 1.0
@@ -33,7 +33,7 @@ $router->group([
          */
         $router->group([
             'prefix' => 'user-account/v2',
-            "namespace" => "OneStepId2"
+            "namespace" => "OneStepId2",
         ], function ($router) {
             $router->post('/create', "CreateUserIDController@createAccount");
             $router->post('/otp/resend', "CreateUserIDController@resendOTP");
@@ -79,14 +79,14 @@ $router->group([
     $router->group([
         'namespace' => 'Application',
         'middleware' => [
-            'auth:api'
-        ]
+            'auth:api',
+        ],
     ], function ($router) {
         /**
          * 2Fa Security
          */
         $router->group([
-            'prefix' => '2fa'
+            'prefix' => '2fa',
         ], function ($router) {
             $router->get('/generateSecret', 'TwoFASecurityController@generate2faSecret');
             $router->post('/enable2fa', 'TwoFASecurityController@enable2fa');
@@ -163,14 +163,14 @@ $router->group([
         'prefix' => 'admin',
         'namespace' => 'Admin',
         'middleware' => [
-            'auth:api'
-        ]
+            'auth:api',
+        ],
     ], function ($router) {
         /**
          * KYC Management
          */
         $router->group([
-            'prefix' => 'kyc'
+            'prefix' => 'kyc',
         ], function ($router) {
             $router->get('/', 'KYCController@index');
             $router->put('/{id}', 'KYCController@update');
@@ -207,6 +207,8 @@ $router->group([
             ], function () use ($router) {
                 $router->get('/all', 'StatisticsController@totalUsers');
                 $router->get('/new', 'StatisticsController@totalNewUsers');
+                $router->get('/status', 'StatisticsController@getUsersStatus');
+                $router->get('/registration', 'StatisticsController@getUserRegistrationStatistics');
             });
 
 
@@ -236,7 +238,7 @@ $router->group([
      */
     $router->group([
         'prefix' => 'webhooks',
-        'namespace' => 'Webhooks'
+        'namespace' => 'Webhooks',
     ], function ($router) {
         $router->post('identify/{object}', 'IdentifyWebhookController');
         $router->post('identities', 'IdentitiesWebhookController');
