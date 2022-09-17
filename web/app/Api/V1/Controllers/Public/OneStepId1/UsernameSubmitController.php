@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use PubSub;
 use App\Models\Role;
@@ -86,6 +87,9 @@ class UsernameSubmitController extends Controller
                 'sid' => 'required|string|min:8|max:36',
                 'referral_code' => 'sometimes|string|min:8',
             ]);
+
+            // Transform username to lower case
+            $inputData->username = Str::lower($inputData->username);
         } catch (ValidationException $e) {
             // Send log
             Log::error('User authorization. Validation error: ' . $e->getMessage() . '. ' . json_encode($request->all()));
