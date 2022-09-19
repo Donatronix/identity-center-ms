@@ -9,6 +9,8 @@ use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use PubSub;
 use App\Models\Role;
@@ -85,30 +87,56 @@ class UsernameSubmitController extends Controller
                 'sid' => 'required|string|min:8|max:36',
                 'referral_code' => 'sometimes|string|min:8',
             ]);
+
+            // Transform username to lower case
+            $inputData->username = Str::lower($inputData->username);
         } catch (ValidationException $e) {
+            // Send log
+            Log::error('User authorization. Validation error: ' . $e->getMessage() . '. ' . json_encode($request->all()));
+
             return response()->jsonApi([
                 'title' => 'User authorization',
-                'message' => "Validation error: " . $e->getMessage(),
+                'message' => 'Validation error: ' . $e->getMessage(),
                 'data' => $e->validator->errors()
             ], 422);
         }
 
         // try to retrieve user using sid
         try {
-            $authUser = TwoFactorAuth::where('sid', $inputData->sid)
-                ->with('user')
+            $twoFa = TwoFactorAuth::where('sid', $inputData->sid)
                 ->orderBy('id', 'desc')
-                ->firstOrFail()
-                ->user;
+                ->firstOrFail();
         } catch (ModelNotFoundException $e) {
+            // Send log
+            Log::error('User authorization. SID not found or incorrect: ' . $inputData->sid . '. ' . $e->getMessage());
+
+            // Return response
             return response()->jsonApi([
                 'title' => 'User authorization',
                 'message' => 'SID not found or incorrect'
             ], 403);
         }
 
+        // Try get auth user
+        try {
+            $authUser = User::findOrFail($twoFa->user_id);
+        } catch (ModelNotFoundException $e) {
+            // Send log
+            Log::error('User authorization. User no found or incorrect: ' . $twoFa->user_id . '. ' . $e->getMessage());
+
+            // Return response
+            return response()->jsonApi([
+                'title' => 'User authorization',
+                'message' => 'User no found or incorrect'
+            ], 403);
+        }
+
         // Check if user status is banned
         if ($authUser->status == User::STATUS_BANNED) {
+            // Clean all SIDs
+            TwoFactorAuth::where('user_id', $authUser->id)->delete();
+
+            // Return response
             return response()->jsonApi([
                 'title' => 'User authorization',
                 'message' => 'User has been banned from this platform',
@@ -188,6 +216,9 @@ class UsernameSubmitController extends Controller
                     ], 403);
                 }
             } else {
+                // Clean all SIDs
+                TwoFactorAuth::where('user_id', $authUser->id)->delete();
+
                 // if username is correct, means that user is disable
                 if ($authUser->username === $inputData->username) {
                     return response()->jsonApi([
@@ -263,10 +294,10 @@ class UsernameSubmitController extends Controller
             // Generate access token
             $token = $user->createToken($user->username)->accessToken;
 
-            // Deleting SID
-            TwoFactorAuth::where('sid', $input['sid'])->delete();
-
 //            $redis->del($userLoginAttemptsKey);
+
+            // Clean all SIDs
+            TwoFactorAuth::where('user_id', $user->id)->delete();
 
             $user = collect($user->toArray());
 
@@ -298,6 +329,10 @@ class UsernameSubmitController extends Controller
                 ]
             ]);
         } catch (Exception $e) {
+            // Send log
+            Log::error('User authorization. Create access token failed: ' . $e->getMessage());
+
+            // Return response
             return response()->jsonApi([
                 'title' => 'User authorization',
                 'message' => $messages['incorrect'] . ': ' . $e->getMessage(),

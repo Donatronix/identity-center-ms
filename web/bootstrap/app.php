@@ -101,7 +101,20 @@ $app->routeMiddleware([
 $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(App\Providers\EventServiceProvider::class);
+
+/*
+ * Telegram Logger
+ */
+$app->register(\Sumra\SDK\Providers\TelegramLogServiceProvider::class);
+
+/**
+ * Redis
+ */
 $app->register(Illuminate\Redis\RedisServiceProvider::class);
+
+/**
+ * Passport Auth
+ */
 $app->register(Laravel\Passport\PassportServiceProvider::class);
 $app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
 
@@ -132,9 +145,6 @@ $app->register(\Sumra\SDK\JsonApiServiceProvider::class);
  */
 $app->configure('swagger-lume');
 $app->register(\SwaggerLume\ServiceProvider::class);
-$app->register(Laravel\Passport\PassportServiceProvider::class);
-$app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
-
 
 /**
  * Artisan Commands Lumen Generator
