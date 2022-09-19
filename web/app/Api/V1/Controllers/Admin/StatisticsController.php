@@ -225,7 +225,7 @@
          *     path="/admin/users/count/registration",
          *     summary="Get number of registered users",
          *     description="Get number of registered users per day, week, month, year, day of week, or hour",
-         *     tags={"Admin | Partners"},
+         *     tags={"Admin | Users Statistics"},
          *
          *     @OA\Parameter(
          *         name="filter",
